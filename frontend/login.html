@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sign In — CleanMadurai</title>
+    <meta name="description"
+        content="Sign in to your CleanMadurai account to report civic issues and manage city services." />
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+    <div class="auth-page">
+        <div style="margin-bottom:28px; animation: fadeInUp 0.5s ease;">
+            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center;">
+                <div class="logo-icon">♻</div>
+                <span>CleanMadurai</span>
+            </a>
+        </div>
+
+        <div class="auth-card fade-in">
+            <div class="auth-card-header">
+                <h1 style="font-size:1.7rem; margin-bottom:6px;">Welcome Back 👋</h1>
+                <p class="text-muted text-sm">Sign in to access your civic dashboard</p>
+            </div>
+
+            <div class="auth-card-body">
+                <form id="login-form" class="form-stack" novalidate autocomplete="off">
+                    <div class="form-group">
+                        <label class="label" for="email">Email Address</label>
+                        <input id="email" type="email" class="input" placeholder="name@example.com" required
+                            autocomplete="new-password" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="password">Password</label>
+                        <input id="password" type="password" class="input" placeholder="Your password" required
+                            autocomplete="new-password" />
+                    </div>
+
+                    <button id="login-btn" type="submit" class="btn btn-primary btn-full btn-lg"
+                        style="margin-top:4px;">
+                        <span id="login-btn-text">🔑 Sign In</span>
+                        <div id="login-spinner" class="spinner spinner-sm" style="display:none;"></div>
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-card-footer">
+                <p class="text-sm text-muted">
+                    Don't have an account?
+                    <a href="register.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;Register
+                        here →</a>
+                </p>
+            </div>
+        </div>
+
+        <p class="text-xs text-muted" style="margin-top:20px; opacity:0.7;">
+            © 2024 Madurai District Administration
+        </p>
+    </div>
+
+    <script type="module">
+        import { redirectIfLoggedIn } from './js/router.js';
+        import { login } from './js/auth.js';
+        import { toast } from './js/toast.js';
+
+        redirectIfLoggedIn();
+
+        // Clear fields on every load to prevent autofill interference
+        window.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('email').value = '';
+            document.getElementById('password').value = '';
+        });
+        // Also clear immediately since module scripts run deferred
+        document.getElementById('email').value = '';
+        document.getElementById('password').value = '';
+
+        const form = document.getElementById('login-form');
+        const btn = document.getElementById('login-btn');
+        const btnText = document.getElementById('login-btn-text');
+        const spinner = document.getElementById('login-spinner');
+
+        function setLoading(on) {
+            btn.disabled = on;
+            btnText.style.display = on ? 'none' : 'inline-flex';
+            spinner.style.display = on ? 'block' : 'none';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!email || !password) {
+                toast.error('Missing Fields', 'Please enter your email and password.');
+                return;
+            }
+
+            setLoading(true);
+            try {
+                const data = await login(email, password);
+                toast.success('Welcome back!', `Signed in successfully.`);
+                // Strip leading slash — Live Server serves from a subfolder, not root
+                const redirect = (data.redirect || '').replace(/^\//, '');
+                setTimeout(() => { window.location.href = redirect; }, 800);
+            } catch (err) {
+                const errData = err.data || {};
+                if (errData.status === 'pending') {
+                    toast.warning('Pending Approval', 'Your account is awaiting admin approval.');
+                    setTimeout(() => { window.location.href = '/pending.html'; }, 1200);
+                } else {
+                    toast.error('Login Failed', err.message || 'Invalid email or password.');
+                }
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+
+</html>

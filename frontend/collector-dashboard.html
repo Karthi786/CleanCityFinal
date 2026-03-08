@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Collector Dashboard — CleanMadurai</title>
+    <link rel="stylesheet" href="css/styles.css" />
+
+    <!-- Leaflet & Heatmap dependencies -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .review-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            color: #f59e0b;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .review-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        .review-issue-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .review-comment {
+            color: var(--text-muted);
+            font-size: 0.87rem;
+            margin-top: 6px;
+            font-style: italic;
+        }
+
+        .dept-badge {
+            font-size: 0.72rem;
+            padding: 2px 8px;
+            border-radius: 99px;
+            background: var(--bg-muted);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo">
+                <div class="logo-icon">♻</div><span>CleanMadurai</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Collector Panel</div>
+            <a class="sidebar-link active" data-tab="issues" href="#" id="nav-issues"
+                onclick="event.preventDefault();switchTab('issues')"><span class="icon">📊</span> All Issues</a>
+            <a class="sidebar-link" data-tab="map" href="#" id="nav-map"
+                onclick="event.preventDefault();switchTab('map')"><span class="icon">🗺️</span> Heatmap</a>
+            <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews"
+                onclick="event.preventDefault();switchTab('reviews')"><span class="icon">⭐</span> All Reviews</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="user-avatar-sidebar" id="sidebar-avatar">C</div>
+                <div>
+                    <div class="sidebar-user-name" id="sidebar-name">Collector</div>
+                    <div class="sidebar-user-role">District Collector</div>
+                </div>
+            </div>
+            <button id="logout-btn" class="btn btn-ghost btn-full"
+                style="color:rgba(255,255,255,0.5);margin-top:8px;font-size:0.82rem;">🚪 Sign Out</button>
+        </div>
+    </aside>
+
+    <div class="dash-layout">
+        <main class="dash-main">
+            <header class="dash-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="hamburger" id="hamburger">☰</button>
+                    <span class="dash-header-title">District Collector Overview</span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;" id="issues-filters">
+                    <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem;">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">Processing</option>
+                        <option value="COMPLETED">Done</option>
+                    </select>
+                    <select id="dept-filter" class="select" style="width:190px;padding:6px 12px;font-size:0.85rem;">
+                        <option value="">All Departments</option>
+                        <option value="MADURAI_CORPORATION">Madurai Corporation</option>
+                        <option value="TNEB">TNEB</option>
+                        <option value="POLICE">Police</option>
+                        <option value="FIRE_STATION">Fire Station</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="dash-content">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title">City-Wide Management</h2>
+                        <p class="page-subtitle">Monitor and oversee civic issue resolution across all departments.</p>
+                    </div>
+                    <div class="tab-list">
+                        <button class="tab-btn active" id="tab-issues-btn" onclick="switchTab('issues')">Issues</button>
+                        <button class="tab-btn" id="tab-map-btn" onclick="switchTab('map')">Heatmap</button>
+                        <button class="tab-btn" id="tab-reviews-btn" onclick="switchTab('reviews')">All Reviews</button>
+                    </div>
+                </div>
+
+                <!-- Issues Tab -->
+                <div id="tab-issues" class="tab-pane active">
+                    <div class="grid grid-3 mb-8">
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label">Total Issues</div>
+                                <div class="stat-value" id="s-total">—</div>
+                            </div>
+                            <div class="stat-icon blue">📋</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:var(--warning);">Pending</div>
+                                <div class="stat-value" id="s-pending" style="color:var(--warning);">—</div>
+                            </div>
+                            <div class="stat-icon yellow">⏳</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:var(--success);">Resolved</div>
+                                <div class="stat-value" id="s-resolved" style="color:var(--success);">—</div>
+                            </div>
+                            <div class="stat-icon green">✅</div>
+                        </div>
+                    </div>
+                    <div id="issues-list" class="space-y-4"></div>
+                </div>
+
+                <!-- Heatmap Tab -->
+                <div id="tab-map" class="tab-pane">
+                    <div
+                        style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:24px;margin-bottom:24px;">
+                        <h3 style="font-size:1.1rem;margin-bottom:8px;">Issue Density Matrix</h3>
+                        <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">Geographical
+                            visualization of civic issues across Madurai to identify hotspots.</p>
+
+                        <div id="collector-map"
+                            style="width:100%;height:500px;border-radius:12px;z-index:1;border:1px solid var(--border);">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Tab -->
+                <div id="tab-reviews" class="tab-pane">
+                    <div id="reviews-list" class="reviews-list">
+                        <div class="loading-page" style="min-height:200px;">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script type="module">
+        import { guardPage } from './js/router.js';
+        import { logout } from './js/auth.js';
+        import { issuesAPI, reviewsAPI } from './js/api.js';
+        import { toast } from './js/toast.js';
+
+        const user = guardPage(['COLLECTOR']);
+        if (!user) throw new Error('Unauthorized');
+
+        document.getElementById('sidebar-name').textContent = user.name;
+        document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        document.getElementById('hamburger').addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+        // Tab switching
+        window.switchTab = (name) => {
+            ['issues', 'map', 'reviews'].forEach(t => {
+                document.getElementById('tab-' + t).classList.remove('active');
+                document.getElementById('tab-' + t + '-btn').classList.remove('active');
+                document.getElementById('nav-' + t).classList.remove('active');
+            });
+            document.getElementById('tab-' + name).classList.add('active');
+            document.getElementById('tab-' + name + '-btn').classList.add('active');
+            document.getElementById('nav-' + name).classList.add('active');
+
+            // Adjust header filters visibility
+            document.getElementById('issues-filters').style.display = (name === 'issues' || name === 'map') ? 'flex' : 'none';
+
+            if (name === 'reviews') loadReviews();
+            if (name === 'map') {
+                setTimeout(() => {
+                    if (map) map.invalidateSize();
+                    updateHeatmap();
+                }, 100);
+            }
+        };
+
+        let allIssues = [];
+        let map = null;
+        let heatLayer = null;
+
+        const DEPT_LABELS = { MADURAI_CORPORATION: 'Madurai Corp.', TNEB: 'TNEB', POLICE: 'Police', FIRE_STATION: 'Fire Station' };
+        const STATUS_LABELS = { PENDING: '⏳ Pending', IN_PROGRESS: '🔵 Processing', COMPLETED: '✅ Done' };
+
+        function renderIssueRow(issue) {
+            return `
+        <div class="issue-row">
+          <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">
+            ${issue.category === 'Waste' ? '🗑️' : issue.category === 'Water' ? '💧' : issue.category === 'Electricity' ? '⚡' : issue.category === 'Roads' ? '🛣️' : issue.category === 'Fire' ? '🔥' : '👮'}
+          </div>
+          <div class="issue-row-info">
+            <div class="issue-row-title">${issue.title}</div>
+            <div class="issue-row-meta">
+              <span>${issue.category}</span><span>•</span>
+              <span>${DEPT_LABELS[issue.department] || issue.department}</span><span>•</span>
+              <span>📍 ${issue.location_name || 'N/A'}</span><span>•</span>
+              <span>👍 ${issue.supports_count || 0}</span>
+            </div>
+          </div>
+          <span class="badge badge-${issue.status}">${STATUS_LABELS[issue.status] || issue.status}</span>
+        </div>
+      `;
+        }
+
+        function renderList(issues) {
+            const container = document.getElementById('issues-list');
+            if (issues.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><h3>No Issues Found</h3><p>No issues match the selected filters.</p></div>`;
+                return;
+            }
+            container.innerHTML = issues.map(renderIssueRow).join('');
+        }
+
+        function applyFilters() {
+            const status = document.getElementById('status-filter').value;
+            const dept = document.getElementById('dept-filter').value;
+            let filtered = allIssues;
+            if (status) filtered = filtered.filter(i => i.status === status);
+            if (dept) filtered = filtered.filter(i => i.department === dept);
+            renderList(filtered);
+
+            // Update heatmap if map is initialized
+            if (map) {
+                updateHeatmap(filtered);
+            }
+        }
+
+        document.getElementById('status-filter').addEventListener('change', applyFilters);
+        document.getElementById('dept-filter').addEventListener('change', applyFilters);
+
+        async function loadData() {
+            document.getElementById('issues-list').innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
+            try {
+                const data = await issuesAPI.getAll();
+                allIssues = data.issues || [];
+                document.getElementById('s-total').textContent = allIssues.length;
+                document.getElementById('s-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
+                document.getElementById('s-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
+
+                initCollectorMap();
+                applyFilters();
+            } catch (err) {
+                toast.error('Failed to load issues', err.message);
+            }
+        }
+
+        function initCollectorMap() {
+            if (map) return;
+            // Center around Madurai
+            map = L.map('collector-map').setView([9.9252, 78.1198], 12);
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                attribution: '&copy; OpenStreetMap &copy; CARTO',
+                maxZoom: 19
+            }).addTo(map);
+        }
+
+        function updateHeatmap(filteredIssues = allIssues) {
+            if (!map) return;
+
+            if (heatLayer) {
+                map.removeLayer(heatLayer);
+            }
+
+            const points = filteredIssues
+                .filter(i => i.latitude && i.longitude)
+                .map(i => [
+                    parseFloat(i.latitude),
+                    parseFloat(i.longitude),
+                    // Intensity weight -> Unresolved issues count higher
+                    i.status === 'COMPLETED' ? 0.3 : 1.0
+                ]);
+
+            heatLayer = L.heatLayer(points, {
+                radius: 25,
+                blur: 15,
+                maxZoom: 13,
+                gradient: {
+                    0.4: 'yellow',
+                    0.6: 'orange',
+                    1.0: 'red'
+                }
+            }).addTo(map);
+        }
+
+        async function loadReviews() {
+            const container = document.getElementById('reviews-list');
+            container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
+            try {
+                const data = await reviewsAPI.get();
+                const reviews = data.reviews || [];
+                if (reviews.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⭐</div><h3>No Reviews Yet</h3><p>No citizen reviews have been submitted yet.</p></div>`;
+                    return;
+                }
+                container.innerHTML = reviews.map(r => `
+          <div class="review-card">
+            <div class="review-issue-title">📋 ${r.issues?.title || 'Issue'}</div>
+            <div class="review-header">
+              <div>
+                <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                <div class="review-meta">By ${r.user_name} · ${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+              </div>
+              <div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;">
+                <span class="badge badge-green">${r.rating}/5</span>
+                <span class="dept-badge">${DEPT_LABELS[r.issues?.department] || r.issues?.department || ''}</span>
+              </div>
+            </div>
+            ${r.comment ? `<div class="review-comment">"${r.comment}"</div>` : ''}
+          </div>
+        `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">${err.message}</p></div>`;
+            }
+        }
+
+        loadData();
+    </script>
+</body>
+
+</html>

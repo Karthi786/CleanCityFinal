@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Create Account — CleanMadurai</title>
+    <meta name="description"
+        content="Register for CleanMadurai to report civic issues or manage municipal services in Madurai." />
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        .auth-card {
+            max-width: 520px;
+        }
+
+        .role-option {
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: all var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .role-option:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .role-option.selected {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .role-option input {
+            display: none;
+        }
+
+        .role-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .role-label {
+            font-weight: 600;
+            font-size: 0.92rem;
+        }
+
+        .role-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        #dept-group {
+            animation: fadeInUp 0.3s ease;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="auth-page" style="padding: 40px 24px;">
+        <div style="margin-bottom:24px; animation: fadeInUp 0.5s ease;">
+            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center;">
+                <div class="logo-icon">♻</div>
+                <span>CleanMadurai</span>
+            </a>
+        </div>
+
+        <div class="auth-card fade-in">
+            <div class="auth-card-header">
+                <h1 style="font-size:1.6rem; margin-bottom:6px;">Join the Movement 🌿</h1>
+                <p class="text-muted text-sm">Register to report civic issues or manage city services</p>
+            </div>
+
+            <div class="auth-card-body">
+                <form id="register-form" class="form-stack" novalidate>
+                    <div class="form-group">
+                        <label class="label" for="name">Full Name</label>
+                        <input id="name" type="text" class="input" placeholder="e.g. Arjun Kumar" required
+                            autocomplete="name" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="email">Email Address</label>
+                        <input id="email" type="email" class="input" placeholder="name@example.com" required
+                            autocomplete="email" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="password">Password</label>
+                        <input id="password" type="password" class="input" placeholder="At least 6 characters"
+                            minlength="6" required autocomplete="new-password" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label">Select Your Role</label>
+                        <div class="space-y-4" id="role-options">
+                            <label class="role-option selected" data-role="USER">
+                                <input type="radio" name="role" value="USER" checked />
+                                <span class="role-icon">🏙️</span>
+                                <div>
+                                    <div class="role-label">Citizen</div>
+                                    <div class="role-desc">Report civic issues and support community causes</div>
+                                </div>
+                            </label>
+                            <label class="role-option" data-role="COLLECTOR">
+                                <input type="radio" name="role" value="COLLECTOR" />
+                                <span class="role-icon">🛡️</span>
+                                <div>
+                                    <div class="role-label">District Collector</div>
+                                    <div class="role-desc">Oversee all departments and city-wide issue resolution</div>
+                                </div>
+                            </label>
+                            <label class="role-option" data-role="DEPT">
+                                <input type="radio" name="role" value="DEPT" />
+                                <span class="role-icon">🏛️</span>
+                                <div>
+                                    <div class="role-label">Department Staff</div>
+                                    <div class="role-desc">Manage issues assigned to your municipal department</div>
+                                </div>
+                            </label>
+                            <label class="role-option" data-role="ADMIN">
+                                <input type="radio" name="role" value="ADMIN" />
+                                <span class="role-icon">👑</span>
+                                <div>
+                                    <div class="role-label">System Administrator</div>
+                                    <div class="role-desc">Manage users, verify accounts, and oversee the platform</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Department sub-selector (shown only for DEPT role) -->
+                    <div class="form-group" id="dept-group" style="display:none;">
+                        <label class="label" for="department">Select Department</label>
+                        <select id="department" class="select">
+                            <option value="">— Choose your department —</option>
+                            <option value="MADURAI_CORPORATION">Madurai Corporation (Waste / Water / Roads)</option>
+                            <option value="TNEB">TNEB — Electrical</option>
+                            <option value="POLICE">Madurai Police</option>
+                            <option value="FIRE_STATION">Fire Station</option>
+                        </select>
+                    </div>
+
+                    <button id="register-btn" type="submit" class="btn btn-primary btn-full btn-lg"
+                        style="margin-top:4px;">
+                        <span id="register-btn-text">✨ Create Account</span>
+                        <div id="register-spinner" class="spinner spinner-sm" style="display:none;"></div>
+                    </button>
+                </form>
+            </div>
+
+            <div class="auth-card-footer">
+                <p class="text-sm text-muted">
+                    Already have an account?
+                    <a href="login.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;Sign In
+                        →</a>
+                </p>
+            </div>
+        </div>
+
+        <p class="text-xs text-muted" style="margin-top:20px; opacity:0.7;">
+            © 2024 Madurai District Administration
+        </p>
+    </div>
+
+    <script type="module">
+        import { redirectIfLoggedIn } from './js/router.js';
+        import { register } from './js/auth.js';
+        import { toast } from './js/toast.js';
+
+        redirectIfLoggedIn();
+
+        // Role selector UI
+        const roleOptions = document.querySelectorAll('.role-option');
+        const deptGroup = document.getElementById('dept-group');
+        let selectedRole = 'USER';
+
+        roleOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                roleOptions.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                opt.querySelector('input').checked = true;
+                selectedRole = opt.dataset.role;
+                deptGroup.style.display = selectedRole === 'DEPT' ? 'flex' : 'none';
+            });
+        });
+
+        const form = document.getElementById('register-form');
+        const btn = document.getElementById('register-btn');
+        const btnText = document.getElementById('register-btn-text');
+        const spinner = document.getElementById('register-spinner');
+
+        function setLoading(on) {
+            btn.disabled = on;
+            btnText.style.display = on ? 'none' : 'inline-flex';
+            spinner.style.display = on ? 'block' : 'none';
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const dept = document.getElementById('department').value;
+
+            if (!name || !email || !password) {
+                toast.error('Missing Fields', 'Please fill in all required fields.');
+                return;
+            }
+            if (password.length < 6) {
+                toast.error('Weak Password', 'Password must be at least 6 characters.');
+                return;
+            }
+            if (selectedRole === 'DEPT' && !dept) {
+                toast.error('Select Department', 'Please choose your department.');
+                return;
+            }
+
+            // Map role
+            let finalRole = selectedRole;
+            if (selectedRole === 'DEPT') finalRole = dept;
+
+            setLoading(true);
+            try {
+                const data = await register({ name, email, password, role: finalRole, department: dept || null });
+                // Strip leading slash — Live Server serves from a subfolder, not root
+                const redirect = (data.redirect || '').replace(/^\//, '');
+                if (redirect === 'pending.html') {
+                    toast.info('Account Pending', 'Your account is awaiting admin approval.');
+                    setTimeout(() => { window.location.href = 'pending.html'; }, 1000);
+                } else {
+                    toast.success('Welcome!', 'Account created successfully.');
+                    setTimeout(() => { window.location.href = redirect; }, 800);
+                }
+            } catch (err) {
+                toast.error('Registration Failed', err.message);
+            } finally {
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+
+</html>

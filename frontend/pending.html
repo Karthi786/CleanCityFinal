@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Pending — CleanMadurai</title>
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+    <div class="auth-page">
+        <div class="pending-card fade-in">
+            <div class="pending-icon">⏳</div>
+            <h1 style="font-size:1.6rem; margin-bottom:12px; color:var(--text);">Account Pending Approval</h1>
+            <p class="text-muted" style="margin-bottom:24px; font-size:0.95rem; line-height:1.7;">
+                Your administrative account has been submitted and is currently under review by a system administrator.
+                You'll be able to access your dashboard once approved.
+            </p>
+            <div class="card" style="text-align:left; margin-bottom:28px; border-left: 3px solid var(--warning);">
+                <div class="card-body">
+                    <p class="text-sm font-semibold" style="margin-bottom:8px; color:var(--warning);">📋 What happens
+                        next?</p>
+                    <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:16px; line-height:1.8;">
+                        <li>A system administrator will review your registration</li>
+                        <li>You'll gain access once your role is verified</li>
+                        <li>If rejected, you'll be notified. Contact support for help.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div id="user-info"
+                style="margin-bottom:24px; padding:14px; background:var(--bg-muted); border-radius:var(--radius-sm); font-size:0.87rem; color:var(--text-muted); display:none;">
+                Logged in as: <strong id="user-email"></strong> (<span id="user-role"></span>)
+            </div>
+
+            <button id="logout-btn" class="btn btn-outline btn-full">
+                🚪 Sign Out & Return Home
+            </button>
+        </div>
+    </div>
+
+    <script type="module">
+        import { getUser, logout } from './js/auth.js';
+        import { ROLE_LABELS } from './js/auth.js';
+
+        const user = getUser();
+        if (user) {
+            document.getElementById('user-info').style.display = 'block';
+            document.getElementById('user-email').textContent = user.email;
+            document.getElementById('user-role').textContent = ROLE_LABELS[user.role] || user.role;
+        }
+
+        document.getElementById('logout-btn').addEventListener('click', logout);
+    </script>
+</body>
+
+</html>

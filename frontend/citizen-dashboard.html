@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Citizen Dashboard — CleanMadurai</title>
+    <meta name="description"
+        content="CleanMadurai citizen dashboard — report, track and support civic issues in Madurai." />
+    <!-- Global CSS -->
+    <link rel="stylesheet" href="css/styles.css" />
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --cm-green: #16a34a;
+            --cm-green-light: #e6f6ec;
+            --cm-text-dark: #111827;
+            --cm-text-gray: #6b7280;
+            --cm-bg-gray: #f9fafb;
+            --font-inter: 'Inter', sans-serif;
+        }
+
+        body {
+            font-family: var(--font-inter);
+            background-color: #ffffff;
+            /* Clean white bg as per screenshot */
+        }
+
+        /* ── Sidebar Overrides (Light Theme) ── */
+        .sidebar {
+            background-color: #ffffff;
+            color: var(--cm-text-dark);
+            border-right: 1px solid var(--border);
+            box-shadow: none;
+            width: 280px;
+        }
+
+        .sidebar-logo {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-logo .logo-icon-img {
+            width: 44px;
+            height: 44px;
+            border-radius: 4px;
+            object-fit: cover;
+            background: #e2e8f0;
+        }
+
+        .sidebar-logo-text {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .sidebar-logo-title {
+            color: var(--cm-green);
+            font-weight: 800;
+            font-size: 1.05rem;
+            line-height: 1.2;
+        }
+
+        .sidebar-logo-sub {
+            color: #94a3b8;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .sidebar-link {
+            color: var(--cm-text-dark);
+            font-weight: 600;
+            font-size: 0.95rem;
+            padding: 12px 16px;
+            border-radius: 8px;
+        }
+
+        .sidebar-link:hover {
+            background-color: var(--cm-bg-gray);
+            color: var(--cm-text-dark);
+        }
+
+        .sidebar-link.active {
+            background-color: var(--cm-green);
+            color: #ffffff;
+            box-shadow: none;
+        }
+
+        .sidebar-link .icon {
+            color: inherit;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border);
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: auto;
+        }
+
+        .user-avatar-sidebar {
+            width: 40px;
+            height: 40px;
+            background: #333;
+            color: white;
+            font-weight: 600;
+        }
+
+        .logout-text {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-decoration: none;
+            background: none;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .logout-text:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Header Overrides ── */
+        .dash-header {
+            background: #ffffff;
+            border-bottom: 1px solid var(--border);
+            height: 70px;
+            padding: 0 32px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .dash-header-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--cm-text-dark);
+        }
+
+        .header-search {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 320px;
+        }
+
+        .header-search input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .header-bell {
+            font-size: 1.2rem;
+            color: var(--cm-text-gray);
+            cursor: pointer;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+        }
+
+        .header-user-info .name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--cm-text-dark);
+        }
+
+        .header-user-info .role {
+            font-size: 0.75rem;
+            color: var(--cm-text-gray);
+        }
+
+        /* ── Main Layout ── */
+        .dash-main {
+            margin-left: 280px;
+        }
+
+        .dash-content {
+            padding: 32px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* ── Welcome Section ── */
+        .welcome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--cm-green);
+            margin-bottom: 4px;
+        }
+
+        .welcome-sub {
+            font-size: 0.95rem;
+            color: var(--cm-text-gray);
+            font-style: italic;
+        }
+
+        /* ── Stat Cards Grid (Screenshot match) ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-box {
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .stat-box-info {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .stat-box-label {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .stat-box-val {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--cm-text-dark);
+        }
+
+        .stat-box-icon-wrapper {
+            width: 56px;
+            height: 56px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        /* Specific colors */
+        .stat-blue .stat-box-label {
+            color: var(--cm-text-gray);
+        }
+
+        .stat-blue .stat-box-icon-wrapper {
+            background: #e6f6ec;
+            color: var(--cm-green);
+        }
+
+        .stat-green .stat-box-label {
+            color: var(--cm-green);
+        }
+
+        .stat-green .stat-box-icon-wrapper {
+            background: #e6f6ec;
+            color: var(--cm-green);
+        }
+
+        .stat-orange .stat-box-label {
+            color: #d97706;
+        }
+
+        .stat-orange .stat-box-icon-wrapper {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        /* ── Layout Cols for Issues & Trending ── */
+        .content-cols {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 32px;
+        }
+
+        /* ── Tabs Row ── */
+        .tabs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0;
+        }
+
+        .tabs-nav {
+            display: flex;
+            gap: 24px;
+        }
+
+        .tab-item {
+            padding: 12px 0;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--cm-text-gray);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab-item:hover {
+            color: var(--cm-text-dark);
+        }
+
+        .tab-item.active {
+            color: var(--cm-text-dark);
+            border-bottom: 3px solid var(--cm-green);
+        }
+
+        .filter-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--cm-text-gray);
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 12px 0;
+        }
+
+        /* ── Issue Cards ── */
+        .issues-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .cm-issue-card {
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(0, 0, 0, 0.02);
+            transition: transform 0.2s;
+        }
+
+        .cm-issue-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .ic-image-wrap {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: #e2e8f0;
+        }
+
+        .ic-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .ic-badges {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            align-items: flex-end;
+        }
+
+        .ic-badge-status {
+            background: #fef08a;
+            color: #854d0e;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .ic-badge-pri {
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            backdrop-filter: blur(4px);
+        }
+
+        .ic-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .ic-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .ic-cat {
+            border: 1px solid var(--border);
+            padding: 4px 12px;
+            border-radius: 99px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: var(--cm-text-gray);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .ic-support-cta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--cm-green);
+            font-weight: 700;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        .ic-title {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--cm-text-dark);
+            margin-bottom: 12px;
+        }
+
+        .ic-meta {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            color: #94a3b8;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .ic-meta.location {
+            color: #94a3b8;
+        }
+
+        .ic-meta.location .ic-icon {
+            color: var(--cm-green);
+            font-size: 1rem;
+        }
+
+        .ic-meta.time .ic-icon {
+            color: #94a3b8;
+            font-size: 1rem;
+        }
+
+        .ic-desc {
+            font-size: 0.9rem;
+            color: var(--cm-text-gray);
+            margin-top: 12px;
+            margin-bottom: 24px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .ic-footer {
+            margin-top: auto;
+            display: flex;
+            gap: 12px;
+        }
+
+        .ic-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+
+        .ic-btn-outline {
+            background: transparent;
+            border: 1.5px solid #e5e7eb;
+            color: #6b7280;
+        }
+
+        .ic-btn-supported {
+            background: var(--cm-green-light);
+            color: var(--cm-green);
+            border: 1.5px solid transparent;
+        }
+
+        .ic-btn-solid {
+            background: var(--cm-green);
+            color: white;
+            border: 1.5px solid transparent;
+        }
+
+        .ic-btn-solid:hover {
+            background: #15803d;
+        }
+
+        .ic-btn-outline:hover {
+            background: var(--cm-bg-gray);
+            border-color: #cbd5e1;
+        }
+
+        /* ── Most Supported Panel ── */
+        .ms-panel {
+            background: var(--cm-green);
+            border-radius: 16px;
+            padding: 24px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(22, 163, 74, 0.2);
+            position: sticky;
+            top: 100px;
+        }
+
+        .ms-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .ms-sub {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 20px;
+            line-height: 1.4;
+        }
+
+        .ms-item {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            backdrop-filter: blur(8px);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .ms-item:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .ms-num {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .ms-content {
+            flex: 1;
+        }
+
+        .ms-title {
+            font-weight: 800;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+
+        .ms-meta {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.9);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Report Modal adjustments */
+        .modal {
+            border-radius: 16px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* Generic utilities */
+        .ic-icon-svg {
+            width: 16px;
+            height: 16px;
+            fill: currentColor;
+        }
+
+        /* Map */
+        #issue-map {
+            height: 200px;
+            width: 100%;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            margin-top: 8px;
+            z-index: 10;
+        }
+    </style>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-text">
+                <div class="sidebar-logo-title">Smart & Clean<br>Madurai</div>
+                <div class="sidebar-logo-sub">Government of Tamil Nadu</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a class="sidebar-link active" href="citizen-dashboard.html">
+                <span style="display:flex;align-items:center;gap:12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    Citizen Dashboard
+                </span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-avatar-sidebar"
+                style="display:flex;align-items:center;justify-content:center;border-radius:50%;" id="sidebar-avatar">N
+            </div>
+            <button id="logout-btn" class="logout-text">Logout</button>
+        </div>
+    </aside>
+
+    <div class="dash-layout">
+        <main class="dash-main">
+            <!-- Header -->
+            <header class="dash-header">
+                <div class="dash-header-title">Citizen Portal</div>
+                <div class="header-actions">
+                    <div class="header-user">
+                        <div class="header-user-info">
+                            <div class="name" id="header-name">kevin</div>
+                            <div class="role">Citizen</div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <div class="dash-content">
+                <!-- Welcome -->
+                <div class="welcome-header">
+                    <div>
+                        <h1 class="welcome-title text-primary" id="welcome-msg">Welcome, kevin!</h1>
+                        <p class="welcome-sub">Your voice transforms Madurai. Report. Support. Impact.</p>
+                    </div>
+                    <button id="report-btn" class="btn btn-primary" style="border-radius:8px; padding:12px 24px;">
+                        ＋ Report New Issue
+                    </button>
+                </div>
+
+                <!-- Stats Grid -->
+                <div class="stats-grid">
+                    <div class="stat-box stat-blue">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label">City-wide Reports</div>
+                            <div class="stat-box-val" id="stat-total">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                <polyline points="14 2 14 8 20 8"></polyline>
+                                <line x1="16" y1="13" x2="8" y2="13"></line>
+                                <line x1="16" y1="17" x2="8" y2="17"></line>
+                                <polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-box stat-green">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label">Resolved Cases</div>
+                            <div class="stat-box-val" id="stat-resolved">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="stat-box stat-orange">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label">Active Pending</div>
+                            <div class="stat-box-val" id="stat-pending">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <polyline points="12 6 12 12 16 14"></polyline>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-cols">
+                    <!-- Left: Tabs + Grid -->
+                    <div>
+                        <div class="tabs-header">
+                            <div class="tabs-nav">
+                                <div class="tab-item active" data-tab="community">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                    </svg>
+                                    Community Feed
+                                </div>
+                                <div class="tab-item" data-tab="mine">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                        <polyline points="14 2 14 8 20 8"></polyline>
+                                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                                        <polyline points="10 9 9 9 8 9"></polyline>
+                                    </svg>
+                                    My Submissions (<span id="my-count">0</span>)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane active" id="tab-community">
+                            <div id="community-issues" class="issues-grid"></div>
+                        </div>
+                        <div class="tab-pane" id="tab-mine">
+                            <div id="my-issues" class="issues-grid"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Trending -->
+                    <div>
+                        <div class="ms-panel">
+                            <div class="ms-header">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                                    <polyline points="16 7 22 7 22 13"></polyline>
+                                </svg>
+                                Most Supported
+                            </div>
+                            <div class="ms-sub">Issues receiving the most attention right now.</div>
+                            <div id="trending-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Report Modal -->
+    <div class="modal-overlay" id="report-modal">
+        <div class="modal modal-lg">
+            <div class="modal-header">
+                <div>
+                    <div class="modal-title">Report New Issue</div>
+                    <p class="text-muted text-sm" style="margin-top:4px;">Be specific to help departments act faster.
+                    </p>
+                </div>
+                <button class="modal-close" id="modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="report-form" class="form-stack">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+                        <div class="form-group" style="grid-column:1/-1;">
+                            <label class="label" for="issue-title">Issue Title *</label>
+                            <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop"
+                                required />
+                        </div>
+                        <div class="form-group">
+                            <label class="label" for="issue-category">Category *</label>
+                            <select id="issue-category" class="select" required>
+                                <option value="">— Select Category —</option>
+                                <option value="Waste">🗑️ Waste</option>
+                                <option value="Water">💧 Water</option>
+                                <option value="Electricity">⚡ Electricity</option>
+                                <option value="Roads">🛣️ Roads</option>
+                                <option value="Law &amp; Order">👮 Law & Order</option>
+                                <option value="Fire">🔥 Fire</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="grid-column:1/-1;">
+                            <label class="label" for="issue-location">Location Address *</label>
+                            <div style="display:flex; gap:8px;">
+                                <input id="issue-location" class="input" placeholder="e.g. Coimbatore North..." required
+                                    style="flex:1;" />
+                                <button type="button" class="btn btn-outline" id="detect-location-btn"
+                                    style="white-space:nowrap; padding: 0 16px; border-radius:8px;">
+                                    📍 Auto-Detect
+                                </button>
+                            </div>
+                            <div id="issue-map"></div>
+                            <input type="hidden" id="issue-lat" />
+                            <input type="hidden" id="issue-lng" />
+                        </div>
+                        <div class="form-group" style="grid-column:1/-1;">
+                            <label class="label" for="issue-desc">Description *</label>
+                            <textarea id="issue-desc" class="textarea" placeholder="Describe the issue..."
+                                required></textarea>
+                        </div>
+                        <div class="form-group" style="grid-column:1/-1;">
+                            <label class="label" for="issue-image">Upload Image *</label>
+                            <input id="issue-image" class="input" type="file" accept="image/*" required />
+                            <div id="image-verify-status"
+                                style="margin-top:8px; font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:6px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="padding:0; border:none; margin-top:8px;">
+                        <button type="button" class="btn btn-outline" id="modal-cancel">Cancel</button>
+                        <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;">
+                            <span id="submit-text">Submit Report</span>
+                            <div class="spinner spinner-sm" id="submit-spinner" style="display:none;"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details/Timeline Modal -->
+    <div class="modal-overlay" id="details-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Issue Details</div>
+                <button class="modal-close"
+                    onclick="document.getElementById('details-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <h3 id="det-title" style="font-size:1.1rem;margin-bottom:16px;"></h3>
+
+                <!-- Timeline -->
+                <div style="margin-bottom:24px;background:var(--cm-bg-gray);border-radius:12px;padding:20px;">
+                    <h4 style="margin-bottom:16px;font-size:0.95rem;">Issue Timeline</h4>
+                    <div id="det-timeline" style="display:flex;flex-direction:column;gap:12px;"></div>
+                </div>
+
+                <!-- Before & After Images Section -->
+                <div id="det-images-sec" style="margin-bottom:24px;display:none;">
+                    <h4
+                        style="margin-bottom:16px;font-size:0.95rem;border-top:1px solid var(--border);padding-top:16px;">
+                        Issue Resolution</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div>
+                            <div
+                                style="font-size:0.8rem;font-weight:600;color:var(--cm-text-gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                                Before Fix</div>
+                            <div
+                                style="width:100%;height:150px;border-radius:8px;background:#f1f5f9;overflow:hidden;border:1px solid var(--border);">
+                                <img id="det-img-before" src="" style="width:100%;height:100%;object-fit:cover;" />
+                            </div>
+                        </div>
+                        <div id="det-img-after-container" style="display:none;">
+                            <div
+                                style="font-size:0.8rem;font-weight:600;color:var(--cm-green);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                                After Fix</div>
+                            <div
+                                style="width:100%;height:150px;border-radius:8px;background:#e6f6ec;overflow:hidden;border:1px solid var(--border);position:relative;">
+                                <img id="det-img-after" src="" style="width:100%;height:100%;object-fit:cover;" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reviews Section -->
+                <div id="det-reviews-sec" style="display:none;margin-top:24px;">
+                    <h4
+                        style="margin-bottom:16px;font-size:1.05rem;border-top:1px solid var(--border);padding-top:16px;">
+                        Citizen Reviews</h4>
+
+                    <!-- Write Review Form -->
+                    <div id="det-my-review-form"
+                        style="display:none;margin-bottom:24px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;">
+                        <h5 style="margin-bottom:8px;">Write a Review</h5>
+                        <p style="font-size:0.8rem;color:var(--cm-text-gray);margin-bottom:12px;">Rate the resolution of
+                            this issue.</p>
+                        <select id="rev-rating" class="select" style="margin-bottom:12px;">
+                            <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
+                            <option value="4">⭐⭐⭐⭐ 4 Stars</option>
+                            <option value="3">⭐⭐⭐ 3 Stars</option>
+                            <option value="2">⭐⭐ 2 Stars</option>
+                            <option value="1">⭐ 1 Star</option>
+                        </select>
+                        <textarea id="rev-comment" class="textarea" placeholder="Add a comment... (optional)"
+                            style="margin-bottom:12px;min-height:80px;"></textarea>
+                        <button id="rev-submit-btn" class="btn btn-primary btn-sm">Submit Review</button>
+                    </div>
+
+                    <!-- Reviews List -->
+                    <div id="det-reviews-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { guardPage } from './js/router.js';
+        import { logout } from './js/auth.js';
+        import { issuesAPI, reviewsAPI } from './js/api.js';
+        import { toast } from './js/toast.js';
+
+        const user = guardPage(['USER']);
+        if (!user) throw new Error('Not authorized');
+
+        // Populate User Info
+        const firstName = user.name.split(' ')[0];
+        document.getElementById('header-name').textContent = firstName;
+        document.getElementById('welcome-msg').textContent = `Welcome, ${firstName}!`;
+
+        const avatarStr = firstName.substring(0, 2).toUpperCase();
+        document.getElementById('sidebar-avatar').textContent = avatarStr.charAt(0);
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
+        // Tabs Logic
+        document.querySelectorAll('.tab-item').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Modal Logic
+        const modal = document.getElementById('report-modal');
+        document.getElementById('report-btn').addEventListener('click', () => modal.classList.add('open'));
+        document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
+        document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
+
+        // Helpers
+        function timeAgo(dateStr) {
+            const diff = Date.now() - new Date(dateStr).getTime();
+            const h = Math.max(1, Math.floor(diff / 3600000));
+            return `Reported about ${h} hours ago`;
+        }
+
+        let allIssues = [];
+        let supportedIds = new Set();
+
+        function renderIssueCard(issue) {
+            const isSupported = supportedIds.has(issue.id);
+            const statusLabel = issue.status === 'COMPLETED' ? 'RESOLVED' : issue.status;
+            const imgUrl = issue.image_url || 'https://via.placeholder.com/600x400.png?text=Issue+Image';
+
+            const btnClass = isSupported ? 'ic-btn-supported' : 'ic-btn-outline';
+            const btnContent = isSupported
+                ? '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Supported'
+                : 'Support Issue';
+
+            return `
+            <div class="cm-issue-card">
+              <div class="ic-image-wrap">
+                <img src="${imgUrl}" alt="Issue Image">
+                <div class="ic-badges">
+                  <span class="ic-badge-status">${statusLabel}</span>
+                </div>
+              </div>
+              <div class="ic-body">
+                <div class="ic-row-top">
+                  <span class="ic-cat">${issue.category}</span>
+                  <div class="ic-support-cta support-btn-trigger" data-id="${issue.id}">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>
+                    <span class="scount">${issue.supports_count || 0}</span>
+                  </div>
+                </div>
+                <div class="ic-title">${issue.title}</div>
+                
+                <div class="ic-meta location">
+                  <span class="ic-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
+                  ${issue.location_name || 'Madurai'}
+                </div>
+                
+                <div class="ic-meta time">
+                  <span class="ic-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg></span>
+                  ${timeAgo(issue.created_at)}
+                </div>
+                
+                <div class="ic-desc">${issue.description}</div>
+                
+                <div class="ic-footer">
+                  <button class="ic-btn ${btnClass} support-btn-main" data-id="${issue.id}">
+                    ${btnContent}
+                  </button>
+                  <button class="ic-btn ic-btn-solid" onclick="openIssueDetails('${issue.id}')">View Details →</button>
+                </div>
+              </div>
+            </div>`;
+        }
+
+        function renderEmpty(container, msg) {
+            container.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:#94a3b8; background:#fff; border-radius:16px; border:1px dashed #cbd5e1;">${msg}</div>`;
+        }
+
+        function renderTrending() {
+            const top3 = [...allIssues].sort((a, b) => (b.supports_count || 0) - (a.supports_count || 0)).slice(0, 3);
+            const el = document.getElementById('trending-list');
+            if (top3.length === 0) { el.innerHTML = '<div>No issues yet</div>'; return; }
+
+            el.innerHTML = top3.map((issue, idx) => `
+                <div class="ms-item">
+                    <div class="ms-num">${idx + 1}</div>
+                    <div class="ms-content">
+                        <div class="ms-title">${issue.category.toLowerCase()}</div>
+                        <div class="ms-meta">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                            ${issue.supports_count || 0} Supports • ${issue.category}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function handleSupportAction(btn, id) {
+            if (btn.disabled) return;
+            btn.disabled = true;
+            try {
+                const data = await issuesAPI.support(id);
+                if (data.supported) {
+                    supportedIds.add(id);
+                    toast.success('Support Recorded', 'You have supported this civic issue.');
+                } else {
+                    supportedIds.delete(id);
+                }
+
+                const issue = allIssues.find(i => i.id === id);
+                if (issue) issue.supports_count = data.supportsCount;
+
+                // Refresh views manually to maintain state
+                document.querySelectorAll(`.ic-support-cta[data-id="${id}"] .scount`).forEach(el => el.textContent = data.supportsCount);
+                document.querySelectorAll(`.support-btn-main[data-id="${id}"]`).forEach(el => {
+                    if (data.supported) {
+                        el.className = 'ic-btn ic-btn-supported support-btn-main';
+                        el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg> Supported';
+                    } else {
+                        el.className = 'ic-btn ic-btn-outline support-btn-main';
+                        el.innerHTML = 'Support Issue';
+                    }
+                });
+                renderTrending();
+            } catch (err) {
+                toast.error('Failed', err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        }
+
+        async function loadIssues() {
+            try {
+                const [issuesData, supportsData] = await Promise.all([
+                    issuesAPI.getAll(),
+                    issuesAPI.mySupports().catch(() => ({ supportedIds: [] })),
+                ]);
+
+                allIssues = issuesData.issues || [];
+                supportedIds = new Set(supportsData.supportedIds || []);
+
+                const myIssues = allIssues.filter(i => i.reported_by_id === user.id);
+                const communityIssues = allIssues.filter(i => i.reported_by_id !== user.id);
+
+                // Stats Update
+                document.getElementById('stat-total').textContent = allIssues.length;
+                document.getElementById('stat-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
+                document.getElementById('stat-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
+                document.getElementById('my-count').textContent = myIssues.length;
+
+                // Grids
+                const commEl = document.getElementById('community-issues');
+                if (communityIssues.length === 0) renderEmpty(commEl, 'No community issues reported yet.');
+                else commEl.innerHTML = communityIssues.map(i => renderIssueCard(i)).join('');
+
+                const myEl = document.getElementById('my-issues');
+                if (myIssues.length === 0) renderEmpty(myEl, "You haven't reported any issues yet.");
+                else myEl.innerHTML = myIssues.map(i => renderIssueCard(i)).join('');
+
+                renderTrending();
+
+                // Attach listeners dynamically
+                document.querySelectorAll('.support-btn-trigger, .support-btn-main').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        handleSupportAction(btn, btn.dataset.id);
+                    });
+                });
+
+            } catch (err) {
+                toast.error('Failed to load issues', err.message);
+            }
+        }
+
+        // Image Processor
+        function processImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_SIZE = 800;
+                        let { width, height } = img;
+
+                        if (width > height && width > MAX_SIZE) {
+                            height *= MAX_SIZE / width;
+                            width = MAX_SIZE;
+                        } else if (height > MAX_SIZE) {
+                            width *= MAX_SIZE / height;
+                            height = MAX_SIZE;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.onerror = () => reject(new Error('Failed to load image for processing'));
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Image preview on selection
+        document.getElementById('issue-image').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = !file;
+        });
+
+
+        // Location & Map logic
+        let map, marker;
+        const DEFAULT_LAT = 9.9252;
+        const DEFAULT_LNG = 78.1198; // Madurai
+
+        function initMap() {
+            if (map) return;
+            map = L.map('issue-map').setView([DEFAULT_LAT, DEFAULT_LNG], 13);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+
+            marker = L.marker([DEFAULT_LAT, DEFAULT_LNG], { draggable: true }).addTo(map);
+
+            // Allow clicking map to move pin
+            map.on('click', function (e) {
+                marker.setLatLng(e.latlng);
+                updateLocationHiddenFields(e.latlng.lat, e.latlng.lng);
+                reverseGeocode(e.latlng.lat, e.latlng.lng);
+            });
+
+            // Updating pins on drag
+            marker.on('dragend', function (e) {
+                const position = marker.getLatLng();
+                updateLocationHiddenFields(position.lat, position.lng);
+                reverseGeocode(position.lat, position.lng);
+            });
+        }
+
+        function updateLocationHiddenFields(lat, lng) {
+            document.getElementById('issue-lat').value = lat;
+            document.getElementById('issue-lng').value = lng;
+        }
+
+        async function reverseGeocode(lat, lng) {
+            try {
+                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                const data = await res.json();
+                if (data && data.display_name) {
+                    document.getElementById('issue-location').value = data.display_name;
+                }
+            } catch (err) {
+                console.error("Geocoding failed", err);
+            }
+        }
+
+        document.getElementById('detect-location-btn').addEventListener('click', () => {
+            const btn = document.getElementById('detect-location-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = 'Detecting...';
+            btn.disabled = true;
+
+            if ("geolocation" in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    position => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+
+                        map.setView([lat, lng], 16);
+                        marker.setLatLng([lat, lng]);
+                        updateLocationHiddenFields(lat, lng);
+                        reverseGeocode(lat, lng);
+
+                        btn.innerHTML = '📍 Auto-Detect';
+                        btn.disabled = false;
+                    },
+                    error => {
+                        toast.error('Location Error', 'Could not detect your location. Please check browser permissions.');
+                        btn.innerHTML = '📍 Auto-Detect';
+                        btn.disabled = false;
+                    },
+                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                );
+            } else {
+                toast.error('Not Supported', 'Geolocation is not supported by your browser.');
+                btn.innerHTML = '📍 Auto-Detect';
+                btn.disabled = false;
+            }
+        });
+
+        // Initialize map when modal opens
+        document.getElementById('report-btn').addEventListener('click', () => {
+            modal.classList.add('open');
+            setTimeout(() => {
+                initMap();
+                map.invalidateSize(); // Fixes grey boxes bug in Leaflet modals
+            }, 100);
+        });
+
+        // Report form submit
+        document.getElementById('report-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+
+            const fileInput = document.getElementById('issue-image');
+            const file = fileInput.files[0];
+            if (!file) {
+                toast.error('Image Required', 'Please upload an image for the issue.');
+                btn.disabled = false;
+                return;
+            }
+
+            try {
+                const imageUrl = await processImageFile(file);
+                const lat = document.getElementById('issue-lat').value;
+                const lng = document.getElementById('issue-lng').value;
+
+                await issuesAPI.create({
+                    title: document.getElementById('issue-title').value.trim(),
+                    description: document.getElementById('issue-desc').value.trim(),
+                    category: document.getElementById('issue-category').value,
+                    locationName: document.getElementById('issue-location').value.trim(),
+                    latitude: lat ? parseFloat(lat) : null,
+                    longitude: lng ? parseFloat(lng) : null,
+                    imageUrl: imageUrl,
+                });
+                toast.success('Report Submitted! 🎉', 'Your issue has been sent.');
+                modal.classList.remove('open');
+                document.getElementById('report-form').reset();
+                await loadIssues();
+            } catch (err) {
+                toast.error('Submission Failed', err.message);
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        window.openIssueDetails = async (id) => {
+            const issue = allIssues.find(i => i.id === id);
+            if (!issue) return;
+
+            document.getElementById('det-title').textContent = issue.title;
+
+            // Build timeline
+            const createdDate = new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+
+            let timelineHtml = `<div style="display:flex;gap:8px;"><span style="color:var(--cm-green);">✔</span> <b>Arised</b> - ${createdDate}</div>`;
+
+            if (issue.status === 'IN_PROGRESS' || issue.status === 'COMPLETED') {
+                const updatedDate = new Date(issue.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                timelineHtml += `<div style="display:flex;gap:8px;"><span style="color:var(--cm-green);">✔</span> <b>In Work</b> - ${issue.status === 'IN_PROGRESS' ? updatedDate : createdDate}</div>`;
+            }
+            if (issue.status === 'COMPLETED') {
+                const updatedDate = new Date(issue.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                timelineHtml += `<div style="display:flex;gap:8px;"><span style="color:var(--cm-green);">✔</span> <b>Done</b> - ${updatedDate}</div>`;
+            }
+
+            document.getElementById('det-timeline').innerHTML = timelineHtml;
+
+            // Handle Review & Images section
+            const imgSec = document.getElementById('det-images-sec');
+            const imgBefore = document.getElementById('det-img-before');
+            const imgAfterCont = document.getElementById('det-img-after-container');
+            const imgAfter = document.getElementById('det-img-after');
+
+            const revSec = document.getElementById('det-reviews-sec');
+            const revForm = document.getElementById('det-my-review-form');
+            const revList = document.getElementById('det-reviews-list');
+
+            // Default reset
+            imgSec.style.display = 'none';
+            revSec.style.display = 'none';
+            revForm.style.display = 'none';
+
+            if (issue.status === 'COMPLETED') {
+                // Show resolution images
+                imgSec.style.display = 'block';
+                imgBefore.src = issue.image_url || 'https://via.placeholder.com/400x300.png?text=No+Before+Image';
+                if (issue.completion_image_url) {
+                    imgAfterCont.style.display = 'block';
+                    imgAfter.src = issue.completion_image_url;
+                } else {
+                    imgAfterCont.style.display = 'none';
+                }
+
+                // Show reviews section
+                revSec.style.display = 'block';
+                revList.innerHTML = '<div class="spinner spinner-sm"></div>';
+
+                let reviews = [];
+                try {
+                    const data = await reviewsAPI.getByIssue(issue.id);
+                    reviews = data.reviews || [];
+                } catch (err) {
+                    console.error('Reviews load error:', err);
+                    // Continue with empty array so user can still submit
+                }
+
+                const myReview = reviews.find(r => r.user_id === user.id);
+
+                if (myReview) {
+                    revForm.style.display = 'none'; // Already reviewed
+                } else {
+                    revForm.style.display = 'block';
+                    // Reset forms
+                    document.getElementById('rev-rating').value = '5';
+                    document.getElementById('rev-comment').value = '';
+
+                    document.getElementById('rev-submit-btn').onclick = async () => {
+                        const rating = document.getElementById('rev-rating').value;
+                        const comment = document.getElementById('rev-comment').value;
+                        if (!rating) {
+                            toast.error('Check Rating', 'Please select a rating from 1 to 5.');
+                            return;
+                        }
+                        const btn = document.getElementById('rev-submit-btn');
+                        btn.disabled = true;
+                        try {
+                            await reviewsAPI.create({ issueId: issue.id, rating, comment });
+                            toast.success('Review Submitted!');
+                            openIssueDetails(id); // reload modal
+                        } catch (err) {
+                            toast.error('Review Failed', err.message);
+                        } finally {
+                            btn.disabled = false;
+                        }
+                    };
+                }
+
+                if (reviews.length === 0) {
+                    revList.innerHTML = '<div style="color:var(--cm-text-gray);font-size:0.85rem;">No reviews yet.</div>';
+                } else {
+                    revList.innerHTML = reviews.map(r => `
+                        <div style="background:var(--cm-bg-gray);padding:12px;border-radius:8px;border:1px solid var(--border);">
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                                <strong>${r.user_name}</strong>
+                                <span style="color:#f59e0b;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
+                            </div>
+                            ${r.comment ? `<div style="font-size:0.85rem;color:var(--cm-text-gray);">${r.comment}</div>` : ''}
+                        </div>
+                    `).join('');
+                }
+            } else {
+                imgSec.style.display = 'none';
+                revSec.style.display = 'none';
+            }
+
+            document.getElementById('details-modal').classList.add('open');
+        };
+
+        loadIssues();
+
+        // Ensure toast styles support the new format if needed
+        const style = document.createElement('style');
+        style.textContent = `
+          .toast {
+            background: #ffffff !important;
+            color: var(--cm-text-dark) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
+            border: 1px solid #e5e7eb !important;
+            padding: 16px 20px !important;
+          }
+          .toast strong { color: var(--cm-text-dark) !important; font-size: 1rem !important; }
+          .toast p { color: var(--cm-text-gray) !important; font-size: 0.85rem !important; margin-top: 4px !important; }
+        `;
+        document.head.appendChild(style);
+    </script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+</body>
+
+</html>

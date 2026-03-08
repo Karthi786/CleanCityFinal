@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Department Dashboard — CleanMadurai</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        /* Reviews Tab */
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .review-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stars {
+            color: #f59e0b;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+        }
+
+        .review-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        .review-issue-title {
+            font-weight: 700;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .review-comment {
+            color: var(--text-muted);
+            font-size: 0.87rem;
+            margin-top: 6px;
+        }
+
+        .tab-list {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        /* File input style */
+        .file-input-wrap {
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .file-input-wrap:hover {
+            border-color: var(--primary);
+        }
+
+        .file-input-wrap input[type="file"] {
+            display: none;
+        }
+
+        .file-input-label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .file-input-icon {
+            font-size: 2rem;
+        }
+
+        .file-input-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .file-chosen {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        /* Update Modal Specifics */
+        .modal-body {
+            padding: 24px;
+        }
+
+        .detail-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .detail-val {
+            font-size: 0.95rem;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .cit-img-box {
+            width: 100%;
+            height: 180px;
+            border-radius: 12px;
+            background: #f1f5f9;
+            overflow: hidden;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .cit-img-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .status-radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .status-radio {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .status-radio:hover {
+            border-color: #cbd5e1;
+            background: #f8fafc;
+        }
+
+        .status-radio input[type="radio"] {
+            display: none;
+        }
+
+        .status-radio.selected {
+            border-color: var(--cm-green);
+            background: #e6f6ec;
+        }
+
+        .sr-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sr-icon {
+            font-size: 1.2rem;
+        }
+
+        .sr-text {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .sr-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .status-radio.selected .sr-indicator {
+            border-color: var(--cm-green);
+        }
+
+        .status-radio.selected .sr-indicator::after {
+            content: '';
+            width: 10px;
+            height: 10px;
+            background: var(--cm-green);
+            border-radius: 50%;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo">
+                <div class="logo-icon">♻</div><span>CleanMadurai</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="sidebar-section-label">Department Panel</div>
+            <a class="sidebar-link" data-tab="issues" href="#" id="nav-issues"
+                onclick="event.preventDefault();switchTab('issues');"><span class="icon">🏛️</span> My Issues</a>
+            <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews"
+                onclick="event.preventDefault();switchTab('reviews');"><span class="icon">⭐</span> Reviews</a>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-user">
+                <div class="user-avatar-sidebar" id="sidebar-avatar">D</div>
+                <div>
+                    <div class="sidebar-user-name" id="sidebar-name">Department Staff</div>
+                    <div class="sidebar-user-role" id="sidebar-role">Department</div>
+                </div>
+            </div>
+            <button id="logout-btn" class="btn btn-ghost btn-full"
+                style="color:rgba(255,255,255,0.5);margin-top:8px;font-size:0.82rem;">🚪 Sign Out</button>
+        </div>
+    </aside>
+
+    <div class="dash-layout">
+        <main class="dash-main">
+            <header class="dash-header">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="hamburger" id="hamburger">☰</button>
+                    <span class="dash-header-title" id="dept-title">Department Dashboard</span>
+                </div>
+                <div style="display:flex;gap:8px;align-items:center;" id="issues-filter-wrap">
+                    <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem;">
+                        <option value="">All Statuses</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="IN_PROGRESS">Processing</option>
+                        <option value="COMPLETED">Done</option>
+                    </select>
+                </div>
+            </header>
+
+            <div class="dash-content">
+                <div class="page-header">
+                    <div>
+                        <h2 class="page-title" id="page-title">Department Issues</h2>
+                        <p class="page-subtitle">Manage and resolve issues assigned to your department.</p>
+                    </div>
+                    <div class="tab-list">
+                        <button class="tab-btn active" id="tab-issues-btn" onclick="switchTab('issues')">Issues</button>
+                        <button class="tab-btn" id="tab-reviews-btn" onclick="switchTab('reviews')">Reviews</button>
+                    </div>
+                </div>
+
+                <!-- Issues Tab -->
+                <div id="tab-issues" class="tab-pane active">
+                    <div class="grid grid-3 mb-8">
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label">Assigned Issues</div>
+                                <div class="stat-value" id="s-total">—</div>
+                            </div>
+                            <div class="stat-icon blue">📋</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:var(--warning);">Pending</div>
+                                <div class="stat-value" id="s-pending" style="color:var(--warning);">—</div>
+                            </div>
+                            <div class="stat-icon yellow">⏳</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:var(--success);">Completed</div>
+                                <div class="stat-value" id="s-resolved" style="color:var(--success);">—</div>
+                            </div>
+                            <div class="stat-icon green">✅</div>
+                        </div>
+                    </div>
+                    <div id="issues-list" class="space-y-4"></div>
+                </div>
+
+                <!-- Reviews Tab -->
+                <div id="tab-reviews" class="tab-pane">
+                    <div id="reviews-list" class="reviews-list">
+                        <div class="loading-page" style="min-height:200px;">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Update Status Modal -->
+    <div class="modal-overlay" id="update-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Update Issue Status</div>
+                <button class="modal-close" id="modal-close">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+                <form id="update-form" class="form-stack">
+                    <div class="section-title">Issue Information</div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Issue Title</span>
+                        <span class="detail-val" id="modal-issue-title"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Issue Description</span>
+                        <span class="detail-val" id="modal-issue-desc"
+                            style="font-size: 0.85rem; line-height: 1.5;"></span>
+                    </div>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                        <div class="detail-row">
+                            <span class="detail-label">Location</span>
+                            <span class="detail-val" id="modal-issue-loc" style="font-size: 0.85rem;"></span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Reported Date</span>
+                            <span class="detail-val" id="modal-issue-date" style="font-size: 0.85rem;"></span>
+                        </div>
+                    </div>
+
+                    <div class="detail-row" style="margin-top:8px;">
+                        <span class="detail-label" style="margin-bottom:4px;">Citizen Uploaded Image</span>
+                        <div class="cit-img-box">
+                            <img id="modal-issue-img" src="" alt="Citizen image issue preview" />
+                        </div>
+                    </div>
+
+                    <div class="section-title">Status Management</div>
+
+                    <div class="status-radio-group">
+                        <label class="status-radio" id="rad-PENDING">
+                            <div class="sr-info">
+                                <span class="sr-icon">⏳</span>
+                                <span class="sr-text">Pending</span>
+                            </div>
+                            <input type="radio" name="new-status" value="PENDING">
+                            <div class="sr-indicator"></div>
+                        </label>
+                        <label class="status-radio" id="rad-IN_PROGRESS">
+                            <div class="sr-info">
+                                <span class="sr-icon">🔵</span>
+                                <span class="sr-text">Processing</span>
+                            </div>
+                            <input type="radio" name="new-status" value="IN_PROGRESS">
+                            <div class="sr-indicator"></div>
+                        </label>
+                        <label class="status-radio" id="rad-COMPLETED">
+                            <div class="sr-info">
+                                <span class="sr-icon">✅</span>
+                                <span class="sr-text">Done (Resolved)</span>
+                            </div>
+                            <input type="radio" name="new-status" value="COMPLETED">
+                            <div class="sr-indicator"></div>
+                        </label>
+                    </div>
+
+                    <!-- Proof image upload — only shown when Done is selected -->
+                    <div class="form-group" id="completion-group"
+                        style="display:none;background:var(--bg-muted);padding:16px;border-radius:12px;border:1px dashed var(--border);">
+                        <label class="label">Upload Resolution Proof <span
+                                style="color:#ef4444;">*Required</span></label>
+                        <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">Please upload an image
+                            showing the completed work (jpg, png, jpeg).</p>
+                        <div class="file-input-wrap" id="proof-drop-wrap"
+                            onclick="document.getElementById('proof-file').click()">
+                            <label class="file-input-label" for="proof-file">
+                                <span class="file-input-icon">📷</span>
+                                <button type="button" class="file-input-btn">Choose File</button>
+                                <span class="file-chosen" id="proof-file-name">No file chosen</span>
+                            </label>
+                            <input type="file" id="proof-file" accept="image/jpeg, image/png, image/jpg" />
+                        </div>
+                    </div>
+                    <input type="hidden" id="modal-issue-id" />
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="modal-cancel">Cancel</button>
+                <button class="btn btn-primary" id="update-submit">
+                    <span id="update-text">Update Status</span>
+                    <div class="spinner spinner-sm" id="update-spinner" style="display:none;"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { guardPage } from './js/router.js';
+        import { logout } from './js/auth.js';
+        import { issuesAPI, reviewsAPI } from './js/api.js';
+        import { toast } from './js/toast.js';
+
+        const DEPT_ROLES = ['MADURAI_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
+        const user = guardPage(DEPT_ROLES);
+        if (!user) throw new Error('Unauthorized');
+
+        const ROLE_LABELS = { MADURAI_CORPORATION: 'Madurai Corporation', TNEB: 'TNEB (Electrical)', POLICE: 'Madurai Police', FIRE_STATION: 'Fire Station' };
+        const deptLabel = ROLE_LABELS[user.role] || user.role;
+
+        document.getElementById('sidebar-name').textContent = user.name;
+        document.getElementById('sidebar-role').textContent = deptLabel;
+        document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById('dept-title').textContent = `${deptLabel} Dashboard`;
+        document.getElementById('page-title').textContent = `${deptLabel} Issues`;
+        document.getElementById('logout-btn').addEventListener('click', logout);
+
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        document.getElementById('hamburger').addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
+        overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
+
+        // Tab switching
+        window.switchTab = (name) => {
+            ['issues', 'reviews'].forEach(t => {
+                document.getElementById('tab-' + t).classList.remove('active');
+                document.getElementById('tab-' + t + '-btn').classList.remove('active');
+                const navEl = document.getElementById('nav-' + t);
+                if (navEl) navEl.classList.remove('active');
+            });
+            document.getElementById('tab-' + name).classList.add('active');
+            document.getElementById('tab-' + name + '-btn').classList.add('active');
+            const navEl = document.getElementById('nav-' + name);
+            if (navEl) navEl.classList.add('active');
+            document.getElementById('issues-filter-wrap').style.display = name === 'issues' ? 'flex' : 'none';
+            if (name === 'reviews') loadReviews();
+        };
+
+        // Modal
+        const modal = document.getElementById('update-modal');
+        let currentIssueId = null;
+
+        document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
+        document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
+        modal.addEventListener('click', e => { if (e.target === modal) modal.classList.remove('open'); });
+
+        document.querySelectorAll('input[name="new-status"]').forEach(radio => {
+            radio.addEventListener('change', function () {
+                document.querySelectorAll('.status-radio').forEach(lbl => lbl.classList.remove('selected'));
+                document.getElementById('rad-' + this.value).classList.add('selected');
+
+                const isDone = this.value === 'COMPLETED';
+                document.getElementById('completion-group').style.display = isDone ? 'block' : 'none';
+                if (!isDone) {
+                    document.getElementById('proof-file').value = '';
+                    document.getElementById('proof-file-name').textContent = 'No file chosen';
+                }
+            });
+        });
+
+        // Show file name on select
+        document.getElementById('proof-file').addEventListener('change', function () {
+            const name = this.files[0] ? this.files[0].name : 'No file chosen';
+            document.getElementById('proof-file-name').textContent = name;
+        });
+
+        function processImageFile(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX = 1024;
+                        let { width, height } = img;
+                        if (width > height && width > MAX) { height *= MAX / width; width = MAX; }
+                        else if (height > MAX) { width *= MAX / height; height = MAX; }
+                        canvas.width = width; canvas.height = height;
+                        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    };
+                    img.onerror = () => reject(new Error('Failed to load image'));
+                    img.src = e.target.result;
+                };
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        let allIssues = [];
+
+        function renderIssueRow(issue) {
+            const catIcons = { 'Waste': '🗑️', 'Water': '💧', 'Electricity': '⚡', 'Roads': '🛣️', 'Law & Order': '👮', 'Fire': '🔥' };
+            const statusLabel = { PENDING: '⏳ Pending', IN_PROGRESS: '🔵 Processing', COMPLETED: '✅ Done' };
+            const safeTitle = issue.title.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+            return `
+        <div class="issue-row" style="cursor:pointer;" onclick="openUpdate('${issue.id}')">
+          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">
+            ${catIcons[issue.category] || '📋'}
+          </div>
+          <div class="issue-row-info">
+            <div class="issue-row-title">${issue.title}</div>
+            <div class="issue-row-meta">
+              <span>${issue.category}</span><span>•</span>
+              <span>📍 ${issue.location_name || 'No location'}</span><span>•</span>
+              <span>👍 ${issue.supports_count || 0} supports</span><span>•</span>
+              <span>By ${issue.reported_by_name || 'Citizen'}</span>
+            </div>
+            <div style="margin-top:6px;"><p class="text-sm text-muted" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${issue.description}</p></div>
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
+            <span class="badge badge-${issue.status}">${statusLabel[issue.status] || issue.status}</span>
+            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openUpdate('${issue.id}')">✏️ Update</button>
+          </div>
+        </div>
+      `;
+        }
+
+        window.openUpdate = (id) => {
+            const issue = allIssues.find(i => i.id === id);
+            if (!issue) return;
+            currentIssueId = id;
+
+            document.getElementById('modal-issue-id').value = id;
+            document.getElementById('modal-issue-title').textContent = issue.title;
+            document.getElementById('modal-issue-desc').textContent = issue.description;
+            document.getElementById('modal-issue-loc').textContent = issue.location_name || 'N/A';
+            document.getElementById('modal-issue-date').textContent = new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+            document.getElementById('modal-issue-img').src = issue.image_url || 'https://via.placeholder.com/600x400.png?text=No+Image';
+
+            // Set radio values
+            const status = issue.status;
+            document.querySelectorAll('.status-radio').forEach(lbl => lbl.classList.remove('selected'));
+            document.getElementById('rad-' + status).classList.add('selected');
+            const targetRadio = document.querySelector(`input[name="new-status"][value="${status}"]`);
+            if (targetRadio) targetRadio.checked = true;
+
+            document.getElementById('completion-group').style.display = status === 'COMPLETED' ? 'block' : 'none';
+            document.getElementById('proof-file').value = '';
+            document.getElementById('proof-file-name').textContent = 'No file chosen';
+            modal.classList.add('open');
+        };
+
+        document.getElementById('update-submit').addEventListener('click', async () => {
+            const statusRadio = document.querySelector('input[name="new-status"]:checked');
+            const status = statusRadio ? statusRadio.value : 'PENDING';
+            const proofFile = document.getElementById('proof-file').files[0];
+            const btn = document.getElementById('update-submit');
+            const txt = document.getElementById('update-text');
+            const spin = document.getElementById('update-spinner');
+
+            // Require proof image when marking Done
+            if (status === 'COMPLETED' && !proofFile) {
+                toast.error('Proof Required', 'Please upload a proof image when marking as Done.');
+                return;
+            }
+
+            btn.disabled = true; txt.style.display = 'none'; spin.style.display = 'block';
+            try {
+                let completionImageUrl = null;
+                if (proofFile) {
+                    completionImageUrl = await processImageFile(proofFile);
+                }
+                await issuesAPI.updateStatus(currentIssueId, status, completionImageUrl);
+                toast.success('Status Updated ✅', `Issue marked as ${status === 'IN_PROGRESS' ? 'Processing' : status === 'COMPLETED' ? 'Done' : 'Pending'}.`);
+                modal.classList.remove('open');
+                await loadData();
+            } catch (err) {
+                toast.error('Update Failed', err.message);
+            } finally {
+                btn.disabled = false; txt.style.display = 'inline'; spin.style.display = 'none';
+            }
+        });
+
+        function applyFilter() {
+            const status = document.getElementById('status-filter').value;
+            const filtered = status ? allIssues.filter(i => i.status === status) : allIssues;
+            const container = document.getElementById('issues-list');
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>No issues found</h3><p>No ${status || ''} issues for your department.</p></div>`;
+            } else {
+                container.innerHTML = filtered.map(renderIssueRow).join('');
+            }
+        }
+
+        document.getElementById('status-filter').addEventListener('change', applyFilter);
+
+        async function loadData() {
+            document.getElementById('issues-list').innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
+            try {
+                const data = await issuesAPI.getAll({ department: user.role });
+                allIssues = data.issues || [];
+                document.getElementById('s-total').textContent = allIssues.length;
+                document.getElementById('s-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
+                document.getElementById('s-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
+                applyFilter();
+            } catch (err) {
+                toast.error('Failed to load issues', err.message);
+            }
+        }
+
+        async function loadReviews() {
+            const container = document.getElementById('reviews-list');
+            container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
+            try {
+                const data = await reviewsAPI.get({ department: user.role });
+                const reviews = data.reviews || [];
+                if (reviews.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⭐</div><h3>No Reviews Yet</h3><p>Citizens will leave reviews once issues are marked as Done.</p></div>`;
+                    return;
+                }
+                container.innerHTML = reviews.map(r => `
+          <div class="review-card">
+            <div class="review-issue-title">📋 ${r.issues?.title || 'Issue'}</div>
+            <div class="review-header">
+              <div>
+                <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
+                <div class="review-meta">By ${r.user_name} · ${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+              </div>
+              <span class="badge badge-green">${r.rating}/5</span>
+            </div>
+            ${r.comment ? `<div class="review-comment">"${r.comment}"</div>` : ''}
+          </div>
+        `).join('');
+            } catch (err) {
+                container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">${err.message}</p></div>`;
+            }
+        }
+
+        // Init: start on issues tab
+        switchTab('issues');
+        loadData();
+    </script>
+</body>
+
+</html>
