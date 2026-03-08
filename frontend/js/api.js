@@ -3,9 +3,9 @@
  * All fetch calls go through this module to handle auth headers + errors.
  */
 
-const API_BASE = window.location.hostname === 'localhost' && window.location.port !== '3000'
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:3000/api'
-    : '/api';
+    : 'https://cleancityfinal.onrender.com/api';
 
 /**
  * Core fetch wrapper — attaches JWT, handles 401 redirect
