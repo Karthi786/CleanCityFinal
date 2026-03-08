@@ -31,7 +31,14 @@ async function apiFetch(path, options = {}) {
         return;
     }
 
-    const data = await res.json();
+    const text = await res.text();
+    let data;
+    try {
+        data = text ? JSON.parse(text) : {};
+    } catch (e) {
+        console.error("Failed to parse JSON. Raw response from server was:", text);
+        throw new Error("Server returned an invalid JSON response. Please check the console or ensure the backend is running properly.");
+    }
 
     if (!res.ok) {
         const error = new Error(data.error || `Request failed: ${res.status}`);
