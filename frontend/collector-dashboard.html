@@ -142,9 +142,12 @@
     <div class="dash-layout">
         <main class="dash-main">
             <header class="dash-header">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <button class="hamburger" id="hamburger">☰</button>
-                    <span class="dash-header-title">District Collector Overview</span>
+                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <button class="hamburger" id="hamburger">☰</button>
+                        <span class="dash-header-title">District Collector Overview</span>
+                    </div>
+                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn">Logout</button>
                 </div>
                 <div class="header-filters" id="issues-filters">
                     <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem;">
@@ -242,6 +245,7 @@
         document.getElementById('sidebar-name').textContent = user.name;
         document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
         document.getElementById('logout-btn').addEventListener('click', logout);
+        document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');

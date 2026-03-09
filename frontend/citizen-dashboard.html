@@ -786,6 +786,7 @@
                             <div class="role">Citizen</div>
                         </div>
                     </div>
+                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn">Logout</button>
                 </div>
             </header>
 
@@ -1065,6 +1066,7 @@
         const avatarStr = firstName.substring(0, 2).toUpperCase();
         document.getElementById('sidebar-avatar').textContent = avatarStr.charAt(0);
         document.getElementById('logout-btn').addEventListener('click', logout);
+        document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
         // Tabs Logic
         document.querySelectorAll('.tab-item').forEach(btn => {
