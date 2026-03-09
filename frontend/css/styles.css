@@ -467,6 +467,10 @@ p {
   .grid-2 {
     grid-template-columns: 1fr;
   }
+
+  .stat-card {
+    padding: 16px;
+  }
 }
 
 /* ── Form Elements ── */
@@ -783,6 +787,14 @@ p {
   .sidebar.open {
     transform: translateX(0);
   }
+
+  .dash-header {
+    padding: 0 16px;
+  }
+
+  .dash-content {
+    padding: 16px;
+  }
 }
 
 /* ── Page Header ── */
@@ -821,6 +833,8 @@ p {
   padding: 4px;
   border-radius: var(--radius-sm);
   width: fit-content;
+  max-width: 100%;
+  overflow-x: auto;
 }
 
 .tab-btn {
@@ -937,6 +951,19 @@ p {
   transition: all var(--transition);
 }
 
+@media (max-width: 640px) {
+  .issue-row {
+    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .issue-row .badge, .issue-row .btn-icon {
+    align-self: flex-start;
+    margin-left: 0 !important;
+  }
+}
+
 .issue-row:hover {
   box-shadow: var(--shadow-sm);
 }
@@ -1042,6 +1069,18 @@ p {
 
 .modal-body {
   padding: 24px 28px;
+}
+
+@media (max-width: 640px) {
+  .modal-header {
+    padding: 16px;
+  }
+  .modal-body {
+    padding: 16px;
+  }
+  .modal-footer {
+    padding: 16px;
+  }
 }
 
 .modal-footer {

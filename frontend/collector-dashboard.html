@@ -78,6 +78,33 @@
         .tab-pane.active {
             display: block;
         }
+
+        .header-filters {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        @media (max-width: 640px) {
+            .header-filters {
+                flex-direction: column;
+                align-items: stretch;
+                margin-top: 12px;
+                width: 100%;
+            }
+
+            .header-filters .select {
+                width: 100% !important;
+            }
+
+            .dash-header {
+                height: auto;
+                padding-top: 16px;
+                padding-bottom: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
     </style>
 </head>
 
@@ -119,7 +146,7 @@
                     <button class="hamburger" id="hamburger">☰</button>
                     <span class="dash-header-title">District Collector Overview</span>
                 </div>
-                <div style="display:flex;gap:8px;align-items:center;" id="issues-filters">
+                <div class="header-filters" id="issues-filters">
                     <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem;">
                         <option value="">All Statuses</option>
                         <option value="PENDING">Pending</option>
@@ -238,8 +265,9 @@
             if (name === 'reviews') loadReviews();
             if (name === 'map') {
                 setTimeout(() => {
+                    initCollectorMap();
                     if (map) map.invalidateSize();
-                    updateHeatmap();
+                    applyFilters();
                 }, 100);
             }
         };
@@ -267,6 +295,9 @@
             </div>
           </div>
           <span class="badge badge-${issue.status}">${STATUS_LABELS[issue.status] || issue.status}</span>
+          <button class="btn btn-danger btn-icon delete-btn" data-id="${issue.id}" style="margin-left: 12px; flex-shrink: 0;" title="Delete Issue">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+          </button>
         </div>
       `;
         }
@@ -278,6 +309,32 @@
                 return;
             }
             container.innerHTML = issues.map(renderIssueRow).join('');
+
+            // Attach delete listeners
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', async (e) => {
+                    e.stopPropagation();
+                    const id = btn.dataset.id;
+                    if (btn.disabled) return;
+
+                    if (!confirm('Are you sure you want to delete this report? This action cannot be undone.')) {
+                        return;
+                    }
+
+                    btn.disabled = true;
+                    btn.innerHTML = '<div class="spinner spinner-sm" style="border-top-color: white;"></div>';
+
+                    try {
+                        await issuesAPI.delete(id);
+                        toast.success('Deleted successfully', 'Report has been removed.');
+                        await loadData(); // Refresh list to reflect deletion
+                    } catch (err) {
+                        toast.error('Failed to delete', err.message);
+                        btn.disabled = false;
+                        btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
+                    }
+                });
+            });
         }
 
         function applyFilters() {
@@ -288,8 +345,8 @@
             if (dept) filtered = filtered.filter(i => i.department === dept);
             renderList(filtered);
 
-            // Update heatmap if map is initialized
-            if (map) {
+            // Update heatmap if map is initialized and visible
+            if (map && document.getElementById('tab-map').classList.contains('active')) {
                 updateHeatmap(filtered);
             }
         }
@@ -306,7 +363,6 @@
                 document.getElementById('s-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
                 document.getElementById('s-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
 
-                initCollectorMap();
                 applyFilters();
             } catch (err) {
                 toast.error('Failed to load issues', err.message);

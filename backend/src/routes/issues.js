@@ -213,11 +213,29 @@ router.post('/:id/support', verifyToken, requireApproved, async (req, res) => {
 
 /**
  * DELETE /api/issues/:id
- * Delete an issue (ADMIN only)
+ * Delete an issue (Creator, COLLECTOR, or ADMIN)
  */
-router.delete('/:id', verifyToken, requireApproved, requireRole('ADMIN'), async (req, res) => {
+router.delete('/:id', verifyToken, requireApproved, async (req, res) => {
     const { id } = req.params;
     try {
+        // Fetch the issue to check ownership
+        const { data: issue, error: fetchError } = await supabaseAdmin
+            .from('issues')
+            .select('reported_by_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchError || !issue) {
+            return res.status(404).json({ error: 'Issue not found.' });
+        }
+
+        // Access Control: Allow if user is ADMIN, COLLECTOR, or the original creator
+        const canDelete = ['ADMIN', 'COLLECTOR'].includes(req.user.role) || issue.reported_by_id === req.userId;
+
+        if (!canDelete) {
+            return res.status(403).json({ error: 'You do not have permission to delete this issue.' });
+        }
+
         const { error } = await supabaseAdmin.from('issues').delete().eq('id', id);
         if (error) throw error;
         return res.json({ message: 'Issue deleted.' });
