@@ -1,56 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Smart & Clean Madurai — Report. Support. Transform.</title>
-  <meta name="description" content="CleanMadurai is a civic issue management platform for Madurai citizens to report, track and resolve local infrastructure problems." />
+  <meta name="description"
+    content="CleanMadurai is a civic issue management platform for Madurai citizens to report, track and resolve local infrastructure problems." />
   <link rel="stylesheet" href="css/styles.css" />
   <style>
-    body { background: #0a0f1a; overflow-x: hidden; }
+    body {
+      background: #0a0f1a;
+      overflow-x: hidden;
+    }
 
     .hero-bg {
       min-height: 100vh;
-      background: radial-gradient(ellipse at 20% 80%, rgba(22,163,74,0.18) 0%, transparent 60%),
-                  radial-gradient(ellipse at 80% 20%, rgba(14,165,233,0.14) 0%, transparent 55%),
-                  linear-gradient(160deg, #0a0f1a 0%, #0f1e10 50%, #0a0f1a 100%);
-      display: flex; flex-direction: column;
+      background: radial-gradient(ellipse at 20% 80%, rgba(22, 163, 74, 0.18) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(14, 165, 233, 0.14) 0%, transparent 55%),
+        linear-gradient(160deg, #0a0f1a 0%, #0f1e10 50%, #0a0f1a 100%);
+      display: flex;
+      flex-direction: column;
     }
 
     nav {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
       padding: 20px 48px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
     }
+
     .nav-logo {
-      display: flex; align-items: center; gap: 12px;
-      color: white; font-size: 1.2rem; font-weight: 900;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 900;
     }
+
     .nav-logo-icon {
-      width: 42px; height: 42px;
+      width: 42px;
+      height: 42px;
       background: linear-gradient(135deg, #16a34a, #15803d);
       border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.3rem; font-weight: 900;
-      box-shadow: 0 4px 20px rgba(22,163,74,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+      font-weight: 900;
+      box-shadow: 0 4px 20px rgba(22, 163, 74, 0.4);
     }
-    .nav-links { display: flex; align-items: center; gap: 8px; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
     .hero {
       flex: 1;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 60px 24px;
-      max-width: 800px; margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 60px 24px;
+      max-width: 800px;
+      margin: 0 auto;
     }
 
     .hero-badge {
-      display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(22,163,74,0.12);
-      border: 1px solid rgba(22,163,74,0.25);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(22, 163, 74, 0.12);
+      border: 1px solid rgba(22, 163, 74, 0.25);
       border-radius: 99px;
       padding: 6px 18px;
       color: #4ade80;
-      font-size: 0.82rem; font-weight: 600;
+      font-size: 0.82rem;
+      font-weight: 600;
       margin-bottom: 32px;
       animation: fadeInUp 0.6s ease forwards;
     }
@@ -64,6 +95,7 @@
       animation: fadeInUp 0.7s 0.1s ease forwards;
       opacity: 0;
     }
+
     .hero-title .highlight {
       background: linear-gradient(135deg, #4ade80, #16a34a);
       -webkit-background-clip: text;
@@ -73,78 +105,159 @@
 
     .hero-sub {
       font-size: 1.15rem;
-      color: rgba(255,255,255,0.55);
-      max-width: 520px; margin: 0 auto 48px;
+      color: rgba(255, 255, 255, 0.55);
+      max-width: 520px;
+      margin: 0 auto 48px;
       line-height: 1.7;
       animation: fadeInUp 0.7s 0.2s ease forwards;
       opacity: 0;
     }
 
     .hero-cta {
-      display: flex; flex-wrap: wrap; gap: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
       justify-content: center;
       animation: fadeInUp 0.7s 0.3s ease forwards;
       opacity: 0;
     }
+
     .btn-hero-primary {
-      padding: 16px 36px; border-radius: 14px;
+      padding: 16px 36px;
+      border-radius: 14px;
       background: linear-gradient(135deg, #16a34a, #15803d);
-      color: white; border: none;
-      font-size: 1.05rem; font-weight: 700;
-      cursor: pointer; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 10px;
-      box-shadow: 0 8px 30px rgba(22,163,74,0.40);
+      color: white;
+      border: none;
+      font-size: 1.05rem;
+      font-weight: 700;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 8px 30px rgba(22, 163, 74, 0.40);
       transition: all 0.2s;
     }
-    .btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(22,163,74,0.5); }
+
+    .btn-hero-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(22, 163, 74, 0.5);
+    }
+
     .btn-hero-outline {
-      padding: 16px 36px; border-radius: 14px;
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.85); border: 1px solid rgba(255,255,255,0.15);
-      font-size: 1.05rem; font-weight: 600;
-      cursor: pointer; text-decoration: none;
-      display: inline-flex; align-items: center; gap: 10px;
+      padding: 16px 36px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      font-size: 1.05rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
       transition: all 0.2s;
     }
-    .btn-hero-outline:hover { background: rgba(255,255,255,0.12); color: white; }
+
+    .btn-hero-outline:hover {
+      background: rgba(255, 255, 255, 0.12);
+      color: white;
+    }
 
     .features {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;
-      width: 100%; max-width: 900px; margin: 64px auto 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      width: 100%;
+      max-width: 900px;
+      margin: 64px auto 0;
       padding: 0 24px;
       animation: fadeInUp 0.7s 0.4s ease forwards;
       opacity: 0;
     }
+
     .feature-card {
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px; padding: 24px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 24px;
       text-align: center;
       transition: all 0.2s;
     }
-    .feature-card:hover { background: rgba(255,255,255,0.07); transform: translateY(-3px); }
-    .feature-icon { font-size: 2.2rem; margin-bottom: 14px; }
-    .feature-title { font-size: 0.95rem; font-weight: 700; color: white; margin-bottom: 6px; }
-    .feature-desc { font-size: 0.82rem; color: rgba(255,255,255,0.45); line-height: 1.6; }
+
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.07);
+      transform: translateY(-3px);
+    }
+
+    .feature-icon {
+      font-size: 2.2rem;
+      margin-bottom: 14px;
+    }
+
+    .feature-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 6px;
+    }
+
+    .feature-desc {
+      font-size: 0.82rem;
+      color: rgba(255, 255, 255, 0.45);
+      line-height: 1.6;
+    }
 
     footer {
-      text-align: center; padding: 32px 24px;
-      color: rgba(255,255,255,0.25); font-size: 0.82rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
+      text-align: center;
+      padding: 32px 24px;
+      color: rgba(255, 255, 255, 0.25);
+      font-size: 0.82rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
       margin-top: 48px;
     }
 
     @media (max-width: 768px) {
-      nav { padding: 16px 20px; }
-      .nav-links .btn-outline { display: none; }
-      .features { grid-template-columns: 1fr; }
+      nav {
+        padding: 16px 20px;
+      }
+
+      .nav-links .btn-hero-outline {
+        display: none;
+      }
+
+      .features {
+        grid-template-columns: 1fr;
+        margin-top: 40px;
+      }
+
+      .hero-title {
+        font-size: clamp(2rem, 8vw, 3rem);
+      }
+
+      .hero {
+        padding: 40px 16px;
+      }
     }
+
     @media (max-width: 480px) {
-      .hero-cta { flex-direction: column; }
-      .btn-hero-primary, .btn-hero-outline { justify-content: center; }
+      .hero-cta {
+        flex-direction: column;
+        width: 100%;
+        max-width: 320px;
+      }
+
+      .btn-hero-primary,
+      .btn-hero-outline {
+        justify-content: center;
+        width: 100%;
+        box-sizing: border-box;
+      }
     }
   </style>
 </head>
+
 <body>
   <div class="hero-bg">
     <nav>
@@ -153,8 +266,10 @@
         <span>CleanMadurai</span>
       </div>
       <div class="nav-links">
-        <a href="login.html" class="btn-hero-outline" style="padding:10px 22px;font-size:0.9rem;border-radius:10px;">Sign In</a>
-        <a href="register.html" class="btn-hero-primary" style="padding:10px 22px;font-size:0.9rem;border-radius:10px;box-shadow:none;">Register</a>
+        <a href="login.html" class="btn-hero-outline"
+          style="padding:10px 22px;font-size:0.9rem;border-radius:10px;">Sign In</a>
+        <a href="register.html" class="btn-hero-primary"
+          style="padding:10px 22px;font-size:0.9rem;border-radius:10px;box-shadow:none;">Register</a>
       </div>
     </nav>
 
@@ -170,7 +285,8 @@
       </h1>
 
       <p class="hero-sub">
-        Report civic issues, support community causes, and track resolutions — all in one platform built for Madurai's citizens and administrators.
+        Report civic issues, support community causes, and track resolutions — all in one platform built for Madurai's
+        citizens and administrators.
       </p>
 
       <div class="hero-cta">
@@ -186,17 +302,20 @@
         <div class="feature-card">
           <div class="feature-icon">📍</div>
           <div class="feature-title">Report Issues</div>
-          <div class="feature-desc">Submit civic problems with location, photos, and category — routed to the right department automatically.</div>
+          <div class="feature-desc">Submit civic problems with location, photos, and category — routed to the right
+            department automatically.</div>
         </div>
         <div class="feature-card">
           <div class="feature-icon">👥</div>
           <div class="feature-title">Community Support</div>
-          <div class="feature-desc">Upvote issues that matter most to you. High-priority problems rise to the top for faster action.</div>
+          <div class="feature-desc">Upvote issues that matter most to you. High-priority problems rise to the top for
+            faster action.</div>
         </div>
         <div class="feature-card">
           <div class="feature-icon">📊</div>
           <div class="feature-title">Track Resolution</div>
-          <div class="feature-desc">Real-time status updates as departments work to resolve reported issues across the city.</div>
+          <div class="feature-desc">Real-time status updates as departments work to resolve reported issues across the
+            city.</div>
         </div>
       </div>
     </div>
@@ -211,4 +330,5 @@
     redirectIfLoggedIn();
   </script>
 </body>
+
 </html>

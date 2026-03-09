@@ -231,6 +231,26 @@
             border-bottom: 1px solid var(--border);
             padding-bottom: 8px;
         }
+
+        @media (max-width: 640px) {
+            .dash-header {
+                height: auto;
+                padding-top: 16px;
+                padding-bottom: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            #issues-filter-wrap {
+                margin-top: 12px;
+                width: 100%;
+                flex-direction: column;
+            }
+
+            #status-filter {
+                width: 100% !important;
+            }
+        }
     </style>
 </head>
 
@@ -352,7 +372,7 @@
                         <span class="detail-val" id="modal-issue-desc"
                             style="font-size: 0.85rem; line-height: 1.5;"></span>
                     </div>
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="grid grid-2" style="gap:16px;">
                         <div class="detail-row">
                             <span class="detail-label">Location</span>
                             <span class="detail-val" id="modal-issue-loc" style="font-size: 0.85rem;"></span>
