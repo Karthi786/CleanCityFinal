@@ -775,6 +775,10 @@ p {
   flex: 1;
 }
 
+.mobile-logout-btn {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
   .dash-main {
     margin-left: 0;
@@ -794,6 +798,14 @@ p {
 
   .dash-content {
     padding: 16px;
+  }
+
+  .mobile-logout-btn {
+    display: inline-flex !important;
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 100;
   }
 }
 
@@ -957,8 +969,9 @@ p {
     flex-direction: column;
     align-items: flex-start;
   }
-  
-  .issue-row .badge, .issue-row .btn-icon {
+
+  .issue-row .badge,
+  .issue-row .btn-icon {
     align-self: flex-start;
     margin-left: 0 !important;
   }
@@ -1075,9 +1088,11 @@ p {
   .modal-header {
     padding: 16px;
   }
+
   .modal-body {
     padding: 16px;
   }
+
   .modal-footer {
     padding: 16px;
   }
