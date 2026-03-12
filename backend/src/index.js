@@ -55,6 +55,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/issues', require('./routes/issues'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/reviews', require('./routes/reviews'));
+app.use('/api/analytics', require('./routes/analytics'));
 
 /*
 ========================================
