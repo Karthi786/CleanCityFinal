@@ -15,6 +15,11 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- ApexCharts & SheetJS -->
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Language Script -->
+    <script type="module" src="js/i18n.js"></script>
     <style>
         .reviews-list {
             display: flex;
@@ -105,6 +110,159 @@
                 align-items: flex-start;
             }
         }
+
+        /* ── Analytics Tab ── */
+        .analytics-grid-4 {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .analytics-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .analytics-grid-1 {
+            margin-bottom: 20px;
+        }
+
+        .chart-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .chart-card-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 4px;
+        }
+
+        .chart-card-subtitle {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            margin-bottom: 16px;
+        }
+
+        .kpi-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .kpi-card.kpi-blue::before {
+            background: linear-gradient(90deg, #2563EB, #8B5CF6);
+        }
+
+        .kpi-card.kpi-green::before {
+            background: linear-gradient(90deg, #10B981, #06B6D4);
+        }
+
+        .kpi-card.kpi-yellow::before {
+            background: linear-gradient(90deg, #F59E0B, #EF4444);
+        }
+
+        .kpi-card.kpi-purple::before {
+            background: linear-gradient(90deg, #8B5CF6, #2563EB);
+        }
+
+        .kpi-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        .kpi-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+        }
+
+        .kpi-icon {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 1.8rem;
+            opacity: 0.15;
+        }
+
+        .kpi-badge {
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 99px;
+        }
+
+        .kpi-badge.green {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .kpi-badge.red {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .analytics-fadein {
+            animation: fadeInUp 0.45s ease both;
+        }
+
+        @media (max-width: 900px) {
+            .analytics-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .analytics-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .analytics-grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -118,13 +276,18 @@
             </div>
         </div>
         <nav class="sidebar-nav">
-            <div class="sidebar-section-label">Collector Panel</div>
+            <div class="sidebar-section-label" data-i18n="col_panel">Collector Panel</div>
             <a class="sidebar-link active" data-tab="issues" href="#" id="nav-issues"
                 onclick="event.preventDefault();switchTab('issues')"><span class="icon">📊</span> All Issues</a>
+            <a class="sidebar-link" data-tab="analytics" href="#" id="nav-analytics"
+                onclick="event.preventDefault();switchTab('analytics')"><span class="icon">📊</span> <span
+                    data-i18n="tab_analytics">Analytics</span></a>
             <a class="sidebar-link" data-tab="map" href="#" id="nav-map"
-                onclick="event.preventDefault();switchTab('map')"><span class="icon">🗺️</span> Heatmap</a>
+                onclick="event.preventDefault();switchTab('map')"><span class="icon">🗺️</span> <span
+                    data-i18n="tab_map">Heatmap</span></a>
             <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews"
-                onclick="event.preventDefault();switchTab('reviews')"><span class="icon">⭐</span> All Reviews</a>
+                onclick="event.preventDefault();switchTab('reviews')"><span class="icon">⭐</span> <span
+                    data-i18n="tab_all_reviews">All Reviews</span></a>
         </nav>
         <div class="sidebar-footer">
             <div class="sidebar-user">
@@ -145,9 +308,16 @@
                 <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <button class="hamburger" id="hamburger">☰</button>
-                        <span class="dash-header-title">District Collector Overview</span>
+                        <span class="dash-header-title" data-i18n="lbl_dist_overview">District Collector Overview</span>
                     </div>
-                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn">Logout</button>
+                    <div class="header-actions" style="display:flex;align-items:center;gap:12px;">
+                        <select class="select lang-switcher" style="padding:4px 8px; font-size:0.85rem;">
+                            <option value="en">English</option>
+                            <option value="ta">தமிழ்</option>
+                        </select>
+                        <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn"
+                            data-i18n="nav_logout">Logout</button>
+                    </div>
                 </div>
                 <div class="header-filters" id="issues-filters">
                     <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem;">
@@ -163,6 +333,10 @@
                         <option value="POLICE">Police</option>
                         <option value="FIRE_STATION">Fire Station</option>
                     </select>
+                    <button id="download-excel-btn" class="btn btn-primary btn-sm"
+                        style="display:flex;align-items:center;gap:6px;" data-i18n="btn_download">
+                        📊 Download Excel
+                    </button>
                 </div>
             </header>
 
@@ -174,6 +348,8 @@
                     </div>
                     <div class="tab-list">
                         <button class="tab-btn active" id="tab-issues-btn" onclick="switchTab('issues')">Issues</button>
+                        <button class="tab-btn" id="tab-analytics-btn" onclick="switchTab('analytics')">📊
+                            Analytics</button>
                         <button class="tab-btn" id="tab-map-btn" onclick="switchTab('map')">Heatmap</button>
                         <button class="tab-btn" id="tab-reviews-btn" onclick="switchTab('reviews')">All Reviews</button>
                     </div>
@@ -221,6 +397,73 @@
                     </div>
                 </div>
 
+                <!-- Analytics Tab -->
+                <div id="tab-analytics" class="tab-pane">
+                    <div class="analytics-fadein">
+                        <!-- KPI Row -->
+                        <div class="analytics-grid-4">
+                            <div class="kpi-card kpi-blue">
+                                <span class="kpi-icon">📋</span>
+                                <div class="kpi-label">Total Complaints</div>
+                                <div class="kpi-value" id="ck-total">—</div>
+                                <span class="kpi-badge green" id="ck-total-badge">District-wide</span>
+                            </div>
+                            <div class="kpi-card kpi-green">
+                                <span class="kpi-icon">✅</span>
+                                <div class="kpi-label">Resolved</div>
+                                <div class="kpi-value" id="ck-resolved" style="color:#10B981;">—</div>
+                                <span class="kpi-badge green" id="ck-res-badge">Loading…</span>
+                            </div>
+                            <div class="kpi-card kpi-yellow">
+                                <span class="kpi-icon">⏳</span>
+                                <div class="kpi-label">Pending</div>
+                                <div class="kpi-value" id="ck-pending" style="color:#F59E0B;">—</div>
+                                <span class="kpi-badge red" id="ck-pend-badge">Loading…</span>
+                            </div>
+                            <div class="kpi-card kpi-purple">
+                                <span class="kpi-icon">🎯</span>
+                                <div class="kpi-label">Resolution Rate</div>
+                                <div class="kpi-value" id="ck-rate" style="color:#8B5CF6;">—</div>
+                                <span class="kpi-badge green">Efficiency</span>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 2 -->
+                        <div class="analytics-grid-2">
+                            <div class="chart-card">
+                                <div class="chart-card-title">Complaints by Department</div>
+                                <div class="chart-card-subtitle">Total complaint count per government department</div>
+                                <div id="col-dept-bar-chart"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-card-title">Status Distribution</div>
+                                <div class="chart-card-subtitle">District-wide Pending · In Progress · Resolved</div>
+                                <div id="col-status-chart"></div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 3 -->
+                        <div class="analytics-grid-1">
+                            <div class="chart-card">
+                                <div class="chart-card-title">Monthly District Trend</div>
+                                <div class="chart-card-subtitle">Total vs. Resolved complaints across all departments
+                                    (last 6 months)</div>
+                                <div id="col-monthly-chart"></div>
+                            </div>
+                        </div>
+
+                        <!-- Charts Row 4 -->
+                        <div class="analytics-grid-1">
+                            <div class="chart-card">
+                                <div class="chart-card-title">Department Performance Comparison</div>
+                                <div class="chart-card-subtitle">Resolved vs. Pending vs. In Progress per department
+                                </div>
+                                <div id="col-perf-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Reviews Tab -->
                 <div id="tab-reviews" class="tab-pane">
                     <div id="reviews-list" class="reviews-list">
@@ -236,8 +479,9 @@
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, analyticsAPI } from './js/api.js';
         import { toast } from './js/toast.js';
+        import { t } from './js/i18n.js';
 
         const user = guardPage(['COLLECTOR']);
         if (!user) throw new Error('Unauthorized');
@@ -253,8 +497,9 @@
         overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
         // Tab switching
+        let analyticsLoaded = false;
         window.switchTab = (name) => {
-            ['issues', 'map', 'reviews'].forEach(t => {
+            ['issues', 'analytics', 'map', 'reviews'].forEach(t => {
                 document.getElementById('tab-' + t).classList.remove('active');
                 document.getElementById('tab-' + t + '-btn').classList.remove('active');
                 document.getElementById('nav-' + t).classList.remove('active');
@@ -267,6 +512,10 @@
             document.getElementById('issues-filters').style.display = (name === 'issues' || name === 'map') ? 'flex' : 'none';
 
             if (name === 'reviews') loadReviews();
+            if (name === 'analytics' && !analyticsLoaded) {
+                analyticsLoaded = true;
+                loadCollectorAnalytics();
+            }
             if (name === 'map') {
                 setTimeout(() => {
                     initCollectorMap();
@@ -284,6 +533,9 @@
         const STATUS_LABELS = { PENDING: '⏳ Pending', IN_PROGRESS: '🔵 Processing', COMPLETED: '✅ Done' };
 
         function renderIssueRow(issue) {
+            const statusLabelKey = issue.status === 'COMPLETED' ? 'status_completed' :
+                (issue.status === 'IN_PROGRESS' ? 'status_in_progress' :
+                    (issue.status === 'PENDING' ? 'status_pending' : issue.status));
             return `
         <div class="issue-row">
           <div style="width:40px;height:40px;border-radius:10px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;">
@@ -298,8 +550,8 @@
               <span>👍 ${issue.supports_count || 0}</span>
             </div>
           </div>
-          <span class="badge badge-${issue.status}">${STATUS_LABELS[issue.status] || issue.status}</span>
-          <button class="btn btn-danger btn-icon delete-btn" data-id="${issue.id}" style="margin-left: 12px; flex-shrink: 0;" title="Delete Issue">
+          <span class="badge badge-${issue.status}">${t(statusLabelKey)}</span>
+          <button class="btn btn-danger btn-icon delete-btn" data-id="${issue.id}" style="margin-left: 12px; flex-shrink: 0;" title="${t('btn_delete')}">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
           </button>
         </div>
@@ -357,6 +609,49 @@
 
         document.getElementById('status-filter').addEventListener('change', applyFilters);
         document.getElementById('dept-filter').addEventListener('change', applyFilters);
+
+        document.getElementById('download-excel-btn').addEventListener('click', () => {
+            if (allIssues.length === 0) {
+                toast.error('No Data', 'No reports available to download.');
+                return;
+            }
+
+            const exportData = allIssues.map(issue => {
+                const createdDate = new Date(issue.created_at).toLocaleString('en-IN');
+                const lastUpdated = issue.updated_at ? new Date(issue.updated_at).toLocaleString('en-IN') : 'N/A';
+                let pendingDate = createdDate;
+                let completedDate = issue.status === 'COMPLETED' ? lastUpdated : 'N/A';
+
+                return {
+                    'Report ID': issue.id,
+                    'Report Name': issue.title,
+                    'Description': issue.description,
+                    'Department': DEPT_LABELS[issue.department] || issue.department,
+                    'Created Date': createdDate,
+                    'Pending Date': pendingDate,
+                    'Completed Date': completedDate,
+                    'Status': issue.status === 'IN_PROGRESS' ? 'In Progress' : (issue.status === 'COMPLETED' ? 'Done' : 'Pending'),
+                    'Assigned Department': DEPT_LABELS[issue.department] || issue.department,
+                    'Last Updated': lastUpdated
+                };
+            });
+
+            const worksheet = XLSX.utils.json_to_sheet(exportData);
+
+            // Auto-size columns
+            const colWidths = exportData.map(row => Object.keys(row).map(key => ({ wch: Math.max(key.length, String(row[key]).length) + 2 })));
+            const maxColWidths = colWidths[0].map((_, i) => ({ wch: Math.max(...colWidths.map(row => row[i].wch)) }));
+            worksheet['!cols'] = maxColWidths;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'District Reports');
+
+            const dateStr = new Date().toISOString().split('T')[0];
+            const fileName = `District_All_Department_Reports_${dateStr}.xlsx`;
+
+            XLSX.writeFile(workbook, fileName);
+            toast.success('Download Complete', 'Excel file has been downloaded successfully.');
+        });
 
         async function loadData() {
             document.getElementById('issues-list').innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
@@ -443,6 +738,110 @@
         }
 
         loadData();
+
+        /* ── Collector Analytics ── */
+        let colDeptChart, colStatusChart, colMonthlyChart, colPerfChart;
+
+        async function loadCollectorAnalytics() {
+            try {
+                const [stats, statusData, monthData, deptData] = await Promise.all([
+                    analyticsAPI.stats(),
+                    analyticsAPI.statusDistribution(),
+                    analyticsAPI.monthly({ months: 6 }),
+                    analyticsAPI.byDepartment(),
+                ]);
+
+                // KPI Cards
+                document.getElementById('ck-total').textContent = stats.total;
+                document.getElementById('ck-resolved').textContent = stats.completed;
+                document.getElementById('ck-pending').textContent = stats.pending;
+                document.getElementById('ck-rate').textContent = stats.resolutionRate + '%';
+                document.getElementById('ck-total-badge').textContent = stats.inProgress + ' In Progress';
+                document.getElementById('ck-res-badge').textContent = stats.resolutionRate + '% Rate';
+                document.getElementById('ck-pend-badge').textContent = stats.pending + ' Open';
+
+                const depts = deptData.departments;
+                const deptLabels = depts.map(d => d.label);
+
+                // Chart: By Department (Vertical Bar)
+                if (colDeptChart) colDeptChart.destroy();
+                colDeptChart = new ApexCharts(document.getElementById('col-dept-bar-chart'), {
+                    series: [{ name: t('lbl_total_reports'), data: depts.map(d => d.total) }],
+                    chart: { type: 'bar', height: 280, toolbar: { show: false }, animations: { enabled: true, speed: 600 } },
+                    plotOptions: { bar: { borderRadius: 8, columnWidth: '50%' } },
+                    colors: ['#2563EB'],
+                    fill: { type: 'gradient', gradient: { shade: 'light', type: 'vertical', gradientToColors: ['#8B5CF6'], stops: [0, 100] } },
+                    dataLabels: { enabled: true, style: { fontSize: '11px', fontWeight: 700 } },
+                    xaxis: { categories: deptLabels, labels: { style: { fontSize: '12px' } } },
+                    grid: { borderColor: '#f1f5f9' },
+                    tooltip: { theme: 'light' },
+                });
+                colDeptChart.render();
+
+                // Chart: Status Distribution (Donut)
+                if (colStatusChart) colStatusChart.destroy();
+                colStatusChart = new ApexCharts(document.getElementById('col-status-chart'), {
+                    series: statusData.values,
+                    chart: { type: 'donut', height: 280, toolbar: { show: false }, animations: { enabled: true, speed: 600 } },
+                    labels: statusData.labels,
+                    colors: ['#F59E0B', '#06B6D4', '#10B981'],
+                    legend: { position: 'bottom', fontSize: '13px' },
+                    plotOptions: { pie: { donut: { size: '68%', labels: { show: true, total: { show: true, label: 'Total', color: '#64748b', fontSize: '13px', fontWeight: 700 } } } } },
+                    dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%' },
+                    tooltip: { theme: 'light' },
+                });
+                colStatusChart.render();
+
+                // Chart: Monthly Trend (Area)
+                if (colMonthlyChart) colMonthlyChart.destroy();
+                colMonthlyChart = new ApexCharts(document.getElementById('col-monthly-chart'), {
+                    series: [
+                        { name: t('lbl_total_reports'), data: monthData.totalCounts },
+                        { name: t('lbl_completed_reports'), data: monthData.resolvedCounts },
+                    ],
+                    chart: { type: 'area', height: 280, toolbar: { show: false }, animations: { enabled: true, speed: 700 } },
+                    colors: ['#2563EB', '#10B981'],
+                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, stops: [0, 100] } },
+                    stroke: { curve: 'smooth', width: 3 },
+                    dataLabels: { enabled: false },
+                    xaxis: { categories: monthData.months, labels: { style: { fontSize: '12px' } } },
+                    yaxis: { labels: { style: { fontSize: '12px' } }, min: 0 },
+                    legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
+                    grid: { borderColor: '#f1f5f9', padding: { left: 8, right: 8 } },
+                    markers: { size: 5, strokeWidth: 2 },
+                    tooltip: { theme: 'light', shared: true, intersect: false },
+                });
+                colMonthlyChart.render();
+
+                // Chart: Department Performance (Grouped Stacked Bar)
+                if (colPerfChart) colPerfChart.destroy();
+                colPerfChart = new ApexCharts(document.getElementById('col-perf-chart'), {
+                    series: [
+                        { name: t('status_completed'), data: depts.map(d => d.completed) },
+                        { name: t('status_in_progress'), data: depts.map(d => d.inProgress) },
+                        { name: t('status_pending'), data: depts.map(d => d.pending) },
+                    ],
+                    chart: { type: 'bar', height: 280, stacked: true, toolbar: { show: false }, animations: { enabled: true, speed: 700 } },
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '55%' } },
+                    colors: ['#10B981', '#06B6D4', '#F59E0B'],
+                    xaxis: { categories: deptLabels, labels: { style: { fontSize: '12px' } } },
+                    yaxis: { labels: { style: { fontSize: '12px' } } },
+                    legend: { position: 'top', horizontalAlign: 'right', fontSize: '13px' },
+                    grid: { borderColor: '#f1f5f9' },
+                    tooltip: { theme: 'light', shared: true, intersect: false },
+                    dataLabels: { enabled: false },
+                });
+                colPerfChart.render();
+
+            } catch (err) {
+                toast.error('Analytics Error', err.message);
+            }
+        }
+
+        window.addEventListener('languageChanged', () => {
+            loadData();
+            if (analyticsLoaded) loadCollectorAnalytics();
+        });
     </script>
 </body>
 

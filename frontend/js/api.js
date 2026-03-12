@@ -120,3 +120,24 @@ export const reviewsAPI = {
         body: JSON.stringify(payload),
     }),
 };
+
+/* ── Analytics Endpoints ── */
+export const analyticsAPI = {
+    stats: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/analytics/stats${q ? '?' + q : ''}`);
+    },
+    byCategory: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/analytics/by-category${q ? '?' + q : ''}`);
+    },
+    byDepartment: () => apiFetch('/analytics/by-department'),
+    monthly: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/analytics/monthly${q ? '?' + q : ''}`);
+    },
+    statusDistribution: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/analytics/status-distribution${q ? '?' + q : ''}`);
+    },
+};

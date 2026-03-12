@@ -8,40 +8,48 @@
     <meta name="description"
         content="Sign in to your CleanMadurai account to report civic issues and manage city services." />
     <link rel="stylesheet" href="css/styles.css" />
+    <!-- Language Script -->
+    <script type="module" src="js/i18n.js"></script>
 </head>
 
 <body>
     <div class="auth-page">
-        <div style="margin-bottom:28px; animation: fadeInUp 0.5s ease;">
-            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center;">
+        <div
+            style="margin-bottom:28px; animation: fadeInUp 0.5s ease; display:flex; justify-content:space-between; align-items:center;">
+            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center; text-decoration:none;">
                 <div class="logo-icon">♻</div>
-                <span>CleanMadurai</span>
+                <span style="color:white; font-weight:700;">CleanMadurai</span>
             </a>
+            <select class="select lang-switcher"
+                style="padding:4px 8px; font-size:0.85rem; background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);">
+                <option value="en" style="color:black;">English</option>
+                <option value="ta" style="color:black;">தமிழ்</option>
+            </select>
         </div>
 
         <div class="auth-card fade-in">
             <div class="auth-card-header">
-                <h1 style="font-size:1.7rem; margin-bottom:6px;">Welcome Back 👋</h1>
-                <p class="text-muted text-sm">Sign in to access your civic dashboard</p>
+                <h1 style="font-size:1.7rem; margin-bottom:6px;" data-i18n="auth_login_title">Welcome Back 👋</h1>
+                <p class="text-muted text-sm" data-i18n="app_title">Sign in to access your civic dashboard</p>
             </div>
 
             <div class="auth-card-body">
                 <form id="login-form" class="form-stack" novalidate autocomplete="off">
                     <div class="form-group">
-                        <label class="label" for="email">Email Address</label>
+                        <label class="label" for="email" data-i18n="lbl_email">Email Address</label>
                         <input id="email" type="email" class="input" placeholder="name@example.com" required
                             autocomplete="new-password" />
                     </div>
 
                     <div class="form-group">
-                        <label class="label" for="password">Password</label>
+                        <label class="label" for="password" data-i18n="lbl_pwd">Password</label>
                         <input id="password" type="password" class="input" placeholder="Your password" required
                             autocomplete="new-password" />
                     </div>
 
                     <button id="login-btn" type="submit" class="btn btn-primary btn-full btn-lg"
                         style="margin-top:4px;">
-                        <span id="login-btn-text">🔑 Sign In</span>
+                        <span id="login-btn-text" data-i18n="btn_signin">🔑 Sign In</span>
                         <div id="login-spinner" class="spinner spinner-sm" style="display:none;"></div>
                     </button>
                 </form>
@@ -49,9 +57,8 @@
 
             <div class="auth-card-footer">
                 <p class="text-sm text-muted">
-                    Don't have an account?
-                    <a href="register.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;Register
-                        here →</a>
+                    <span data-i18n="lbl_no_account">Don't have an account? Sign up</span>
+                    <a href="register.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;→</a>
                 </p>
             </div>
         </div>

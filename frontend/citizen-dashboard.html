@@ -4,13 +4,15 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Citizen Dashboard — CleanMadurai</title>
+    <title>Citizen dashboard — CleanMadurai</title>
     <meta name="description"
         content="CleanMadurai citizen dashboard — report, track and support civic issues in Madurai." />
     <!-- Global CSS -->
     <link rel="stylesheet" href="css/styles.css" />
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Language Script -->
+    <script type="module" src="js/i18n.js"></script>
     <style>
         :root {
             --cm-green: #16a34a;
@@ -762,7 +764,7 @@
                         <rect x="14" y="14" width="7" height="7"></rect>
                         <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
-                    Citizen Dashboard
+                    <span data-i18n="nav_dashboard">Citizen Dashboard</span>
                 </span>
             </a>
         </nav>
@@ -778,15 +780,20 @@
         <main class="dash-main">
             <!-- Header -->
             <header class="dash-header">
-                <div class="dash-header-title">Citizen Portal</div>
+                <div class="dash-header-title" data-i18n="cit_panel">Citizen Portal</div>
                 <div class="header-actions">
+                    <select class="select lang-switcher" style="padding:4px 8px; font-size:0.85rem;">
+                        <option value="en">English</option>
+                        <option value="ta">தமிழ்</option>
+                    </select>
                     <div class="header-user">
                         <div class="header-user-info">
                             <div class="name" id="header-name">kevin</div>
                             <div class="role">Citizen</div>
                         </div>
                     </div>
-                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn">Logout</button>
+                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn"
+                        data-i18n="nav_logout">Logout</button>
                 </div>
             </header>
 
@@ -794,10 +801,13 @@
                 <!-- Welcome -->
                 <div class="welcome-header">
                     <div>
-                        <h1 class="welcome-title text-primary" id="welcome-msg">Welcome, kevin!</h1>
-                        <p class="welcome-sub">Your voice transforms Madurai. Report. Support. Impact.</p>
+                        <h1 class="welcome-title text-primary" id="welcome-msg" data-i18n="auth_login_title">Welcome,
+                            kevin!</h1>
+                        <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Madurai. Report. Support.
+                            Impact.</p>
                     </div>
-                    <button id="report-btn" class="btn btn-primary" style="border-radius:8px; padding:12px 24px;">
+                    <button id="report-btn" class="btn btn-primary" style="border-radius:8px; padding:12px 24px;"
+                        data-i18n="lbl_report_name">
                         ＋ Report New Issue
                     </button>
                 </div>
@@ -806,7 +816,7 @@
                 <div class="stats-grid">
                     <div class="stat-box stat-blue">
                         <div class="stat-box-info">
-                            <div class="stat-box-label">City-wide Reports</div>
+                            <div class="stat-box-label" data-i18n="lbl_total_reports">City-wide Reports</div>
                             <div class="stat-box-val" id="stat-total">0</div>
                         </div>
                         <div class="stat-box-icon-wrapper">
@@ -822,7 +832,7 @@
                     </div>
                     <div class="stat-box stat-green">
                         <div class="stat-box-info">
-                            <div class="stat-box-label">Resolved Cases</div>
+                            <div class="stat-box-label" data-i18n="lbl_completed_reports">Resolved Cases</div>
                             <div class="stat-box-val" id="stat-resolved">0</div>
                         </div>
                         <div class="stat-box-icon-wrapper">
@@ -835,7 +845,7 @@
                     </div>
                     <div class="stat-box stat-orange">
                         <div class="stat-box-info">
-                            <div class="stat-box-label">Active Pending</div>
+                            <div class="stat-box-label" data-i18n="lbl_pending_reports">Active Pending</div>
                             <div class="stat-box-val" id="stat-pending">0</div>
                         </div>
                         <div class="stat-box-icon-wrapper">
@@ -891,9 +901,10 @@
                                     <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
                                     <polyline points="16 7 22 7 22 13"></polyline>
                                 </svg>
-                                Most Supported
+                                <span data-i18n="lbl_assigned_issues">Most Supported</span>
                             </div>
-                            <div class="ms-sub">Issues receiving the most attention right now.</div>
+                            <div class="ms-sub" data-i18n="lbl_city_wide_desc">Issues receiving the most attention right
+                                now.</div>
                             <div id="trending-list">
                                 <!-- Populated dynamically -->
                             </div>
@@ -909,8 +920,9 @@
         <div class="modal modal-lg">
             <div class="modal-header">
                 <div>
-                    <div class="modal-title">Report New Issue</div>
-                    <p class="text-muted text-sm" style="margin-top:4px;">Be specific to help departments act faster.
+                    <div class="modal-title" data-i18n="lbl_report_name">Report New Issue</div>
+                    <p class="text-muted text-sm" style="margin-top:4px;" data-i18n="app_title">Be specific to help
+                        departments act faster.
                     </p>
                 </div>
                 <button class="modal-close" id="modal-close">✕</button>
@@ -919,24 +931,25 @@
                 <form id="report-form" class="form-stack">
                     <div class="grid grid-2" style="gap:16px;">
                         <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-title">Issue Title *</label>
+                            <label class="label" for="issue-title" data-i18n="lbl_report_name">Issue Title *</label>
                             <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop"
                                 required />
                         </div>
                         <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-category">Category *</label>
+                            <label class="label" for="issue-category" data-i18n="lbl_department">Category *</label>
                             <select id="issue-category" class="select" required>
                                 <option value="">— Select Category —</option>
-                                <option value="Waste">🗑️ Waste</option>
-                                <option value="Water">💧 Water</option>
-                                <option value="Electricity">⚡ Electricity</option>
-                                <option value="Roads">🛣️ Roads</option>
-                                <option value="Law &amp; Order">👮 Law & Order</option>
-                                <option value="Fire">🔥 Fire</option>
+                                <option value="Waste" data-i18n="cat_waste">🗑️ Waste</option>
+                                <option value="Water" data-i18n="cat_water">💧 Water</option>
+                                <option value="Electricity" data-i18n="cat_eb">⚡ Electricity</option>
+                                <option value="Roads" data-i18n="cat_pw">🛣️ Roads</option>
+                                <option value="Law &amp; Order" data-i18n="cat_police">👮 Law & Order</option>
+                                <option value="Fire" data-i18n="cat_fire">🔥 Fire</option>
                             </select>
                         </div>
                         <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-location">Location Address *</label>
+                            <label class="label" for="issue-location" data-i18n="lbl_location">Location Address
+                                *</label>
                             <div style="display:flex; gap:8px;">
                                 <input id="issue-location" class="input" placeholder="e.g. Coimbatore North..." required
                                     style="flex:1;" />
@@ -950,7 +963,7 @@
                             <input type="hidden" id="issue-lng" />
                         </div>
                         <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-desc">Description *</label>
+                            <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Description *</label>
                             <textarea id="issue-desc" class="textarea" placeholder="Describe the issue..."
                                 required></textarea>
                         </div>
@@ -963,9 +976,10 @@
                         </div>
                     </div>
                     <div class="modal-footer" style="padding:0; border:none; margin-top:8px;">
-                        <button type="button" class="btn btn-outline" id="modal-cancel">Cancel</button>
+                        <button type="button" class="btn btn-outline" id="modal-cancel"
+                            data-i18n="btn_cancel">Cancel</button>
                         <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;">
-                            <span id="submit-text">Submit Report</span>
+                            <span id="submit-text" data-i18n="btn_submit">Submit Report</span>
                             <div class="spinner spinner-sm" id="submit-spinner" style="display:none;"></div>
                         </button>
                     </div>
@@ -978,7 +992,7 @@
     <div class="modal-overlay" id="details-modal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">Issue Details</div>
+                <div class="modal-title" data-i18n="btn_view_details">Issue Details</div>
                 <button class="modal-close"
                     onclick="document.getElementById('details-modal').classList.remove('open')">✕</button>
             </div>
@@ -1054,6 +1068,7 @@
         import { logout } from './js/auth.js';
         import { issuesAPI, reviewsAPI } from './js/api.js';
         import { toast } from './js/toast.js';
+        import { t, getLang } from './js/i18n.js';
 
         const user = guardPage(['USER']);
         if (!user) throw new Error('Not authorized');
@@ -1096,7 +1111,10 @@
 
         function renderIssueCard(issue) {
             const isSupported = supportedIds.has(issue.id);
-            const statusLabel = issue.status === 'COMPLETED' ? 'RESOLVED' : issue.status;
+            const statusLabelKey = issue.status === 'COMPLETED' ? 'status_completed' :
+                (issue.status === 'IN_PROGRESS' ? 'status_in_progress' :
+                    (issue.status === 'PENDING' ? 'status_pending' : issue.status));
+            const statusLabel = t(statusLabelKey);
             const imgUrl = issue.image_url || 'https://via.placeholder.com/600x400.png?text=Issue+Image';
 
             const btnClass = isSupported ? 'ic-btn-supported' : 'ic-btn-outline';
@@ -1139,7 +1157,7 @@
                   <button class="ic-btn ${btnClass} support-btn-main" data-id="${issue.id}">
                     ${btnContent}
                   </button>
-                  <button class="ic-btn ic-btn-solid" onclick="openIssueDetails('${issue.id}')">View Details →</button>
+                  <button class="ic-btn ic-btn-solid" onclick="openIssueDetails('${issue.id}')">${t('btn_view_details')} →</button>
                   ${isOwner ? `<button class="ic-btn btn-danger delete-btn-main" data-id="${issue.id}" style="border: 1.5px solid transparent; flex: 0.5;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>` : ''}

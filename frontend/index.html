@@ -8,6 +8,8 @@
   <meta name="description"
     content="CleanMadurai is a civic issue management platform for Madurai citizens to report, track and resolve local infrastructure problems." />
   <link rel="stylesheet" href="css/styles.css" />
+  <!-- Language Script -->
+  <script type="module" src="js/i18n.js"></script>
   <style>
     body {
       background: #0a0f1a;
@@ -266,8 +268,13 @@
         <span>CleanMadurai</span>
       </div>
       <div class="nav-links">
-        <a href="login.html" class="btn-hero-outline"
-          style="padding:10px 22px;font-size:0.9rem;border-radius:10px;">Sign In</a>
+        <select class="select lang-switcher"
+          style="padding:8px 12px; font-size:0.9rem; border-radius:10px; background:rgba(255,255,255,0.06); color:white; border:1px solid rgba(255,255,255,0.15); margin-right:8px;">
+          <option value="en">English</option>
+          <option value="ta">தமிழ்</option>
+        </select>
+        <a href="login.html" class="btn-hero-outline" style="padding:10px 22px;font-size:0.9rem;border-radius:10px;"
+          data-i18n="nav_login">Sign In</a>
         <a href="register.html" class="btn-hero-primary"
           style="padding:10px 22px;font-size:0.9rem;border-radius:10px;box-shadow:none;">Register</a>
       </div>
@@ -280,21 +287,21 @@
       </div>
 
       <h1 class="hero-title">
-        Smart &amp; Clean<br />
-        <span class="highlight">Madurai</span>
+        <span data-i18n="hero_title_1">Smart &amp; Clean</span><br />
+        <span class="highlight" data-i18n="hero_title_2">Madurai</span>
       </h1>
 
-      <p class="hero-sub">
+      <p class="hero-sub" data-i18n="hero_subtitle">
         Report civic issues, support community causes, and track resolutions — all in one platform built for Madurai's
         citizens and administrators.
       </p>
 
       <div class="hero-cta">
-        <a href="register.html" class="btn-hero-primary">
+        <a href="register.html" class="btn-hero-primary" data-i18n="lbl_no_account">
           🚀 Get Started — It's Free
         </a>
         <a href="login.html" class="btn-hero-outline">
-          🔑 Sign In
+          🔑 <span data-i18n="nav_login">Sign In</span>
         </a>
       </div>
 

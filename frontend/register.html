@@ -8,6 +8,8 @@
     <meta name="description"
         content="Register for CleanMadurai to report civic issues or manage municipal services in Madurai." />
     <link rel="stylesheet" href="css/styles.css" />
+    <!-- Language Script -->
+    <script type="module" src="js/i18n.js"></script>
     <style>
         .auth-card {
             max-width: 520px;
@@ -62,35 +64,43 @@
 
 <body>
     <div class="auth-page" style="padding: 40px 24px;">
-        <div style="margin-bottom:24px; animation: fadeInUp 0.5s ease;">
-            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center;">
+        <div
+            style="margin-bottom:24px; animation: fadeInUp 0.5s ease; display:flex; justify-content:space-between; align-items:center;">
+            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center; text-decoration:none;">
                 <div class="logo-icon">♻</div>
-                <span>CleanMadurai</span>
+                <span style="color:white; font-weight:700;">CleanMadurai</span>
             </a>
+            <select class="select lang-switcher"
+                style="padding:4px 8px; font-size:0.85rem; background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);">
+                <option value="en" style="color:black;">English</option>
+                <option value="ta" style="color:black;">தமிழ்</option>
+            </select>
         </div>
 
         <div class="auth-card fade-in">
             <div class="auth-card-header">
-                <h1 style="font-size:1.6rem; margin-bottom:6px;">Join the Movement 🌿</h1>
-                <p class="text-muted text-sm">Register to report civic issues or manage city services</p>
+                <h1 style="font-size:1.6rem; margin-bottom:6px;" data-i18n="auth_register_title">Join the Movement 🌿
+                </h1>
+                <p class="text-muted text-sm" data-i18n="app_title">Register to report civic issues or manage city
+                    services</p>
             </div>
 
             <div class="auth-card-body">
                 <form id="register-form" class="form-stack" novalidate>
                     <div class="form-group">
-                        <label class="label" for="name">Full Name</label>
+                        <label class="label" for="name" data-i18n="lbl_fullname">Full Name</label>
                         <input id="name" type="text" class="input" placeholder="e.g. Arjun Kumar" required
                             autocomplete="name" />
                     </div>
 
                     <div class="form-group">
-                        <label class="label" for="email">Email Address</label>
+                        <label class="label" for="email" data-i18n="lbl_email">Email Address</label>
                         <input id="email" type="email" class="input" placeholder="name@example.com" required
                             autocomplete="email" />
                     </div>
 
                     <div class="form-group">
-                        <label class="label" for="password">Password</label>
+                        <label class="label" for="password" data-i18n="lbl_pwd">Password</label>
                         <input id="password" type="password" class="input" placeholder="At least 6 characters"
                             minlength="6" required autocomplete="new-password" />
                     </div>
@@ -102,7 +112,7 @@
                                 <input type="radio" name="role" value="USER" checked />
                                 <span class="role-icon">🏙️</span>
                                 <div>
-                                    <div class="role-label">Citizen</div>
+                                    <div class="role-label" data-i18n="role_cit">Citizen</div>
                                     <div class="role-desc">Report civic issues and support community causes</div>
                                 </div>
                             </label>
@@ -110,7 +120,7 @@
                                 <input type="radio" name="role" value="COLLECTOR" />
                                 <span class="role-icon">🛡️</span>
                                 <div>
-                                    <div class="role-label">District Collector</div>
+                                    <div class="role-label" data-i18n="role_col">District Collector</div>
                                     <div class="role-desc">Oversee all departments and city-wide issue resolution</div>
                                 </div>
                             </label>
@@ -118,7 +128,7 @@
                                 <input type="radio" name="role" value="DEPT" />
                                 <span class="role-icon">🏛️</span>
                                 <div>
-                                    <div class="role-label">Department Staff</div>
+                                    <div class="role-label" data-i18n="role_dept">Department Staff</div>
                                     <div class="role-desc">Manage issues assigned to your municipal department</div>
                                 </div>
                             </label>
@@ -135,19 +145,20 @@
 
                     <!-- Department sub-selector (shown only for DEPT role) -->
                     <div class="form-group" id="dept-group" style="display:none;">
-                        <label class="label" for="department">Select Department</label>
+                        <label class="label" for="department" data-i18n="lbl_department">Select Department</label>
                         <select id="department" class="select">
                             <option value="">— Choose your department —</option>
-                            <option value="MADURAI_CORPORATION">Madurai Corporation (Waste / Water / Roads)</option>
-                            <option value="TNEB">TNEB — Electrical</option>
-                            <option value="POLICE">Madurai Police</option>
-                            <option value="FIRE_STATION">Fire Station</option>
+                            <option value="MADURAI_CORPORATION" data-i18n="cat_waste">Madurai Corporation (Waste / Water
+                                / Roads)</option>
+                            <option value="TNEB" data-i18n="cat_eb">TNEB — Electrical</option>
+                            <option value="POLICE" data-i18n="cat_police">Madurai Police</option>
+                            <option value="FIRE_STATION" data-i18n="cat_fire">Fire Station</option>
                         </select>
                     </div>
 
                     <button id="register-btn" type="submit" class="btn btn-primary btn-full btn-lg"
                         style="margin-top:4px;">
-                        <span id="register-btn-text">✨ Create Account</span>
+                        <span id="register-btn-text" data-i18n="btn_register">✨ Create Account</span>
                         <div id="register-spinner" class="spinner spinner-sm" style="display:none;"></div>
                     </button>
                 </form>
@@ -155,9 +166,8 @@
 
             <div class="auth-card-footer">
                 <p class="text-sm text-muted">
-                    Already have an account?
-                    <a href="login.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;Sign In
-                        →</a>
+                    <span data-i18n="lbl_has_account">Already have an account? Sign in</span>
+                    <a href="login.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;→</a>
                 </p>
             </div>
         </div>
