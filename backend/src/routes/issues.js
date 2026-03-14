@@ -88,6 +88,18 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
 
         if (error) throw error;
 
+        // Increment reports_count in users table (if column exists)
+        try {
+            const { data: userRow } = await supabaseAdmin.from('users').select('reports_count').eq('id', req.userId).single();
+            if (userRow && userRow.hasOwnProperty('reports_count')) {
+                await supabaseAdmin.from('users').update({
+                    reports_count: (userRow.reports_count || 0) + 1
+                }).eq('id', req.userId);
+            }
+        } catch (e) {
+            console.log('[Info] users.reports_count column might not exist yet.');
+        }
+
         return res.status(201).json({ message: 'Issue reported successfully.', issue: data });
     } catch (err) {
         console.error('Create issue error:', err);
@@ -112,12 +124,18 @@ router.put('/:id/status', verifyToken, requireApproved,
 
         try {
             // Department users can only update their own department's issues
+            let issueToUpdate;
             if (!['COLLECTOR', 'ADMIN'].includes(req.user.role)) {
                 const { data: issue } = await supabaseAdmin
-                    .from('issues').select('department').eq('id', id).single();
+                    .from('issues').select('department, reported_by_id, points_awarded, status').eq('id', id).single();
                 if (issue && issue.department !== req.user.role) {
                     return res.status(403).json({ error: 'Cannot update issues from another department.' });
                 }
+                issueToUpdate = issue;
+            } else {
+                const { data: issue } = await supabaseAdmin
+                    .from('issues').select('department, reported_by_id, points_awarded, status').eq('id', id).single();
+                issueToUpdate = issue;
             }
 
             const updateData = {
@@ -125,6 +143,41 @@ router.put('/:id/status', verifyToken, requireApproved,
                 updated_at: new Date().toISOString(),
             };
             if (completionImageUrl) updateData.completion_image_url = completionImageUrl;
+
+            if (status === 'COMPLETED' && issueToUpdate && !issueToUpdate.points_awarded && issueToUpdate.reported_by_id) {
+                console.log(`[Points] Awarding 1pt to reporter ${issueToUpdate.reported_by_id}`);
+                updateData.points_awarded = true;
+                
+                const { data: userRow, error: uErr } = await supabaseAdmin.from('users').select('total_points, reports_resolved, reports_points').eq('id', issueToUpdate.reported_by_id).single();
+                
+                if (uErr) {
+                    console.error('[Points] Failed to fetch user row:', uErr);
+                } else if (userRow) {
+                    const userUpdatePayload = {
+                        reports_resolved: (userRow.reports_resolved || 0) + 1
+                    };
+                    
+                    if (userRow.hasOwnProperty('reports_points')) {
+                        userUpdatePayload.reports_points = (userRow.reports_points || 0) + 1;
+                    }
+                    
+                    // Force total_points to be the sum of latest known + 1
+                    userUpdatePayload.total_points = (userRow.total_points || 0) + 1;
+                    
+                    const { error: updErr } = await supabaseAdmin.from('users').update(userUpdatePayload).eq('id', issueToUpdate.reported_by_id);
+                    if (updErr) console.error('[Points] User update error:', updErr);
+                    else {
+                        console.log(JSON.stringify({
+                            action: 'report_resolved',
+                            user_id: issueToUpdate.reported_by_id,
+                            issue_id: id,
+                            points_awarded: 1,
+                            new_total_points: userUpdatePayload.total_points,
+                            timestamp: new Date().toISOString(),
+                        }));
+                    }
+                }
+            }
 
             const { data, error } = await supabaseAdmin
                 .from('issues')

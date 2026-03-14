@@ -288,6 +288,10 @@
             <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews"
                 onclick="event.preventDefault();switchTab('reviews')"><span class="icon">⭐</span> <span
                     data-i18n="tab_all_reviews">All Reviews</span></a>
+            <a class="sidebar-link" data-tab="campaigns" href="#" id="nav-campaigns"
+                onclick="event.preventDefault();switchTab('campaigns')"><span class="icon">📣</span> Campaigns</a>
+            <a class="sidebar-link" data-tab="leaderboard" href="#" id="nav-leaderboard"
+                onclick="event.preventDefault();switchTab('leaderboard')"><span class="icon">🏆</span> Leaderboard</a>
         </nav>
         <div class="sidebar-footer">
             <div class="sidebar-user">
@@ -352,6 +356,10 @@
                             Analytics</button>
                         <button class="tab-btn" id="tab-map-btn" onclick="switchTab('map')">Heatmap</button>
                         <button class="tab-btn" id="tab-reviews-btn" onclick="switchTab('reviews')">All Reviews</button>
+                        <button class="tab-btn" id="tab-campaigns-btn" onclick="switchTab('campaigns')">📣
+                            Campaigns</button>
+                        <button class="tab-btn" id="tab-leaderboard-btn" onclick="switchTab('leaderboard')">🏆
+                            Leaderboard</button>
                     </div>
                 </div>
 
@@ -472,14 +480,126 @@
                         </div>
                     </div>
                 </div>
-            </div>
+
+                <!-- Campaigns Tab -->
+                <div id="tab-campaigns" class="tab-pane">
+                    <!-- Overview Stats -->
+                    <div class="grid grid-3 mb-8" style="margin-bottom:24px;">
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:#7c3aed;">Total Campaigns</div>
+                                <div class="stat-value" id="col-camp-total">—</div>
+                            </div>
+                            <div class="stat-icon" style="background:#ede9fe;color:#7c3aed;">📣</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:#2563eb;">Upcoming</div>
+                                <div class="stat-value" id="col-camp-upcoming">—</div>
+                            </div>
+                            <div class="stat-icon" style="background:#dbeafe;color:#2563eb;">🗓️</div>
+                        </div>
+                        <div class="stat-card">
+                            <div>
+                                <div class="stat-label" style="color:#16a34a;">Total Volunteers</div>
+                                <div class="stat-value" id="col-camp-volunteers">—</div>
+                            </div>
+                            <div class="stat-icon" style="background:#dcfce7;color:#16a34a;">🙋</div>
+                        </div>
+                    </div>
+                    <!-- Campaigns Table -->
+                    <div
+                        style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+                        <div
+                            style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                            <h3 style="font-size:1rem;font-weight:700;">All Campaigns</h3>
+                        </div>
+                        <div id="col-campaigns-table" style="overflow-x:auto;">
+                            <div class="loading-page" style="min-height:120px;">
+                                <div class="spinner"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Leaderboard Tab -->
+                    <div id="tab-leaderboard" class="tab-pane">
+                        <div
+                            style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.03);">
+                            <div
+                                style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                                <h3 style="font-size:1.1rem;font-weight:700;">Top Citizens Leaderboard</h3>
+                            </div>
+                            <table class="table" style="width:100%;text-align:left;border-collapse:collapse;">
+                                <thead>
+                                    <tr style="border-bottom:2px solid var(--border);">
+                                        <th style="padding:16px 12px;color:var(--text-muted);font-weight:700;">Rank</th>
+                                        <th style="padding:16px 12px;color:var(--text-muted);font-weight:700;">Citizen
+                                            Name</th>
+                                        <th style="padding:16px 12px;color:var(--text-muted);font-weight:700;">Total
+                                            Points</th>
+                                        <th
+                                            style="padding:16px 12px;color:var(--text-muted);font-weight:600;font-size:0.85rem;">
+                                            Issues Resolved</th>
+                                        <th
+                                            style="padding:16px 12px;color:var(--text-muted);font-weight:600;font-size:0.85rem;">
+                                            Campaigns Joined</th>
+                                        <th
+                                            style="padding:16px 12px;color:var(--text-muted);font-weight:600;font-size:0.85rem;">
+                                            Campaigns Run</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="col-leaderboard-tbody">
+                                    <!-- Leaderboard rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
         </main>
+    </div>
+
+    <!-- Campaign Volunteers List Modal (Collector View) -->
+    <div class="modal-overlay" id="col-volunteers-modal">
+        <div class="modal" style="max-width:800px;">
+            <div class="modal-header">
+                <div class="modal-title">Campaign Volunteers (Admin View)</div>
+                <button class="modal-close"
+                    onclick="document.getElementById('col-volunteers-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 id="cv-col-title" style="margin-bottom:4px;"></h3>
+                    </div>
+                    <div>
+                        <button id="cv-col-export-btn" class="btn btn-primary btn-sm">⬇️ Download Excel/CSV</button>
+                    </div>
+                </div>
+
+                <div style="background:#f1f5f9;border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+                    <table class="table" style="width:100%;text-align:left;border-collapse:collapse;">
+                        <thead style="background:#e2e8f0;">
+                            <tr>
+                                <th style="padding:12px;font-size:0.85rem;color:val(--text);">Volunteer Name</th>
+                                <th style="padding:12px;font-size:0.85rem;color:val(--text);">Phone</th>
+                                <th style="padding:12px;font-size:0.85rem;color:val(--text);">Reg. Date</th>
+                                <th style="padding:12px;font-size:0.85rem;color:val(--text);">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cv-col-body">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI, analyticsAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, analyticsAPI, campaignsAPI, leaderboardAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t } from './js/i18n.js';
 
@@ -498,8 +618,10 @@
 
         // Tab switching
         let analyticsLoaded = false;
+        let campaignsLoaded = false;
+        let leaderboardLoaded = false;
         window.switchTab = (name) => {
-            ['issues', 'analytics', 'map', 'reviews'].forEach(t => {
+            ['issues', 'analytics', 'map', 'reviews', 'campaigns', 'leaderboard'].forEach(t => {
                 document.getElementById('tab-' + t).classList.remove('active');
                 document.getElementById('tab-' + t + '-btn').classList.remove('active');
                 document.getElementById('nav-' + t).classList.remove('active');
@@ -512,6 +634,8 @@
             document.getElementById('issues-filters').style.display = (name === 'issues' || name === 'map') ? 'flex' : 'none';
 
             if (name === 'reviews') loadReviews();
+            if (name === 'campaigns' && !campaignsLoaded) { campaignsLoaded = true; loadCollectorCampaigns(); }
+            if (name === 'leaderboard' && !leaderboardLoaded) { leaderboardLoaded = true; loadCollectorLeaderboard(); }
             if (name === 'analytics' && !analyticsLoaded) {
                 analyticsLoaded = true;
                 loadCollectorAnalytics();
@@ -738,6 +862,141 @@
         }
 
         loadData();
+
+        // ─── Collector Campaigns ───
+        async function loadCollectorCampaigns() {
+            const tableEl = document.getElementById('col-campaigns-table');
+            tableEl.innerHTML = '<div class="loading-page" style="min-height:120px;"><div class="spinner"></div></div>';
+            try {
+                const data = await campaignsAPI.getAll();
+                const camps = data.campaigns || [];
+
+                const now = new Date();
+                const upcoming = camps.filter(c => now < new Date(`${c.start_date}T${c.start_time}`)).length;
+                const totalVols = camps.reduce((s, c) => s + (c.registered_count || 0), 0);
+
+                document.getElementById('col-camp-total').textContent = camps.length;
+                document.getElementById('col-camp-upcoming').textContent = upcoming;
+                document.getElementById('col-camp-volunteers').textContent = totalVols;
+
+                if (camps.length === 0) {
+                    tableEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📣</div><h3>No Campaigns</h3><p>No campaigns have been created yet.</p></div>';
+                    return;
+                }
+
+                tableEl.innerHTML = `
+                <table style="width:100%;border-collapse:collapse;font-size:0.88rem;">
+                    <thead>
+                        <tr style="background:#f8fafc;">
+                            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Campaign</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Organizer</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Location</th>
+                            <th style="padding:12px 16px;text-align:left;font-weight:700;color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Schedule</th>
+                            <th style="padding:12px 16px;text-align:center;font-weight:700;color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Volunteers</th>
+                            <th style="padding:12px 16px;text-align:center;font-weight:700;color:#64748b;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${camps.map(c => {
+                    const start = new Date(`${c.start_date}T${c.start_time}`);
+                    const end = new Date(`${c.end_date}T${c.end_time}`);
+                    const status = now < start ? 'UPCOMING' : now <= end ? 'ACTIVE' : 'COMPLETED';
+                    const statusColors = { UPCOMING: '#2563eb', ACTIVE: '#16a34a', COMPLETED: '#6b7280' };
+                    const statusBg = { UPCOMING: '#eff6ff', ACTIVE: '#f0fdf4', COMPLETED: '#f9fafb' };
+                    return `<tr style="border-top:1px solid #f1f5f9;">
+                                <td style="padding:14px 16px;font-weight:600;">${c.title}</td>
+                                <td style="padding:14px 16px;color:#64748b;">${c.created_by_name || 'Anonymous'}</td>
+                                <td style="padding:14px 16px;color:#64748b;">📍 ${c.location_name || 'N/A'}</td>
+                                <td style="padding:14px 16px;color:#64748b;white-space:nowrap;font-size:0.8rem;">${start.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} → ${end.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</td>
+                                <td style="padding:14px 16px;text-align:center;"><span style="background:#ede9fe;color:#7c3aed;padding:4px 10px;border-radius:99px;font-weight:700;font-size:0.8rem;">${c.registered_count}/${c.volunteers_needed}</span></td>
+                                <td style="padding:14px 16px;text-align:center;"><span style="background:${statusBg[status]};color:${statusColors[status]};padding:4px 10px;border-radius:99px;font-weight:700;font-size:0.75rem;">${status}</span></td>
+                                <td style="padding:14px 16px;text-align:center;"><button class="btn btn-outline btn-sm" onclick="openColCampaignVolunteers('${c.id}', '${c.title.replace(/'/g, "\\'")}')">View</button></td>
+                            </tr>`;
+                }).join('')}
+                    </tbody>
+                </table>`;
+            } catch (err) {
+                tableEl.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">${err.message}</p></div>`;
+            }
+        }
+
+        window.openColCampaignVolunteers = async (id, title) => {
+            const modal = document.getElementById('col-volunteers-modal');
+            modal.classList.add('open');
+            document.getElementById('cv-col-title').textContent = title;
+            const tbody = document.getElementById('cv-col-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;">Loading volunteers...</td></tr>';
+
+            try {
+                const data = await campaignsAPI.getVolunteers(id); // Admin route should theoretically fetch everything
+                const list = data.volunteers || [];
+
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--text-muted);">No volunteers have registered yet.</td></tr>';
+                } else {
+                    tbody.innerHTML = list.map(v => `
+                        <tr style="border-top:1px solid var(--border);">
+                            <td style="padding:12px;font-size:0.9rem;font-weight:600;">${v.volunteer_name || v.users?.name || 'Unknown'}</td>
+                            <td style="padding:12px;font-size:0.9rem;">${v.phone_number || 'N/A'}</td>
+                            <td style="padding:12px;font-size:0.85rem;color:var(--text-muted);">${new Date(v.created_at).toLocaleDateString()}</td>
+                            <td style="padding:12px;font-size:0.85rem;">
+                                ${v.participation_status === 'CONFIRMED' ? '<span style="color:var(--success);font-weight:600;">✅ Confirmed</span>' : '<span style="color:var(--warning);font-weight:600;">⏳ Pending</span>'}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                document.getElementById('cv-col-export-btn').onclick = () => {
+                    if (list.length === 0) return toast.error('Empty', 'No data to export.');
+                    let csvContent = "data:text/csv;charset=utf-8,Name,Phone Number,Registration Date,Status\n";
+                    list.forEach(v => {
+                        csvContent += `"${v.volunteer_name || v.users?.name || ''}","${v.phone_number || ''}","${new Date(v.created_at).toLocaleDateString()}","${v.participation_status || 'PENDING'}"\n`;
+                    });
+                    const encodedUri = encodeURI(csvContent);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", encodedUri);
+                    link.setAttribute("download", `Volunteers_${title.replace(/\s+/g, '_')}.csv`);
+                    document.body.appendChild(link); link.click(); document.body.removeChild(link);
+                };
+            } catch (e) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;padding:24px;color:var(--danger);">${e.message}</td></tr>`;
+            }
+        };
+
+        async function loadCollectorLeaderboard() {
+            const tbody = document.getElementById('col-leaderboard-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">Loading leaderboard...</td></tr>';
+
+            try {
+                const data = await leaderboardAPI.getTop100();
+                const users = data.leaderboard || [];
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8;">No ranking data available yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map((u, idx) => {
+                    let rankDisplay = idx + 1;
+                    if (idx === 0) rankDisplay = '🥇 1st';
+                    if (idx === 1) rankDisplay = '🥈 2nd';
+                    if (idx === 2) rankDisplay = '🥉 3rd';
+
+                    return `
+                    <tr style="border-bottom:1px solid #f1f5f9;">
+                        <td style="padding:16px 12px;font-weight:700;">${rankDisplay}</td>
+                        <td style="padding:16px 12px;font-weight:600;">${u.name}</td>
+                        <td style="padding:16px 12px;font-weight:800;color:var(--success);font-size:1.1rem;">${u.total_points || 0}</td>
+                        <td style="padding:16px 12px;">${u.reports_resolved || 0}</td>
+                        <td style="padding:16px 12px;">${u.campaigns_participated || 0}</td>
+                        <td style="padding:16px 12px;">${u.campaigns_organized || 0}</td>
+                    </tr>
+                `}).join('');
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--danger);">Failed to load leaderboard.</td></tr>';
+                toast.error('Leaderboard Fetch Failed', err.message);
+            }
+        }
 
         /* ── Collector Analytics ── */
         let colDeptChart, colStatusChart, colMonthlyChart, colPerfChart;

@@ -222,7 +222,7 @@ const translations = {
         'lbl_no_file': 'எந்த கோப்பும் தேர்வு செய்யப்படவில்லை',
 
         // Forms & Tables
-        'lbl_report_name': 'புகார் பெயர்',
+        'lbl_report_name': 'புகார்',
         'lbl_report_desc': 'விளக்கம்',
         'lbl_department': 'துறை',
         'lbl_location': 'இடம்',
@@ -230,7 +230,7 @@ const translations = {
         'lbl_date': 'தேதி',
 
         'th_id': 'புகார் எண்',
-        'th_name': 'புகார் பெயர்',
+        'th_name': 'புகார்',
         'th_desc': 'விளக்கம்',
         'th_dept': 'துறை',
         'th_created': 'உருவாக்கப்பட்ட தேதி',

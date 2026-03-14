@@ -141,7 +141,18 @@
 
                 <!-- Verifications Tab -->
                 <div id="tab-verifications" class="tab-pane">
-                    <div id="pending-users-list" class="space-y-4"></div>
+                    <div class="tab-list mb-6" style="justify-content:flex-start;gap:20px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+                        <button class="tab-sub-btn active" id="sub-tab-users-btn">User Verification</button>
+                        <button class="tab-sub-btn" id="sub-tab-campaigns-btn">Campaign Approval</button>
+                    </div>
+                    
+                    <div id="users-verification-pane">
+                        <div id="pending-users-list" class="space-y-4"></div>
+                    </div>
+                    
+                    <div id="campaigns-verification-pane" style="display:none;">
+                        <div id="pending-campaigns-list" class="space-y-4"></div>
+                    </div>
                 </div>
 
                 <!-- All Users Tab -->
@@ -166,6 +177,9 @@
         document.getElementById('logout-btn').addEventListener('click', logout);
         document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
+        // Define campaignsAPI if not already imported or needed differently
+        import { campaignsAPI } from './js/api.js';
+
         // Hamburger
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -186,9 +200,35 @@
         document.getElementById('tab-overview-btn').addEventListener('click', () => { switchTab('overview'); loadData(); });
         document.getElementById('tab-verifications-btn').addEventListener('click', () => { switchTab('verifications'); loadPending(); });
         document.getElementById('tab-users-btn').addEventListener('click', () => { switchTab('users'); loadAllUsers(); });
+        
+        // Sub-tabs for verifications
+        const subUsersBtn = document.getElementById('sub-tab-users-btn');
+        const subCampsBtn = document.getElementById('sub-tab-campaigns-btn');
+        const usersPane = document.getElementById('users-verification-pane');
+        const campsPane = document.getElementById('campaigns-verification-pane');
+
+        subUsersBtn.addEventListener('click', () => {
+            subUsersBtn.classList.add('active');
+            subCampsBtn.classList.remove('active');
+            usersPane.style.display = 'block';
+            campsPane.style.display = 'none';
+            loadPending();
+        });
+
+        subCampsBtn.addEventListener('click', () => {
+            subCampsBtn.classList.add('active');
+            subUsersBtn.classList.remove('active');
+            usersPane.style.display = 'none';
+            campsPane.style.display = 'block';
+            loadPendingCampaigns();
+        });
+
         document.getElementById('refresh-btn').addEventListener('click', () => {
             const activeTab = tabs.find(t => document.getElementById('tab-' + t).classList.contains('active'));
-            if (activeTab === 'verifications') loadPending();
+            if (activeTab === 'verifications') {
+                if (subCampsBtn.classList.contains('active')) loadPendingCampaigns();
+                else loadPending();
+            }
             else if (activeTab === 'users') loadAllUsers();
             else loadData();
         });
@@ -282,6 +322,50 @@
                 await usersAPI.verify(id, status);
                 toast.success(status === 'approved' ? 'User Approved ✅' : 'User Rejected ❌', `Account has been ${status}.`);
                 document.getElementById('vcard-' + id)?.remove();
+                loadData();
+            } catch (err) {
+                toast.error('Update Failed', err.message);
+            }
+        };
+
+        async function loadPendingCampaigns() {
+            const container = document.getElementById('pending-campaigns-list');
+            container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
+            try {
+                const data = await campaignsAPI.getPending();
+                const campaigns = data.campaigns || [];
+                if (campaigns.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>All clear!</h3><p>No pending campaign requests.</p></div>`;
+                    return;
+                }
+                container.innerHTML = campaigns.map(c => `
+                    <div class="verify-card" id="ccard-${c.id}">
+                        <div class="verify-info">
+                            <h3 style="font-size:1.05rem;">${c.title}</h3>
+                            <p class="text-muted text-sm" style="margin:4px 0;">👤 ${c.created_by_name} | 📍 ${c.location_name || 'No location'}</p>
+                            <p class="text-sm" style="margin:8px 0;line-height:1.4;">${c.description}</p>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+                                <span class="badge badge-blue">Needed: ${c.volunteers_needed}</span>
+                                <span class="text-xs text-muted">Created: ${new Date(c.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <div class="verify-actions">
+                            <button class="btn btn-primary btn-sm" onclick="approveCampaign('${c.id}', 'approved')">✅ Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="approveCampaign('${c.id}', 'rejected')">❌ Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                toast.error('Failed to load campaigns', err.message);
+                container.innerHTML = `<div class="empty-state"><p>${err.message}</p></div>`;
+            }
+        }
+
+        window.approveCampaign = async (id, status) => {
+            try {
+                await campaignsAPI.verify(id, status);
+                toast.success(status === 'approved' ? 'Campaign Approved ✅' : 'Campaign Rejected ❌', `Campaign has been ${status}.`);
+                document.getElementById('ccard-' + id)?.remove();
                 loadData();
             } catch (err) {
                 toast.error('Update Failed', err.message);

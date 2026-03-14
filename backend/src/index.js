@@ -15,7 +15,9 @@ Allow requests from Netlify frontend
 app.use(cors({
     origin: [
         "https://cleancitymdu.netlify.app",
-        "http://localhost:3001"
+        "http://localhost:3001",
+        "http://127.0.0.1:5500",
+        "http://localhost:5500"
     ],
     credentials: true
 }));
@@ -56,6 +58,8 @@ app.use('/api/issues', require('./routes/issues'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/analytics', require('./routes/analytics'));
+app.use('/api/campaigns', require('./routes/campaigns'));
+app.use('/api/leaderboard', require('./routes/leaderboard'));
 
 /*
 ========================================

@@ -98,3 +98,83 @@ CREATE INDEX IF NOT EXISTS idx_reviews_user ON public.issue_reviews(user_id);
 ALTER TABLE public.issue_reviews ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role full access - reviews"
   ON public.issue_reviews FOR ALL USING (true);
+
+-- ============================================================
+-- 7. Campaigns table — civic community campaigns
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.campaigns (
+  id                UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  title             TEXT NOT NULL,
+  description       TEXT NOT NULL,
+  location_name     TEXT,
+  latitude          DOUBLE PRECISION,
+  longitude         DOUBLE PRECISION,
+  start_date        DATE NOT NULL,
+  start_time        TIME NOT NULL,
+  end_date          DATE NOT NULL,
+  end_time          TIME NOT NULL,
+  volunteers_needed INTEGER NOT NULL DEFAULT 1,
+  registered_count  INTEGER NOT NULL DEFAULT 0,
+  image_url         TEXT,
+  status            TEXT NOT NULL DEFAULT 'UPCOMING'
+                      CHECK (status IN ('UPCOMING','ACTIVE','COMPLETED')),
+  created_by_id     UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  created_by_name   TEXT,
+  created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_campaigns_status ON public.campaigns(status);
+CREATE INDEX IF NOT EXISTS idx_campaigns_created_by ON public.campaigns(created_by_id);
+CREATE INDEX IF NOT EXISTS idx_campaigns_start ON public.campaigns(start_date, start_time);
+
+ALTER TABLE public.campaigns ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Service role full access - campaigns"
+  ON public.campaigns FOR ALL USING (true);
+
+-- ============================================================
+-- 8. Campaign registrations — who signed up to volunteer
+-- ============================================================
+CREATE TABLE IF NOT EXISTS public.campaign_registrations (
+  campaign_id   UUID NOT NULL REFERENCES public.campaigns(id) ON DELETE CASCADE,
+  user_id       UUID NOT NULL REFERENCES public.users(id) ON DELETE CASCADE,
+  registered_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  PRIMARY KEY (campaign_id, user_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_creg_campaign ON public.campaign_registrations(campaign_id);
+CREATE INDEX IF NOT EXISTS idx_creg_user ON public.campaign_registrations(user_id);
+
+ALTER TABLE public.campaign_registrations ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Service role full access - campaign_registrations"
+  ON public.campaign_registrations FOR ALL USING (true);
+
+-- ============================================================
+-- 9. Leaderboard and Volunteer Registration Updates
+-- ============================================================
+ALTER TABLE public.users 
+  ADD COLUMN IF NOT EXISTS total_points INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS reports_resolved INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS campaigns_participated INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS campaigns_organized INTEGER DEFAULT 0;
+
+-- Points breakdown columns (per category)
+ALTER TABLE public.users
+  ADD COLUMN IF NOT EXISTS reports_points INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS campaign_participated_points INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS campaign_created_points INTEGER DEFAULT 0;
+
+-- Track total submitted reports count
+ALTER TABLE public.users
+  ADD COLUMN IF NOT EXISTS reports_count INTEGER DEFAULT 0;
+
+ALTER TABLE public.campaign_registrations
+  ADD COLUMN IF NOT EXISTS volunteer_name TEXT,
+  ADD COLUMN IF NOT EXISTS phone_number TEXT,
+  ADD COLUMN IF NOT EXISTS participation_status TEXT DEFAULT 'PENDING' CHECK (participation_status IN ('PENDING', 'CONFIRMED', 'REJECTED')),
+  ADD COLUMN IF NOT EXISTS points_given BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE public.campaigns
+  ADD COLUMN IF NOT EXISTS creator_points_awarded BOOLEAN DEFAULT FALSE;
+
+ALTER TABLE public.issues
+  ADD COLUMN IF NOT EXISTS points_awarded BOOLEAN DEFAULT FALSE;

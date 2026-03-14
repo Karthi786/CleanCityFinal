@@ -93,6 +93,8 @@ export const issuesAPI = {
 
 /* ── Users Endpoints ── */
 export const usersAPI = {
+    me: () => apiFetch('/users/me'),
+
     getPending: () => apiFetch('/users/pending'),
 
     getAll: (params = {}) => {
@@ -140,4 +142,45 @@ export const analyticsAPI = {
         const q = new URLSearchParams(params).toString();
         return apiFetch(`/analytics/status-distribution${q ? '?' + q : ''}`);
     },
+};
+
+/* ── Campaigns Endpoints ── */
+export const campaignsAPI = {
+    getAll: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/campaigns${q ? '?' + q : ''}`);
+    },
+
+    create: (payload) => apiFetch('/campaigns', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    }),
+
+
+    register: (id, payload = {}) => apiFetch(`/campaigns/${id}/register`, {
+        method: 'POST',
+        body: Object.keys(payload).length > 0 ? JSON.stringify(payload) : undefined
+    }),
+
+    myRegistrations: () => apiFetch('/campaigns/my-registrations'),
+
+    delete: (id) => apiFetch(`/campaigns/${id}`, { method: 'DELETE' }),
+
+    getVolunteers: (id) => apiFetch(`/campaigns/${id}/volunteers`),
+
+    confirmVolunteer: (campaignId, volunteerId) => apiFetch(`/campaigns/${campaignId}/volunteers/${volunteerId}/confirm`, { method: 'POST' }),
+
+    completeCampaign: (id) => apiFetch(`/campaigns/${id}/complete`, { method: 'POST' }),
+
+    getPending: () => apiFetch('/campaigns/pending'),
+
+    verify: (id, status) => apiFetch(`/campaigns/${id}/verify`, {
+        method: 'PUT',
+        body: JSON.stringify({ status })
+    }),
+};
+
+/* ── Leaderboard Endpoints ── */
+export const leaderboardAPI = {
+    getTop100: () => apiFetch('/leaderboard')
 };

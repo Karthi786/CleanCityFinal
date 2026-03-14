@@ -739,6 +739,154 @@
             margin-top: 8px;
             z-index: 10;
         }
+        /* ── Premium Campaign Cards ── */
+        .vm-campaign-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .vm-campaign-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #f1f5f9;
+            position: relative;
+        }
+
+        .vm-campaign-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.12);
+            border-color: #ddd6fe;
+        }
+
+        .vm-banner {
+            height: 140px;
+            position: relative;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .vm-status-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            padding: 4px 10px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .vm-body {
+            padding: 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .vm-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .vm-meta {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #64748b;
+            font-size: 0.8rem;
+            margin-bottom: 6px;
+        }
+
+        .vm-progress-section {
+            margin-top: 12px;
+            margin-bottom: 16px;
+        }
+
+        .vm-progress-bar {
+            height: 6px;
+            background: #f1f5f9;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+
+        .vm-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #7c3aed, #a78bfa);
+            border-radius: 10px;
+        }
+
+        .vm-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #475569;
+        }
+
+        .vm-desc {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 16px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .vm-footer {
+            margin-top: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .vm-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .vm-btn-primary {
+            background: #7c3aed;
+            color: white;
+        }
+
+        .vm-btn-primary:hover {
+            background: #6d28d9;
+        }
+
+        .vm-btn-outline {
+            background: #f5f3ff;
+            color: #7c3aed;
+        }
+
+        .vm-creator {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            color: #94a3b8;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 10px;
+        }
     </style>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -755,7 +903,7 @@
             </div>
         </div>
         <nav class="sidebar-nav">
-            <a class="sidebar-link active" href="citizen-dashboard.html">
+            <a class="sidebar-link active" href="#" id="nav-dashboard-link">
                 <span style="display:flex;align-items:center;gap:12px;">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
@@ -765,6 +913,24 @@
                         <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
                     <span data-i18n="nav_dashboard">Citizen Dashboard</span>
+                </span>
+            </a>
+            <a class="sidebar-link" href="#" id="nav-campaigns-link">
+                <span style="display:flex;align-items:center;gap:12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 11l19-9-9 19-2-8-8-2z"></path>
+                    </svg>
+                    <span>Campaigns</span>
+                </span>
+            </a>
+            <a class="sidebar-link" href="#" id="nav-leaderboard-link">
+                <span style="display:flex;align-items:center;gap:12px;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 15l-3 4-4-4v-8h14v8l-4 4-3-4z"></path>
+                    </svg>
+                    <span>Leaderboard</span>
                 </span>
             </a>
         </nav>
@@ -797,14 +963,12 @@
                 </div>
             </header>
 
-            <div class="dash-content">
+            <div class="dash-content" id="main-dashboard-view">
                 <!-- Welcome -->
                 <div class="welcome-header">
                     <div>
-                        <h1 class="welcome-title text-primary" id="welcome-msg" data-i18n="auth_login_title">Welcome,
-                            kevin!</h1>
-                        <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Madurai. Report. Support.
-                            Impact.</p>
+                        <h1 class="welcome-title text-primary" id="welcome-msg">Welcome back, <span id="welcome-name">kevin</span>!</h1>
+                        <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Madurai. Report. Support. Impact.</p>
                     </div>
                     <button id="report-btn" class="btn btn-primary" style="border-radius:8px; padding:12px 24px;"
                         data-i18n="lbl_report_name">
@@ -816,44 +980,39 @@
                 <div class="stats-grid">
                     <div class="stat-box stat-blue">
                         <div class="stat-box-info">
-                            <div class="stat-box-label" data-i18n="lbl_total_reports">City-wide Reports</div>
-                            <div class="stat-box-val" id="stat-total">0</div>
+                            <div class="stat-box-label">Reports Submitted</div>
+                            <div class="stat-box-val" id="stat-reports-submitted">0</div>
+                            <div style="font-size:0.75rem;color:#64748b;margin-top:4px;">Resolved: <span id="stat-reports-resolved">0</span></div>
                         </div>
                         <div class="stat-box-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                <polyline points="14 2 14 8 20 8"></polyline>
-                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                <polyline points="10 9 9 9 8 9"></polyline>
-                            </svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         </div>
                     </div>
-                    <div class="stat-box stat-green">
+                    <div class="stat-box stat-purple" style="border-right: 4px solid #7c3aed;">
                         <div class="stat-box-info">
-                            <div class="stat-box-label" data-i18n="lbl_completed_reports">Resolved Cases</div>
-                            <div class="stat-box-val" id="stat-resolved">0</div>
+                            <div class="stat-box-label">Campaigns Participated</div>
+                            <div class="stat-box-val" id="stat-campaigns-participated">0</div>
                         </div>
-                        <div class="stat-box-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
+                        <div class="stat-box-icon-wrapper" style="background:#f5f3ff;color:#7c3aed;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         </div>
                     </div>
                     <div class="stat-box stat-orange">
                         <div class="stat-box-info">
-                            <div class="stat-box-label" data-i18n="lbl_pending_reports">Active Pending</div>
-                            <div class="stat-box-val" id="stat-pending">0</div>
+                            <div class="stat-box-label">Campaigns Created</div>
+                            <div class="stat-box-val" id="stat-campaigns-organized">0</div>
                         </div>
                         <div class="stat-box-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="stat-box stat-green" style="border-right: 4px solid var(--cm-green);">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label" style="font-weight:800;color:var(--cm-green);">Total Points</div>
+                            <div class="stat-box-val" id="stat-total-points" style="color:var(--cm-green);">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </div>
                     </div>
                 </div>
@@ -912,78 +1071,246 @@
                     </div>
                 </div>
             </div>
+
+            <!-- ═══════════════════════════════════ CAMPAIGNS PAGE ═══════════════════════════════════ -->
+            <div class="dash-content" id="campaigns-section" style="display:none;">
+                <div class="welcome-header">
+                    <div>
+                        <h1 class="welcome-title" style="color:#7c3aed;">📣 Community Campaigns</h1>
+                        <p class="welcome-sub">Join civic drives, tree plantations, cleanups and more. Be the change!
+                        </p>
+                    </div>
+                    <button id="create-campaign-btn" class="btn btn-primary"
+                        style="border-radius:8px;padding:12px 24px;background:#7c3aed;border-color:#7c3aed;">＋ Create
+                        Campaign</button>
+                </div>
+
+                <!-- Campaign Stats -->
+                <div class="stats-grid" style="margin-bottom:32px;">
+                    <div class="stat-box" style="border-color:#ede9fe;">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label" style="color:#7c3aed;">Total Campaigns</div>
+                            <div class="stat-box-val" id="camp-stat-total">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper" style="background:#ede9fe;color:#7c3aed;font-size:1.5rem;">📣</div>
+                    </div>
+                    <div class="stat-box" style="border-color:#dbeafe;">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label" style="color:#2563eb;">Upcoming</div>
+                            <div class="stat-box-val" id="camp-stat-upcoming">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper" style="background:#dbeafe;color:#2563eb;font-size:1.5rem;">🗓️</div>
+                    </div>
+                    <div class="stat-box" style="border-color:#dcfce7;">
+                        <div class="stat-box-info">
+                            <div class="stat-box-label" style="color:var(--cm-green);">Active Now</div>
+                            <div class="stat-box-val" id="camp-stat-active">0</div>
+                        </div>
+                        <div class="stat-box-icon-wrapper" style="background:#dcfce7;color:var(--cm-green);font-size:1.5rem;">🏃</div>
+                    </div>
+                </div>
+
+                <!-- Campaign Filter Tabs -->
+                <div class="tabs-header" style="margin-bottom:24px;">
+                    <div class="tabs-nav" id="campaign-filters">
+                        <div class="tab-item active" data-filter="all">All Campaigns</div>
+                        <div class="tab-item" data-filter="mine">Created by Me</div>
+                        <div class="tab-item" data-filter="upcoming">Upcoming</div>
+                        <div class="tab-item" data-filter="active">Active Now</div>
+                        <div class="tab-item" data-filter="ended">Ended</div>
+                    </div>
+                </div>
+
+                <!-- Campaign Cards Grid -->
+                <div id="campaigns-grid" class="vm-campaign-grid"></div>
+            </div>
+
+            <!-- Leaderboard Section -->
+            <div class="dash-content" id="leaderboard-section" style="display:none;">
+                <div class="welcome-header">
+                    <div>
+                        <h1 class="welcome-title text-primary"
+                            style="display:flex;align-items:center;gap:12px;">🏆 Top Contributors</h1>
+                        <p class="welcome-sub">The heroes making our city a better place.</p>
+                    </div>
+                </div>
+
+                <div
+                    style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.03);">
+                    <table class="table" style="width:100%;text-align:left;border-collapse:collapse;">
+                        <thead>
+                            <tr style="border-bottom:2px solid var(--border);">
+                                <th style="padding:16px 12px;color:var(--cm-text-gray);font-weight:700;">Rank
+                                </th>
+                                <th style="padding:16px 12px;color:var(--cm-text-gray);font-weight:700;">Citizen
+                                    Name</th>
+                                <th style="padding:16px 12px;color:var(--cm-text-gray);font-weight:700;">Total
+                                    Points</th>
+                                <th
+                                    style="padding:16px 12px;color:var(--cm-text-gray);font-weight:600;font-size:0.85rem;">
+                                    Issues Resolved</th>
+                                <th
+                                    style="padding:16px 12px;color:var(--cm-text-gray);font-weight:600;font-size:0.85rem;">
+                                    Campaigns Joined</th>
+                                <th
+                                    style="padding:16px 12px;color:var(--cm-text-gray);font-weight:600;font-size:0.85rem;">
+                                    Campaigns Run</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leaderboard-tbody">
+                            <!-- Leaderboard rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </main>
     </div>
 
-    <!-- Report Modal -->
+    <!-- Report / Campaign Modal -->
     <div class="modal-overlay" id="report-modal">
         <div class="modal modal-lg">
             <div class="modal-header">
                 <div>
-                    <div class="modal-title" data-i18n="lbl_report_name">Report New Issue</div>
-                    <p class="text-muted text-sm" style="margin-top:4px;" data-i18n="app_title">Be specific to help
-                        departments act faster.
-                    </p>
+                    <div class="modal-title" id="modal-main-title">Report New Issue</div>
+                    <p class="text-muted text-sm" style="margin-top:4px;">Help Madurai grow cleaner and greener.</p>
                 </div>
                 <button class="modal-close" id="modal-close">✕</button>
             </div>
             <div class="modal-body">
-                <form id="report-form" class="form-stack">
-                    <div class="grid grid-2" style="gap:16px;">
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-title" data-i18n="lbl_report_name">Issue Title *</label>
-                            <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop"
-                                required />
-                        </div>
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-category" data-i18n="lbl_department">Category *</label>
-                            <select id="issue-category" class="select" required>
-                                <option value="">— Select Category —</option>
-                                <option value="Waste" data-i18n="cat_waste">🗑️ Waste</option>
-                                <option value="Water" data-i18n="cat_water">💧 Water</option>
-                                <option value="Electricity" data-i18n="cat_eb">⚡ Electricity</option>
-                                <option value="Roads" data-i18n="cat_pw">🛣️ Roads</option>
-                                <option value="Law &amp; Order" data-i18n="cat_police">👮 Law & Order</option>
-                                <option value="Fire" data-i18n="cat_fire">🔥 Fire</option>
-                            </select>
-                        </div>
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-location" data-i18n="lbl_location">Location Address
-                                *</label>
-                            <div style="display:flex; gap:8px;">
-                                <input id="issue-location" class="input" placeholder="e.g. Coimbatore North..." required
-                                    style="flex:1;" />
-                                <button type="button" class="btn btn-outline" id="detect-location-btn"
-                                    style="white-space:nowrap; padding: 0 16px; border-radius:8px;">
-                                    📍 Auto-Detect
-                                </button>
+                <!-- Mode Toggle -->
+                <div style="display:flex;gap:8px;margin-bottom:20px;background:#f1f5f9;padding:4px;border-radius:10px;">
+                    <button type="button" id="toggle-issue"
+                        style="flex:1;padding:10px 0;border-radius:8px;border:none;font-weight:700;font-size:0.9rem;background:var(--cm-green);color:#fff;cursor:pointer;transition:all 0.2s;">🚨
+                        Report Issue</button>
+                    <button type="button" id="toggle-campaign"
+                        style="flex:1;padding:10px 0;border-radius:8px;border:none;font-weight:700;font-size:0.9rem;background:transparent;color:var(--cm-text-gray);cursor:pointer;transition:all 0.2s;">📣
+                        Run Campaign</button>
+                </div>
+
+                <!-- Issue Form Section -->
+                <div id="issue-form-section">
+                    <form id="report-form" class="form-stack">
+                        <div class="grid grid-2" style="gap:16px;">
+                            <div class="form-group" style="grid-column:1/-1;">
+                                <label class="label" for="issue-title" data-i18n="lbl_report_name">Issue Title *</label>
+                                <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop"
+                                    required />
                             </div>
-                            <div id="issue-map"></div>
-                            <input type="hidden" id="issue-lat" />
-                            <input type="hidden" id="issue-lng" />
-                        </div>
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Description *</label>
-                            <textarea id="issue-desc" class="textarea" placeholder="Describe the issue..."
-                                required></textarea>
-                        </div>
-                        <div class="form-group" style="grid-column:1/-1;">
-                            <label class="label" for="issue-image">Upload Image *</label>
-                            <input id="issue-image" class="input" type="file" accept="image/*" required />
-                            <div id="image-verify-status"
-                                style="margin-top:8px; font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:6px;">
+                            <div class="form-group" style="grid-column:1/-1;">
+                                <label class="label" for="issue-category" data-i18n="lbl_department">Category *</label>
+                                <select id="issue-category" class="select" required>
+                                    <option value="">— Select Category —</option>
+                                    <option value="Waste" data-i18n="cat_waste">🗑️ Waste</option>
+                                    <option value="Water" data-i18n="cat_water">💧 Water</option>
+                                    <option value="Electricity" data-i18n="cat_eb">⚡ Electricity</option>
+                                    <option value="Roads" data-i18n="cat_pw">🛣️ Roads</option>
+                                    <option value="Law &amp; Order" data-i18n="cat_police">👮 Law &amp; Order</option>
+                                    <option value="Fire" data-i18n="cat_fire">🔥 Fire</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="grid-column:1/-1;">
+                                <label class="label" for="issue-location" data-i18n="lbl_location">Location Address
+                                    *</label>
+                                <div style="display:flex;gap:8px;">
+                                    <input id="issue-location" class="input" placeholder="e.g. Coimbatore North..."
+                                        required style="flex:1;" />
+                                    <button type="button" class="btn btn-outline" id="detect-location-btn"
+                                        style="white-space:nowrap;padding:0 16px;border-radius:8px;">📍
+                                        Auto-Detect</button>
+                                </div>
+                                <div id="issue-map"></div>
+                                <input type="hidden" id="issue-lat" />
+                                <input type="hidden" id="issue-lng" />
+                            </div>
+                            <div class="form-group" style="grid-column:1/-1;">
+                                <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Description *</label>
+                                <textarea id="issue-desc" class="textarea" placeholder="Describe the issue..."
+                                    required></textarea>
+                            </div>
+                            <div class="form-group" style="grid-column:1/-1;">
+                                <label class="label" for="issue-image">Upload Image *</label>
+                                <input id="issue-image" class="input" type="file" accept="image/*" required />
+                                <div id="image-verify-status"
+                                    style="margin-top:8px;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;">
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer" style="padding:0; border:none; margin-top:8px;">
-                        <button type="button" class="btn btn-outline" id="modal-cancel"
-                            data-i18n="btn_cancel">Cancel</button>
-                        <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;">
-                            <span id="submit-text" data-i18n="btn_submit">Submit Report</span>
-                            <div class="spinner spinner-sm" id="submit-spinner" style="display:none;"></div>
-                        </button>
-                    </div>
-                </form>
+                        <div class="modal-footer" style="padding:0;border:none;margin-top:8px;">
+                            <button type="button" class="btn btn-outline" id="modal-cancel"
+                                data-i18n="btn_cancel">Cancel</button>
+                            <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;">
+                                <span id="submit-text" data-i18n="btn_submit">Submit Report</span>
+                                <div class="spinner spinner-sm" id="submit-spinner" style="display:none;"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Campaign Form Section -->
+                <div id="campaign-form-section" style="display:none;">
+                    <form id="campaign-form" class="form-stack">
+                        <div style="display:grid;gap:16px;">
+                            <div class="form-group">
+                                <label class="label" for="camp-title">Campaign Title *</label>
+                                <input id="camp-title" class="input"
+                                    placeholder="e.g. Tree Plantation Drive at Anna Nagar" required />
+                            </div>
+                            <div class="form-group">
+                                <label class="label" for="camp-desc">Campaign Description *</label>
+                                <textarea id="camp-desc" class="textarea"
+                                    placeholder="Describe the campaign goals, activities, and what volunteers will do..."
+                                    required style="min-height:90px;"></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label class="label" for="camp-location">Location *</label>
+                                <div style="display:flex;gap:8px;">
+                                    <input id="camp-location" class="input" placeholder="Campaign location address"
+                                        required style="flex:1;" />
+                                    <button type="button" class="btn btn-outline" id="camp-detect-location-btn"
+                                        style="white-space:nowrap;padding:0 16px;border-radius:8px;">📍
+                                        Auto-Detect</button>
+                                </div>
+                                <input type="hidden" id="camp-lat" />
+                                <input type="hidden" id="camp-lng" />
+                            </div>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                                <div class="form-group">
+                                    <label class="label" for="camp-start-date">Start Date *</label>
+                                    <input id="camp-start-date" class="input" type="date" required />
+                                </div>
+                                <div class="form-group">
+                                    <label class="label" for="camp-start-time">Start Time *</label>
+                                    <input id="camp-start-time" class="input" type="time" required />
+                                </div>
+                                <div class="form-group">
+                                    <label class="label" for="camp-end-date">End Date *</label>
+                                    <input id="camp-end-date" class="input" type="date" required />
+                                </div>
+                                <div class="form-group">
+                                    <label class="label" for="camp-end-time">End Time *</label>
+                                    <input id="camp-end-time" class="input" type="time" required />
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="label" for="camp-volunteers">Volunteers Needed *</label>
+                                <input id="camp-volunteers" class="input" type="number" min="1" placeholder="e.g. 50"
+                                    required />
+                            </div>
+                            <div class="form-group">
+                                <label class="label" for="camp-image">Campaign Banner (Optional)</label>
+                                <input id="camp-image" class="input" type="file" accept="image/*" />
+                            </div>
+                        </div>
+                        <div class="modal-footer" style="padding:0;border:none;margin-top:8px;">
+                            <button type="button" class="btn btn-outline" id="camp-cancel">Cancel</button>
+                            <button type="submit" id="camp-submit-btn" class="btn btn-primary"
+                                style="border-radius:8px;background:#7c3aed;">
+                                <span id="camp-submit-text">🚀 Launch Campaign</span>
+                                <div class="spinner spinner-sm" id="camp-submit-spinner" style="display:none;"></div>
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
@@ -1063,10 +1390,82 @@
         </div>
     </div>
 
+    <!-- Volunteer Registration Form Modal -->
+    <div class="modal-overlay" id="volunteer-reg-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Register as Volunteer</div>
+                <button class="modal-close"
+                    onclick="document.getElementById('volunteer-reg-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body">
+                <form id="volunteer-reg-form">
+                    <input type="hidden" id="vol-camp-id" />
+                    <div class="form-group">
+                        <label class="label">Full Name</label>
+                        <input id="vol-name" class="input" type="text" placeholder="John Doe" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="label">Phone Number</label>
+                        <input id="vol-phone" class="input" type="text" placeholder="9876543210" required />
+                    </div>
+                    <div class="modal-footer" style="padding:0;border:none;margin-top:24px;">
+                        <button type="button" class="btn btn-outline"
+                            onclick="document.getElementById('volunteer-reg-modal').classList.remove('open')">Cancel</button>
+                        <button type="submit" id="vol-reg-submit" class="btn btn-primary">Confirm Registration</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Campaign Volunteers List Modal (For Creators) -->
+    <div class="modal-overlay" id="creator-volunteers-modal">
+        <div class="modal" style="max-width:800px;">
+            <div class="modal-header">
+                <div class="modal-title">Campaign Volunteers</div>
+                <button class="modal-close"
+                    onclick="document.getElementById('creator-volunteers-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                    <div>
+                        <h3 id="cv-camp-title" style="margin-bottom:4px;"></h3>
+                        <p id="cv-camp-status" style="font-size:0.85rem;color:var(--cm-text-gray);"></p>
+                    </div>
+                    <div style="display:flex;gap:12px;">
+                        <button id="cv-complete-btn" class="btn btn-primary btn-sm" style="display:none;">Mark Complete
+                            & Claim Points</button>
+                        <button id="cv-export-btn" class="btn btn-outline btn-sm">⬇️ Download Excel/CSV</button>
+                    </div>
+                </div>
+
+                <div style="background:#f1f5f9;border-radius:12px;border:1px solid var(--border);overflow:hidden;">
+                    <table class="table" style="width:100%;text-align:left;border-collapse:collapse;">
+                        <thead style="background:#e2e8f0;">
+                            <tr>
+                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Volunteer Name
+                                </th>
+                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Phone</th>
+                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Reg. Date</th>
+                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Status</th>
+                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);text-align:right;">
+                                    Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="cv-volunteers-body">
+                            <!-- Rows -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, campaignsAPI, leaderboardAPI, usersAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t, getLang } from './js/i18n.js';
 
@@ -1083,6 +1482,98 @@
         document.getElementById('logout-btn').addEventListener('click', logout);
         document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
+        // ─── Sidebar Navigation (Dashboard vs Campaigns vs Leaderboard) ───
+        const mainDashView = document.getElementById('main-dashboard-view');
+        const campaignsView = document.getElementById('campaigns-section');
+        const leaderboardView = document.getElementById('leaderboard-section');
+
+        const navDashLink = document.getElementById('nav-dashboard-link');
+        const navCampLink = document.getElementById('nav-campaigns-link');
+        const navLeadLink = document.getElementById('nav-leaderboard-link');
+
+        function showView(view) {
+            mainDashView.style.display = view === 'dashboard' ? '' : 'none';
+            campaignsView.style.display = view === 'campaigns' ? '' : 'none';
+            leaderboardView.style.display = view === 'leaderboard' ? '' : 'none';
+
+            navDashLink.classList.toggle('active', view === 'dashboard');
+            navCampLink.classList.toggle('active', view === 'campaigns');
+            navLeadLink.classList.toggle('active', view === 'leaderboard');
+        }
+
+        navDashLink.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); });
+        navCampLink.addEventListener('click', (e) => { e.preventDefault(); showView('campaigns'); loadCampaigns(); });
+        navLeadLink.addEventListener('click', (e) => { e.preventDefault(); showView('leaderboard'); loadLeaderboard(); });
+
+        // Button on campaigns page also opens modal in campaign mode
+        document.getElementById('create-campaign-btn').addEventListener('click', () => {
+            switchModalMode('campaign');
+            document.getElementById('report-modal').classList.add('open');
+        });
+
+        // ─── Report/Campaign Type Toggle ───
+        const toggleIssueBtn = document.getElementById('toggle-issue');
+        const toggleCampBtn = document.getElementById('toggle-campaign');
+        const issueFormSec = document.getElementById('issue-form-section');
+        const campFormSec = document.getElementById('campaign-form-section');
+        let currentModalMode = 'issue';
+
+        function switchModalMode(mode) {
+            currentModalMode = mode;
+            if (mode === 'issue') {
+                issueFormSec.style.display = '';
+                campFormSec.style.display = 'none';
+                toggleIssueBtn.style.background = 'var(--cm-green)';
+                toggleIssueBtn.style.color = '#fff';
+                toggleCampBtn.style.background = 'transparent';
+                toggleCampBtn.style.color = 'var(--cm-text-gray)';
+                document.getElementById('modal-main-title').textContent = 'Report New Issue';
+            } else {
+                issueFormSec.style.display = 'none';
+                campFormSec.style.display = '';
+                toggleCampBtn.style.background = '#7c3aed';
+                toggleCampBtn.style.color = '#fff';
+                toggleIssueBtn.style.background = 'transparent';
+                toggleIssueBtn.style.color = 'var(--cm-text-gray)';
+                document.getElementById('modal-main-title').textContent = 'Run a Campaign';
+            }
+        }
+
+        toggleIssueBtn.addEventListener('click', () => switchModalMode('issue'));
+        toggleCampBtn.addEventListener('click', () => switchModalMode('campaign'));
+
+        // Cancel buttons for both forms
+        document.getElementById('camp-cancel').addEventListener('click', () => {
+            document.getElementById('report-modal').classList.remove('open');
+        });
+
+        // ─── Campaign detect location ───
+        document.getElementById('camp-detect-location-btn').addEventListener('click', () => {
+            const btn = document.getElementById('camp-detect-location-btn');
+            btn.innerHTML = 'Detecting...';
+            btn.disabled = true;
+            if ('geolocation' in navigator) {
+                navigator.geolocation.getCurrentPosition(
+                    async pos => {
+                        const { latitude: lat, longitude: lng } = pos.coords;
+                        document.getElementById('camp-lat').value = lat;
+                        document.getElementById('camp-lng').value = lng;
+                        try {
+                            const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`);
+                            const d = await r.json();
+                            if (d && d.display_name) document.getElementById('camp-location').value = d.display_name;
+                        } catch (_) { }
+                        btn.innerHTML = '📍 Auto-Detect';
+                        btn.disabled = false;
+                    },
+                    () => { toast.error('Location Error', 'Could not detect location.'); btn.innerHTML = '📍 Auto-Detect'; btn.disabled = false; },
+                    { enableHighAccuracy: true, timeout: 5000 }
+                );
+            } else {
+                toast.error('Not Supported', 'Geolocation not supported.'); btn.innerHTML = '📍 Auto-Detect'; btn.disabled = false;
+            }
+        });
+
         // Tabs Logic
         document.querySelectorAll('.tab-item').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -1095,7 +1586,10 @@
 
         // Modal Logic
         const modal = document.getElementById('report-modal');
-        document.getElementById('report-btn').addEventListener('click', () => modal.classList.add('open'));
+        document.getElementById('report-btn').addEventListener('click', () => {
+            switchModalMode('issue');
+            modal.classList.add('open');
+        });
         document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
         document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
 
@@ -1255,13 +1749,33 @@
                 allIssues = issuesData.issues || [];
                 supportedIds = new Set(supportsData.supportedIds || []);
 
+                // Stats Update
                 const myIssues = allIssues.filter(i => i.reported_by_id === user.id);
                 const communityIssues = allIssues.filter(i => i.reported_by_id !== user.id);
 
-                // Stats Update
-                document.getElementById('stat-total').textContent = allIssues.length;
-                document.getElementById('stat-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
-                document.getElementById('stat-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
+                // Fetch latest user points from dedicated /users/me endpoint
+                try {
+                    const userData = await usersAPI.me();
+                    if (userData && userData.user) {
+                        const u = userData.user;
+                        document.getElementById('stat-total-points').textContent = u.total_points || 0;
+                        document.getElementById('stat-reports-submitted').textContent = Math.max(u.reports_count || 0, myIssues.length || 0);
+                        document.getElementById('stat-reports-resolved').textContent = u.reports_resolved || 0;
+                        document.getElementById('stat-campaigns-participated').textContent = u.campaigns_participated || 0;
+                        document.getElementById('stat-campaigns-organized').textContent = u.campaigns_organized || 0;
+
+                        // Update welcome name
+                        if (document.getElementById('welcome-name')) {
+                            document.getElementById('welcome-name').textContent = u.name || user.name;
+                        }
+
+                        // Update global user object with fresh points data
+                        Object.assign(user, u);
+                    }
+                } catch (e) {
+                    console.error('Failed to refresh user points', e);
+                }
+
                 document.getElementById('my-count').textContent = myIssues.length;
 
                 // Grids
@@ -1417,11 +1931,17 @@
 
         // Initialize map when modal opens
         document.getElementById('report-btn').addEventListener('click', () => {
+            switchModalMode('issue');
             modal.classList.add('open');
             setTimeout(() => {
                 initMap();
-                map.invalidateSize(); // Fixes grey boxes bug in Leaflet modals
+                map.invalidateSize();
             }, 100);
+        });
+
+        // Also init map when switching to issue mode inside modal
+        toggleIssueBtn.addEventListener('click', () => {
+            setTimeout(() => { if (map) map.invalidateSize(); else initMap(); }, 100);
         });
 
         // Report form submit
@@ -1462,6 +1982,435 @@
                 btn.disabled = false;
             }
         });
+
+        // ─── Campaign Form Submission ───
+        document.getElementById('campaign-form').addEventListener('submit', async e => {
+            e.preventDefault();
+            const btn = document.getElementById('camp-submit-btn');
+            btn.disabled = true;
+            const spinner = document.getElementById('camp-submit-spinner');
+            const txt = document.getElementById('camp-submit-text');
+            spinner.style.display = '';
+            txt.style.display = 'none';
+
+            try {
+                // Optional banner image processing
+                let imageUrl = null;
+                const imgFile = document.getElementById('camp-image').files[0];
+                if (imgFile) imageUrl = await processImageFile(imgFile);
+
+                await campaignsAPI.create({
+                    title: document.getElementById('camp-title').value.trim(),
+                    description: document.getElementById('camp-desc').value.trim(),
+                    locationName: document.getElementById('camp-location').value.trim(),
+                    latitude: document.getElementById('camp-lat').value || null,
+                    longitude: document.getElementById('camp-lng').value || null,
+                    startDate: document.getElementById('camp-start-date').value,
+                    startTime: document.getElementById('camp-start-time').value,
+                    endDate: document.getElementById('camp-end-date').value,
+                    endTime: document.getElementById('camp-end-time').value,
+                    volunteersNeeded: parseInt(document.getElementById('camp-volunteers').value, 10),
+                    imageUrl,
+                });
+
+                toast.success('Campaign Launched! 🚀', 'Your campaign is now listed for volunteers to join.');
+                modal.classList.remove('open');
+                document.getElementById('campaign-form').reset();
+                await loadCampaigns();
+                showView('campaigns');
+            } catch (err) {
+                toast.error('Campaign Failed', err.message);
+            } finally {
+                btn.disabled = false;
+                spinner.style.display = 'none';
+                txt.style.display = '';
+            }
+        });
+
+        // ─── Campaign Data & Rendering ───
+        let allCampaigns = [];
+        let myRegIds = new Set();
+
+        function getCampaignStatus(camp) {
+            const now = new Date();
+            const start = new Date(`${camp.start_date}T${camp.start_time}`);
+            const end = new Date(`${camp.end_date}T${camp.end_time}`);
+            if (now < start) return 'UPCOMING';
+            if (now >= start && now <= end) return 'ACTIVE';
+            return 'COMPLETED';
+        }
+
+        function formatDateTime(date, time) {
+            const dt = new Date(`${date}T${time}`);
+            return dt.toLocaleString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+
+        function renderCampaignCard(camp) {
+            const status = getCampaignStatus(camp);
+            const isRegistered = myRegIds.has(camp.id);
+            const isFull = camp.registered_count >= camp.volunteers_needed;
+            const statusColors = { UPCOMING: '#2563eb', ACTIVE: '#16a34a', COMPLETED: '#6b7280' };
+            const bgColors = { UPCOMING: '#dbeafe', ACTIVE: '#dcfce7', COMPLETED: '#f1f5f9' };
+            const statusEmojis = { UPCOMING: '🗓️', ACTIVE: '🏃', COMPLETED: '✅' };
+
+            const isCreator = camp.created_by_id === user.id;
+
+            let btnHtml = '';
+            if (isCreator) {
+                btnHtml = `<button class="vm-btn vm-btn-primary camp-creator-dash-btn" data-id="${camp.id}">View Volunteers ➔</button>`;
+            } else {
+                if (status === 'COMPLETED') {
+                    btnHtml = `<button class="vm-btn" disabled style="background:#f1f5f9;color:#94a3b8;cursor:not-allowed;">✅ Ended</button>`;
+                } else if (status === 'ACTIVE') {
+                    btnHtml = `<button class="vm-btn" disabled style="background:#fef3c7;color:#92400e;cursor:not-allowed;">🏃 Active Now</button>`;
+                } else if (isFull && !isRegistered) {
+                    btnHtml = `<button class="vm-btn" disabled style="background:#fee2e2;color:#991b1b;cursor:not-allowed;">🚫 Full</button>`;
+                } else if (isRegistered) {
+                    btnHtml = `<button class="vm-btn vm-btn-outline camp-reg-btn" data-id="${camp.id}">✓ Registered</button>`;
+                } else {
+                    btnHtml = `<button class="vm-btn vm-btn-primary camp-reg-btn" data-id="${camp.id}">Register Now</button>`;
+                }
+            }
+
+            const deleteBtn = isCreator ? `
+                <button class="camp-del-btn" data-id="${camp.id}" style="position:absolute;top:10px;right:10px;background:rgba(239, 68, 68, 0.85);backdrop-filter:blur(4px);border:none;color:white;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:20;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
+            ` : '';
+
+            const progress = Math.min(100, Math.round((camp.registered_count / camp.volunteers_needed) * 100));
+
+            const bannerStyle = camp.image_url
+                ? `background-image:linear-gradient(to bottom, transparent, rgba(0,0,0,0.4)), url('${camp.image_url}');`
+                : `background:linear-gradient(135deg, ${statusColors[status]}22, ${statusColors[status]}44); display:flex; align-items:center; justify-content:center; font-size:3rem;`;
+
+            return `
+            <div class="vm-campaign-card">
+                ${deleteBtn}
+                <div class="vm-banner" style="${bannerStyle}">
+                    <span class="vm-status-badge" style="background:${bgColors[status]};color:${statusColors[status]};">${statusEmojis[status]} ${status}</span>
+                    ${isCreator ? `
+                    <span class="vm-status-badge" style="top:44px; background:${camp.verification_status === 'approved' ? '#dcfce7' : camp.verification_status === 'rejected' ? '#fee2e2' : '#fef3c7'}; color:${camp.verification_status === 'approved' ? '#16a34a' : camp.verification_status === 'rejected' ? '#991b1b' : '#92400e'};">
+                        ${camp.verification_status === 'approved' ? '✅ Verified' : camp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending Approval'}
+                    </span>` : ''}
+                    ${!camp.image_url ? statusEmojis[status] : ''}
+                </div>
+                <div class="vm-body">
+                    <div class="vm-title">${camp.title}</div>
+                    <div class="vm-meta"><i>📍</i> ${camp.location_name || 'Madurai'}</div>
+                    <div class="vm-meta"><i>🗓️</i> ${formatDateTime(camp.start_date, camp.start_time)}</div>
+                    
+                    <div class="vm-progress-section">
+                        <div class="vm-progress-bar">
+                            <div class="vm-progress-fill" style="width:${progress}%;"></div>
+                        </div>
+                        <div class="vm-stats">
+                            <span>${camp.registered_count} / ${camp.volunteers_needed} Volunteers</span>
+                            <span>${progress}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="vm-desc">${camp.description}</div>
+                    
+                    <div class="vm-footer">
+                        ${btnHtml}
+                    </div>
+                    
+                    <div class="vm-creator">
+                        by ${camp.created_by_name || 'Community Member'}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        async function loadCampaigns() {
+            try {
+                const [campData, regData] = await Promise.all([
+                    campaignsAPI.getAll(),
+                    campaignsAPI.myRegistrations().catch(() => ({ registeredIds: [] })),
+                ]);
+                allCampaigns = campData.campaigns || [];
+                myRegIds = new Set(regData.registeredIds || []);
+
+                // Update stats
+                const upcoming = allCampaigns.filter(c => getCampaignStatus(c) === 'UPCOMING').length;
+                const active = allCampaigns.filter(c => getCampaignStatus(c) === 'ACTIVE').length;
+                const completed = allCampaigns.filter(c => getCampaignStatus(c) === 'COMPLETED').length;
+
+                document.getElementById('camp-stat-total').textContent = allCampaigns.length;
+                document.getElementById('camp-stat-upcoming').textContent = upcoming;
+                document.getElementById('camp-stat-active').textContent = active;
+
+                renderCampaigns(currentCampaignFilter);
+            } catch (err) {
+                toast.error('Failed to load campaigns', err.message);
+            }
+        }
+
+        let currentCampaignFilter = 'all';
+
+        function renderCampaigns(filter = 'all') {
+            currentCampaignFilter = filter;
+            const grid = document.getElementById('campaigns-grid');
+            
+            let filtered = allCampaigns;
+            if (filter === 'mine') {
+                filtered = allCampaigns.filter(c => c.created_by_id === user.id);
+            } else if (filter === 'upcoming') {
+                filtered = allCampaigns.filter(c => getCampaignStatus(c) === 'UPCOMING');
+            } else if (filter === 'active') {
+                filtered = allCampaigns.filter(c => getCampaignStatus(c) === 'ACTIVE');
+            } else if (filter === 'ended') {
+                filtered = allCampaigns.filter(c => getCampaignStatus(c) === 'COMPLETED');
+            }
+
+            if (filtered.length === 0) {
+                renderEmpty(grid, `No campaigns found for this filter.`);
+            } else {
+                grid.innerHTML = filtered.map(c => renderCampaignCard(c)).join('');
+                
+                // Attach listeners
+                grid.querySelectorAll('.camp-reg-btn').forEach(btn => {
+                    btn.onclick = () => handleCampaignRegistration(btn.dataset.id);
+                });
+                grid.querySelectorAll('.camp-creator-dash-btn').forEach(btn => {
+                    btn.onclick = () => openCreatorVolunteersList(btn.dataset.id);
+                });
+                grid.querySelectorAll('.camp-del-btn').forEach(btn => {
+                    btn.onclick = (e) => {
+                        e.stopPropagation();
+                        handleCampaignDeletion(btn, btn.dataset.id);
+                    };
+                });
+            }
+        }
+
+        // Filter event listeners
+        document.querySelectorAll('#campaign-filters .tab-item').forEach(btn => {
+            btn.onclick = () => {
+                document.querySelectorAll('#campaign-filters .tab-item').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderCampaigns(btn.dataset.filter);
+            };
+        });
+
+        // ─── Volunteer Registration Form Submission ───
+        document.getElementById('volunteer-reg-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('vol-reg-submit');
+            btn.disabled = true;
+            btn.textContent = 'Registering...';
+
+            const campId = document.getElementById('vol-camp-id').value;
+            const payload = {
+                volunteerName: document.getElementById('vol-name').value.trim(),
+                phoneNumber: document.getElementById('vol-phone').value.trim()
+            };
+
+            try {
+                await campaignsAPI.register(campId, payload);
+                toast.success('Registered successfully!', 'Thank you for volunteering.');
+                document.getElementById('volunteer-reg-modal').classList.remove('open');
+                await loadCampaigns();
+            } catch (err) {
+                toast.error('Registration failed', err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Confirm Registration';
+            }
+        });
+
+        // Open Registration Modal
+        window.handleCampaignRegistration = function (campId) {
+            const camp = allCampaigns.find(c => c.id === campId);
+            if (!camp) return;
+
+            if (myRegIds.has(campId)) {
+                toast.error('Already Registered', 'You are already registered for this campaign.');
+                return;
+            }
+
+            document.getElementById('vol-camp-id').value = campId;
+            document.getElementById('vol-name').value = user.name || '';
+            document.getElementById('vol-phone').value = ''; // Let them enter phone
+            document.getElementById('volunteer-reg-modal').classList.add('open');
+        };
+        
+        // Handle Campaign Deletion
+        window.handleCampaignDeletion = async function(btn, campId) {
+            if (!confirm('Are you sure you want to delete this campaign? This cannot be undone.')) return;
+            
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '🗑️ Deleting...';
+            
+            try {
+                await campaignsAPI.delete(campId);
+                toast.success('Campaign Deleted', 'Your campaign has been successfully deleted.');
+                await loadCampaigns(); // refresh the list
+            } catch (err) {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                toast.error('Deletion Failed', err.message);
+            }
+        };
+
+        // ─── Volunteer Management (Creator) ───
+        async function openCreatorVolunteersList(campId) {
+            const camp = allCampaigns.find(c => c.id === campId);
+            if (!camp) return;
+
+            document.getElementById('cv-camp-title').textContent = camp.title;
+            const status = getCampaignStatus(camp);
+            document.getElementById('cv-camp-status').textContent = `Status: ${status} | Registered: ${camp.registered_count}/${camp.volunteers_needed} | End: ${formatDateTime(camp.end_date, camp.end_time)}`;
+
+            const tbody = document.getElementById('cv-volunteers-body');
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;">Loading volunteers...</td></tr>';
+
+            const modal = document.getElementById('creator-volunteers-modal');
+            modal.classList.add('open');
+
+            const completeBtn = document.getElementById('cv-complete-btn');
+
+            // Show complete button only if campaign has ended and is not already completed
+            if (status !== 'COMPLETED') {
+                completeBtn.style.display = 'block';
+                completeBtn.textContent = 'Mark Campaign Complete';
+                completeBtn.onclick = async () => {
+                    if (!confirm('Mark this campaign as completed? At least one confirmed volunteer is required.')) return;
+                    completeBtn.disabled = true;
+                    try {
+                        await campaignsAPI.completeCampaign(campId);
+                        toast.success('Campaign Completed!', 'The campaign has been marked as complete.');
+                        completeBtn.style.display = 'none';
+                        // Refresh all views
+                        await loadIssues();
+                        await loadLeaderboard();
+                        await loadCampaigns();
+                    } catch (err) {
+                        toast.error('Failed', err.message);
+                        completeBtn.disabled = false;
+                    }
+                };
+            } else {
+                completeBtn.style.display = 'none';
+            }
+
+            try {
+                const data = await campaignsAPI.getVolunteers(campId);
+                const list = data.volunteers || [];
+
+                if (list.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">No volunteers have registered yet.</td></tr>';
+                } else {
+                    tbody.innerHTML = list.map(v => `
+                        <tr style="border-top:1px solid var(--border);">
+                            <td style="padding:12px;font-size:0.9rem;font-weight:600;">${v.volunteer_name || 'Unknown'}</td>
+                            <td style="padding:12px;font-size:0.9rem;">${v.phone_number || 'N/A'}</td>
+                            <td style="padding:12px;font-size:0.85rem;color:var(--cm-text-gray);">${new Date(v.created_at || v.registered_at).toLocaleDateString()}</td>
+                            <td style="padding:12px;font-size:0.85rem;">
+                                ${v.participation_status === 'CONFIRMED' ? '<span style="color:var(--cm-green);font-weight:600;">✅ Confirmed</span>' : '<span style="color:#f59e0b;font-weight:600;">⏳ Pending</span>'}
+                            </td>
+                            <td style="padding:12px;text-align:right;">
+                                ${!v.points_given ? `<button class="btn btn-sm" style="background:var(--cm-green-light);color:var(--cm-green);padding:4px 8px;" onclick="confirmVolunteer('${campId}', '${v.user_id}')">Confirm (+3 pts)</button>` : `<span style="font-size:0.8rem;color:#94a3b8;">✅ Points Awarded</span>`}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+
+                // Attach export listener
+                document.getElementById('cv-export-btn').onclick = () => exportVolunteersToCSV(list, camp.title);
+
+            } catch (e) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#ef4444;">Failed to load volunteers</td></tr>';
+            }
+        }
+
+        window.confirmVolunteer = async (campId, userId) => {
+            if (!confirm('Confirm this volunteer participated? They will receive 3 points.')) return;
+            try {
+                await campaignsAPI.confirmVolunteer(campId, userId);
+                toast.success('Volunteer confirmed.');
+                // Refresh stats and leaderboard
+                await loadIssues();
+                await loadLeaderboard();
+                await openCreatorVolunteersList(campId); // refresh list
+                await loadCampaigns();
+            } catch (err) {
+                toast.error('Update Failed', err.message);
+            }
+        }
+
+        function exportVolunteersToCSV(volunteers, campaignTitle) {
+            if (!volunteers || volunteers.length === 0) return toast.error('Empty', 'No data to export.');
+
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Name,Phone Number,Registration Date,Status\n";
+
+            volunteers.forEach(v => {
+                const name = v.volunteer_name || v.users?.name || '';
+                const phone = v.phone_number || '';
+                const date = new Date(v.created_at).toLocaleDateString();
+                const status = v.participation_status || 'PENDING';
+                csvContent += `"${name}","${phone}","${date}","${status}"\n`;
+            });
+
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `Volunteers_${campaignTitle.replace(/\s+/g, '_')}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // ─── Leaderboard ───
+        async function loadLeaderboard() {
+            const tbody = document.getElementById('leaderboard-tbody');
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">Loading leaderboard...</td></tr>';
+
+            try {
+                const data = await leaderboardAPI.getTop100();
+                console.log('Leaderboard Data Received:', data);
+                const users = data.leaderboard || [];
+
+                if (users.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8;">No ranking data available yet.</td></tr>';
+                    return;
+                }
+
+                tbody.innerHTML = users.map((u, idx) => {
+                    let rankDisplay = idx + 1;
+                    if (idx === 0) rankDisplay = '🥇 1st';
+                    if (idx === 1) rankDisplay = '🥈 2nd';
+                    if (idx === 2) rankDisplay = '🥉 3rd';
+
+                    const isMe = u.id === user.id;
+                    const rowBg = isMe ? 'background:#fefce8;' : '';
+
+                    return `
+                    <tr style="border-bottom:1px solid #f1f5f9;${rowBg}">
+                        <td style="padding:16px 12px;font-weight:700;">${rankDisplay}</td>
+                        <td style="padding:16px 12px;font-weight:600;">
+                            ${isMe ? `<span style="color:var(--cm-green);">${u.name} (You)</span>` : u.name}
+                        </td>
+                        <td style="padding:16px 12px;font-weight:800;color:var(--cm-green);font-size:1.1rem;">${u.total_points || 0}</td>
+                        <td style="padding:16px 12px;">
+                            <span title="${u.reports_resolved || 0} resolved × 1pt">${u.reports_resolved || 0} <small style="color:#94a3b8;">(${u.reports_points || 0}pt)</small></span>
+                        </td>
+                        <td style="padding:16px 12px;">
+                            <span title="${u.campaigns_participated || 0} joined × 3pt">${u.campaigns_participated || 0} <small style="color:#94a3b8;">(${u.campaign_participated_points || 0}pt)</small></span>
+                        </td>
+                        <td style="padding:16px 12px;">
+                            <span title="${u.campaigns_organized || 0} run × 5pt">${u.campaigns_organized || 0} <small style="color:#94a3b8;">(${u.campaign_created_points || 0}pt)</small></span>
+                        </td>
+                    </tr>
+                `}).join('');
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#ef4444;">Failed to load leaderboard.</td></tr>';
+                toast.error('Leaderboard Fetch Failed', err.message);
+            }
+        }
 
         window.openIssueDetails = async (id) => {
             const issue = allIssues.find(i => i.id === id);

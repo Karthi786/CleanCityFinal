@@ -15,6 +15,30 @@ const ROLE_LABELS = {
 };
 
 /**
+ * GET /api/users/me
+ * Returns the current authenticated user's full profile including all points columns.
+ * Used by the citizen dashboard to refresh stat cards.
+ */
+router.get('/me', verifyToken, requireApproved, async (req, res) => {
+    try {
+        const { data, error } = await supabaseAdmin
+            .from('users')
+            .select('id, name, email, role, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, reports_count, campaigns_participated, campaigns_organized, verification_status')
+            .eq('id', req.userId)
+            .single();
+
+        if (error || !data) {
+            return res.status(404).json({ error: 'User not found.' });
+        }
+
+        return res.json({ user: data });
+    } catch (err) {
+        console.error('GET /users/me error:', err);
+        return res.status(500).json({ error: 'Failed to fetch user profile.' });
+    }
+});
+
+/**
  * GET /api/users/pending
  * List all pending verification users (ADMIN only)
  */
