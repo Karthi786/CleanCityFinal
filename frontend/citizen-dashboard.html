@@ -214,51 +214,7 @@
             margin: 0 auto;
         }
 
-        @media (max-width: 1024px) {
-            .dash-main {
-                margin-left: 0;
-            }
-
-            .dash-header {
-                padding: 0 16px;
-            }
-
-            .dash-content {
-                padding: 16px;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .dash-header {
-                flex-direction: column;
-                height: auto;
-                padding-top: 16px;
-                padding-bottom: 16px;
-                gap: 12px;
-                align-items: stretch;
-            }
-
-            .dash-header>div:first-child {
-                display: flex;
-                align-items: center;
-                gap: 12px;
-            }
-
-            .header-actions {
-                justify-content: space-between;
-                width: 100%;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-        }
+        /* Redundant layout overrides removed - now handled by global styles.css */
 
         /* ── Welcome Section ── */
         .welcome-header {
@@ -894,6 +850,7 @@
 </head>
 
 <body>
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-logo">
@@ -945,8 +902,11 @@
     <div class="dash-layout">
         <main class="dash-main">
             <!-- Header -->
-            <header class="dash-header">
-                <div class="dash-header-title" data-i18n="cit_panel">Citizen Portal</div>
+            <header class="dash-header glass">
+                <div style="display:flex;align-items:center;gap:12px;">
+                    <button class="hamburger" id="hamburger">☰</button>
+                    <div class="dash-header-title" data-i18n="cit_panel">Citizen Portal</div>
+                </div>
                 <div class="header-actions">
                     <select class="select lang-switcher" style="padding:4px 8px; font-size:0.85rem;">
                         <option value="en">English</option>
@@ -963,9 +923,9 @@
                 </div>
             </header>
 
-            <div class="dash-content" id="main-dashboard-view">
+            <div class="dash-content animate-in" id="main-dashboard-view">
                 <!-- Welcome -->
-                <div class="welcome-header">
+                <div class="welcome-header animate-in stagger-1">
                     <div>
                         <h1 class="welcome-title text-primary" id="welcome-msg">Welcome back, <span id="welcome-name">kevin</span>!</h1>
                         <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Madurai. Report. Support. Impact.</p>
@@ -977,7 +937,7 @@
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="stats-grid">
+                <div class="stats-grid animate-in stagger-2">
                     <div class="stat-box stat-blue">
                         <div class="stat-box-info">
                             <div class="stat-box-label">Reports Submitted</div>
@@ -1017,7 +977,7 @@
                     </div>
                 </div>
 
-                <div class="content-cols">
+                <div class="content-cols animate-in stagger-3">
                     <!-- Left: Tabs + Grid -->
                     <div>
                         <div class="tabs-header">
@@ -1073,8 +1033,8 @@
             </div>
 
             <!-- ═══════════════════════════════════ CAMPAIGNS PAGE ═══════════════════════════════════ -->
-            <div class="dash-content" id="campaigns-section" style="display:none;">
-                <div class="welcome-header">
+            <div class="dash-content animate-in" id="campaigns-section" style="display:none;">
+                <div class="welcome-header animate-in stagger-1">
                     <div>
                         <h1 class="welcome-title" style="color:#7c3aed;">📣 Community Campaigns</h1>
                         <p class="welcome-sub">Join civic drives, tree plantations, cleanups and more. Be the change!
@@ -1086,7 +1046,7 @@
                 </div>
 
                 <!-- Campaign Stats -->
-                <div class="stats-grid" style="margin-bottom:32px;">
+                <div class="stats-grid animate-in stagger-2" style="margin-bottom:32px;">
                     <div class="stat-box" style="border-color:#ede9fe;">
                         <div class="stat-box-info">
                             <div class="stat-box-label" style="color:#7c3aed;">Total Campaigns</div>
@@ -1126,8 +1086,8 @@
             </div>
 
             <!-- Leaderboard Section -->
-            <div class="dash-content" id="leaderboard-section" style="display:none;">
-                <div class="welcome-header">
+            <div class="dash-content animate-in" id="leaderboard-section" style="display:none;">
+                <div class="welcome-header animate-in stagger-1">
                     <div>
                         <h1 class="welcome-title text-primary"
                             style="display:flex;align-items:center;gap:12px;">🏆 Top Contributors</h1>
@@ -1294,6 +1254,11 @@
                             <div class="form-group">
                                 <label class="label" for="camp-volunteers">Volunteers Needed *</label>
                                 <input id="camp-volunteers" class="input" type="number" min="1" placeholder="e.g. 50"
+                                    required />
+                            </div>
+                            <div class="form-group">
+                                <label class="label" for="camp-contact">Contact Mobile Number *</label>
+                                <input id="camp-contact" class="input" type="tel" placeholder="e.g. 9876543210"
                                     required />
                             </div>
                             <div class="form-group">
@@ -2010,6 +1975,7 @@
                     endDate: document.getElementById('camp-end-date').value,
                     endTime: document.getElementById('camp-end-time').value,
                     volunteersNeeded: parseInt(document.getElementById('camp-volunteers').value, 10),
+                    contactNumber: document.getElementById('camp-contact').value.trim(),
                     imageUrl,
                 });
 
@@ -2524,6 +2490,31 @@
 
             document.getElementById('details-modal').classList.add('open');
         };
+
+        // Hamburger Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebar-overlay');
+        const hamburger = document.getElementById('hamburger');
+
+        hamburger.addEventListener('click', () => {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        });
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('show');
+        });
+
+        // Close sidebar on link click (mobile)
+        document.querySelectorAll('.sidebar-link').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 1024) {
+                    sidebar.classList.remove('open');
+                    overlay.classList.remove('show');
+                }
+            });
+        });
 
         loadIssues();
 

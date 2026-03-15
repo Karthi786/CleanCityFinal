@@ -445,7 +445,7 @@
 
     <div class="dash-layout">
         <main class="dash-main">
-            <header class="dash-header">
+            <header class="dash-header glass">
                 <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <button class="hamburger" id="hamburger">☰</button>
@@ -475,11 +475,11 @@
                 </div>
             </header>
 
-            <div class="dash-content">
-                <div class="page-header">
-                    <div>
-                        <h2 class="page-title" id="page-title">Department Issues</h2>
-                        <p class="page-subtitle">Manage and resolve issues assigned to your department.</p>
+            <div class="dash-content animate-in">
+                <div class="page-header animate-in stagger-1">
+                    <div id="page-header-text">
+                        <h2 class="page-title" id="page-title">Issues Management</h2>
+                        <p class="page-subtitle">Review, update and resolve civic complaints in your area.</p>
                     </div>
                     <div class="tab-list">
                         <button class="tab-btn active" id="tab-issues-btn" onclick="switchTab('issues')">Issues</button>
@@ -527,7 +527,7 @@
                 </div>
 
                 <!-- Analytics Tab -->
-                <div id="tab-analytics" class="tab-pane">
+                <div id="tab-analytics" class="tab-pane animate-in stagger-2">
                     <div class="analytics-fadein">
                         <!-- KPI Row -->
                         <div class="analytics-grid-4">

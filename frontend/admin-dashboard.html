@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Dashboard — CleanMadurai</title>
     <link rel="stylesheet" href="css/styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         .charts-grid {
             display: grid;
@@ -14,10 +13,32 @@
             gap: 24px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1024px) {
             .charts-grid {
                 grid-template-columns: 1fr;
             }
+        }
+
+        /* UI Tightening */
+        .dash-header {
+            height: 50px !important;
+        }
+        .dash-content {
+            padding: 16px !important;
+        }
+        .page-header {
+            margin-bottom: 12px !important;
+            gap: 8px !important;
+        }
+        .page-title {
+            margin-bottom: 0 !important;
+            line-height: 1 !important;
+        }
+        .tab-pane {
+            padding-top: 4px !important;
+        }
+        .dash-main {
+            margin-top: 0 !important;
         }
     </style>
 </head>
@@ -62,7 +83,7 @@
 
     <div class="dash-layout">
         <main class="dash-main">
-            <header class="dash-header">
+            <header class="dash-header glass">
                 <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <button class="hamburger" id="hamburger">☰</button>
@@ -75,11 +96,10 @@
                 </div>
             </header>
 
-            <div class="dash-content">
-                <div class="page-header">
+            <div class="dash-content animate-in">
+                <div class="page-header animate-in stagger-1">
                     <div>
-                        <h2 class="page-title">Management Console</h2>
-                        <p class="page-subtitle">Administer users and monitor city-wide infrastructure performance.</p>
+                        <h2 class="page-title" style="font-size: 1.3rem;">Management Console</h2>
                     </div>
                     <div class="tab-list">
                         <button class="tab-btn active" id="tab-overview-btn">Analytics</button>
@@ -93,65 +113,25 @@
 
                 <!-- Analytics Tab -->
                 <div id="tab-overview" class="tab-pane active">
-                    <div class="grid grid-3 mb-8">
+                    <div class="grid grid-3 mb-8 animate-in stagger-2" style="grid-template-columns: 1fr;">
                         <div class="stat-card">
                             <div>
-                                <div class="stat-label" style="color:var(--warning);">Pending Approvals</div>
+                                <div class="stat-label" style="color:var(--warning);">Pending User Verifications</div>
                                 <div class="stat-value" id="s-pending">—</div>
                             </div>
                             <div class="stat-icon yellow">⏳</div>
-                        </div>
-                        <div class="stat-card">
-                            <div>
-                                <div class="stat-label">Total Issues</div>
-                                <div class="stat-value" id="s-issues">—</div>
-                            </div>
-                            <div class="stat-icon blue">📋</div>
-                        </div>
-                        <div class="stat-card">
-                            <div>
-                                <div class="stat-label" style="color:var(--success);">Resolved Issues</div>
-                                <div class="stat-value" id="s-resolved" style="color:var(--success);">—</div>
-                            </div>
-                            <div class="stat-icon green">✅</div>
-                        </div>
-                    </div>
-
-                    <div class="charts-grid">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 style="font-size:1rem;">Issues by Department</h3>
-                                <p class="text-muted text-sm">Issue distribution across departments</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-wrap"><canvas id="dept-chart"></canvas></div>
-                            </div>
-                        </div>
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 style="font-size:1rem;">Issue Status Overview</h3>
-                                <p class="text-muted text-sm">Resolution progress across all issues</p>
-                            </div>
-                            <div class="card-body">
-                                <div class="chart-wrap"><canvas id="status-chart"></canvas></div>
-                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Verifications Tab -->
                 <div id="tab-verifications" class="tab-pane">
-                    <div class="tab-list mb-6" style="justify-content:flex-start;gap:20px;border-bottom:1px solid var(--border);padding-bottom:12px;">
+                    <div style="margin-bottom: 16px;">
                         <button class="tab-sub-btn active" id="sub-tab-users-btn">User Verification</button>
-                        <button class="tab-sub-btn" id="sub-tab-campaigns-btn">Campaign Approval</button>
                     </div>
                     
                     <div id="users-verification-pane">
                         <div id="pending-users-list" class="space-y-4"></div>
-                    </div>
-                    
-                    <div id="campaigns-verification-pane" style="display:none;">
-                        <div id="pending-campaigns-list" class="space-y-4"></div>
                     </div>
                 </div>
 
@@ -169,6 +149,8 @@
         import { usersAPI } from './js/api.js';
         import { toast } from './js/toast.js';
 
+        const ROLE_LABELS = { USER: 'Citizen', MADURAI_CORPORATION: 'Madurai Corp.', TNEB: 'TNEB', POLICE: 'Police', FIRE_STATION: 'Fire Station', COLLECTOR: 'Collector', ADMIN: 'Admin' };
+
         const user = guardPage(['ADMIN']);
         if (!user) throw new Error('Unauthorized');
 
@@ -177,9 +159,6 @@
         document.getElementById('logout-btn').addEventListener('click', logout);
         document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
-        // Define campaignsAPI if not already imported or needed differently
-        import { campaignsAPI } from './js/api.js';
-
         // Hamburger
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -187,7 +166,6 @@
         overlay.addEventListener('click', () => { sidebar.classList.remove('open'); overlay.classList.remove('show'); });
 
         // Tabs
-        let deptChart = null, statusChart = null;
         const tabs = ['overview', 'verifications', 'users'];
         function switchTab(name) {
             tabs.forEach(t => {
@@ -200,85 +178,24 @@
         document.getElementById('tab-overview-btn').addEventListener('click', () => { switchTab('overview'); loadData(); });
         document.getElementById('tab-verifications-btn').addEventListener('click', () => { switchTab('verifications'); loadPending(); });
         document.getElementById('tab-users-btn').addEventListener('click', () => { switchTab('users'); loadAllUsers(); });
-        
-        // Sub-tabs for verifications
-        const subUsersBtn = document.getElementById('sub-tab-users-btn');
-        const subCampsBtn = document.getElementById('sub-tab-campaigns-btn');
-        const usersPane = document.getElementById('users-verification-pane');
-        const campsPane = document.getElementById('campaigns-verification-pane');
-
-        subUsersBtn.addEventListener('click', () => {
-            subUsersBtn.classList.add('active');
-            subCampsBtn.classList.remove('active');
-            usersPane.style.display = 'block';
-            campsPane.style.display = 'none';
-            loadPending();
-        });
-
-        subCampsBtn.addEventListener('click', () => {
-            subCampsBtn.classList.add('active');
-            subUsersBtn.classList.remove('active');
-            usersPane.style.display = 'none';
-            campsPane.style.display = 'block';
-            loadPendingCampaigns();
-        });
 
         document.getElementById('refresh-btn').addEventListener('click', () => {
             const activeTab = tabs.find(t => document.getElementById('tab-' + t).classList.contains('active'));
-            if (activeTab === 'verifications') {
-                if (subCampsBtn.classList.contains('active')) loadPendingCampaigns();
-                else loadPending();
-            }
+            if (activeTab === 'verifications') loadPending();
             else if (activeTab === 'users') loadAllUsers();
             else loadData();
         });
-
-        const ROLE_LABELS = { USER: 'Citizen', MADURAI_CORPORATION: 'Madurai Corp.', TNEB: 'TNEB', POLICE: 'Police', FIRE_STATION: 'Fire Station', COLLECTOR: 'Collector', ADMIN: 'Admin' };
 
         async function loadData() {
             try {
                 const stats = (await usersAPI.getStats()).stats;
 
                 document.getElementById('s-pending').textContent = stats.pendingApprovals;
-                document.getElementById('s-issues').textContent = stats.totalIssues;
-                document.getElementById('s-resolved').textContent = stats.completedIssues;
 
                 // Badge
                 document.getElementById('pending-badge').textContent = stats.pendingApprovals;
                 document.getElementById('pending-badge').style.display = stats.pendingApprovals > 0 ? 'inline-flex' : 'none';
                 document.getElementById('tab-badge').style.display = stats.pendingApprovals > 0 ? 'block' : 'none';
-
-                // Dept chart
-                const depts = Object.entries(stats.byDepartment || {});
-                if (deptChart) deptChart.destroy();
-                deptChart = new Chart(document.getElementById('dept-chart'), {
-                    type: 'bar',
-                    data: {
-                        labels: depts.map(([k]) => ROLE_LABELS[k] || k),
-                        datasets: [{
-                            label: 'Issues',
-                            data: depts.map(([, v]) => v.total),
-                            backgroundColor: '#16a34a',
-                            borderRadius: 6,
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-                });
-
-                // Status chart
-                if (statusChart) statusChart.destroy();
-                statusChart = new Chart(document.getElementById('status-chart'), {
-                    type: 'doughnut',
-                    data: {
-                        labels: ['Pending', 'In Progress', 'Completed'],
-                        datasets: [{
-                            data: [stats.pendingIssues, stats.inProgressIssues, stats.completedIssues],
-                            backgroundColor: ['#f59e0b', '#3b82f6', '#10b981'],
-                            borderWidth: 0,
-                        }]
-                    },
-                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
-                });
 
             } catch (err) {
                 toast.error('Failed to load stats', err.message);
@@ -328,49 +245,6 @@
             }
         };
 
-        async function loadPendingCampaigns() {
-            const container = document.getElementById('pending-campaigns-list');
-            container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
-            try {
-                const data = await campaignsAPI.getPending();
-                const campaigns = data.campaigns || [];
-                if (campaigns.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>All clear!</h3><p>No pending campaign requests.</p></div>`;
-                    return;
-                }
-                container.innerHTML = campaigns.map(c => `
-                    <div class="verify-card" id="ccard-${c.id}">
-                        <div class="verify-info">
-                            <h3 style="font-size:1.05rem;">${c.title}</h3>
-                            <p class="text-muted text-sm" style="margin:4px 0;">👤 ${c.created_by_name} | 📍 ${c.location_name || 'No location'}</p>
-                            <p class="text-sm" style="margin:8px 0;line-height:1.4;">${c.description}</p>
-                            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-                                <span class="badge badge-blue">Needed: ${c.volunteers_needed}</span>
-                                <span class="text-xs text-muted">Created: ${new Date(c.created_at).toLocaleDateString()}</span>
-                            </div>
-                        </div>
-                        <div class="verify-actions">
-                            <button class="btn btn-primary btn-sm" onclick="approveCampaign('${c.id}', 'approved')">✅ Approve</button>
-                            <button class="btn btn-danger btn-sm" onclick="approveCampaign('${c.id}', 'rejected')">❌ Reject</button>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (err) {
-                toast.error('Failed to load campaigns', err.message);
-                container.innerHTML = `<div class="empty-state"><p>${err.message}</p></div>`;
-            }
-        }
-
-        window.approveCampaign = async (id, status) => {
-            try {
-                await campaignsAPI.verify(id, status);
-                toast.success(status === 'approved' ? 'Campaign Approved ✅' : 'Campaign Rejected ❌', `Campaign has been ${status}.`);
-                document.getElementById('ccard-' + id)?.remove();
-                loadData();
-            } catch (err) {
-                toast.error('Update Failed', err.message);
-            }
-        };
 
         async function loadAllUsers() {
             const container = document.getElementById('all-users-list');
@@ -383,29 +257,36 @@
                     return;
                 }
                 container.innerHTML = `
-          <div style="overflow-x:auto;">
-            <table style="width:100%;border-collapse:collapse;font-size:0.87rem;min-width:650px;">
-              <thead><tr style="background:var(--bg-muted);">
-                <th style="padding:12px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Name</th>
-                <th style="padding:12px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Email</th>
-                <th style="padding:12px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Role</th>
-                <th style="padding:12px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Status</th>
-                <th style="padding:12px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Joined</th>
-              </tr></thead>
-              <tbody>${users.map((u, i) => `
-                <tr style="border-top:1px solid var(--border);${i % 2 === 0 ? '' : 'background:var(--bg-muted);'}">
-                  <td style="padding:12px 16px;font-weight:600;">${u.name}</td>
-                  <td style="padding:12px 16px;color:var(--text-muted);">${u.email}</td>
-                  <td style="padding:12px 16px;"><span class="badge badge-green">${ROLE_LABELS[u.role] || u.role}</span></td>
-                  <td style="padding:12px 16px;">
-                    <span class="badge ${u.verification_status === 'approved' ? 'badge-green' : u.verification_status === 'rejected' ? 'badge-red' : 'badge-yellow'}">
-                      ${u.verification_status}
-                    </span>
-                  </td>
-                  <td style="padding:12px 16px;color:var(--text-muted);">${new Date(u.created_at).toLocaleDateString()}</td>
-                </tr>
-              `).join('')}</tbody>
-            </table>
+          <div class="card" style="box-shadow: var(--shadow-sm); border-radius: 12px; overflow: hidden;">
+            <div style="overflow-x:auto;">
+              <table style="width:100%;border-collapse:collapse;font-size:0.87rem;min-width:650px;">
+                <thead><tr style="background:var(--bg-muted);">
+                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Name</th>
+                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Email</th>
+                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Role / Dept</th>
+                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Status</th>
+                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Joined</th>
+                </tr></thead>
+                <tbody>${users.map((u, i) => `
+                  <tr style="border-bottom:1px solid var(--border);${i % 2 === 0 ? '' : 'background:var(--bg-muted);'}">
+                    <td style="padding:14px 16px;font-weight:600;">${u.name}</td>
+                    <td style="padding:14px 16px;color:var(--text-muted);">${u.email}</td>
+                    <td style="padding:14px 16px;">
+                      <div style="display:flex;flex-direction:column;gap:4px;">
+                          <span class="badge ${u.role === 'ADMIN' ? 'badge-red' : 'badge-green'}" style="width:fit-content; font-size: 0.7rem; padding: 2px 8px;">${ROLE_LABELS[u.role] || u.role}</span>
+                          ${u.department ? `<span style="font-size:0.72rem;color:var(--text-muted); font-weight: 500;">🏢 ${u.department}</span>` : ''}
+                      </div>
+                    </td>
+                    <td style="padding:14px 16px;">
+                      <span class="badge ${u.verification_status === 'approved' ? 'badge-green' : u.verification_status === 'rejected' ? 'badge-red' : 'badge-yellow'}" style="font-size: 0.7rem; padding: 2px 8px;">
+                        ${u.verification_status}
+                      </span>
+                    </td>
+                    <td style="padding:14px 16px;color:var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
+                  </tr>
+                `).join('')}</tbody>
+              </table>
+            </div>
           </div>
         `;
             } catch (err) {

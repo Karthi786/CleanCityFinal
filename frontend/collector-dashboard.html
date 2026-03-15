@@ -308,7 +308,7 @@
 
     <div class="dash-layout">
         <main class="dash-main">
-            <header class="dash-header">
+            <header class="dash-header glass">
                 <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
                     <div style="display:flex;align-items:center;gap:12px;">
                         <button class="hamburger" id="hamburger">☰</button>
@@ -344,8 +344,8 @@
                 </div>
             </header>
 
-            <div class="dash-content">
-                <div class="page-header">
+            <div class="dash-content animate-in">
+                <div class="page-header animate-in stagger-1">
                     <div>
                         <h2 class="page-title">City-Wide Management</h2>
                         <p class="page-subtitle">Monitor and oversee civic issue resolution across all departments.</p>
@@ -437,7 +437,7 @@
                         </div>
 
                         <!-- Charts Row 2 -->
-                        <div class="analytics-grid-2">
+                        <div class="analytics-grid-2 animate-in stagger-3">
                             <div class="chart-card">
                                 <div class="chart-card-title">Complaints by Department</div>
                                 <div class="chart-card-subtitle">Total complaint count per government department</div>
@@ -508,15 +508,40 @@
                         </div>
                     </div>
                     <!-- Campaigns Table -->
-                    <div
-                        style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
-                        <div
-                            style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                            <h3 style="font-size:1rem;font-weight:700;">All Campaigns</h3>
+                    <!-- Campaigns Content -->
+                    <div id="col-campaigns-content">
+                        <!-- Navigation for campaigns -->
+                        <div class="tab-list mb-6" style="justify-content:flex-start;gap:20px;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:20px;">
+                            <button class="tab-sub-btn active" id="sub-tab-all-camps-btn">All Campaigns</button>
+                            <button class="tab-sub-btn" id="sub-tab-pending-camps-btn" style="position:relative;">
+                                Pending Approvals
+                                <span id="camp-pending-badge" class="badge-dot" style="display:none;top:0;right:-8px;"></span>
+                            </button>
                         </div>
-                        <div id="col-campaigns-table" style="overflow-x:auto;">
-                            <div class="loading-page" style="min-height:120px;">
-                                <div class="spinner"></div>
+
+                        <!-- All Campaigns Pane -->
+                        <div id="all-campaigns-pane">
+                            <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;overflow:hidden;">
+                                <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                                    <h3 style="font-size:1rem;font-weight:700;">Active & Completed Campaigns</h3>
+                                    <button id="download-campaigns-btn" class="btn btn-primary btn-sm">
+                                        📥 Download Campaign Data
+                                    </button>
+                                </div>
+                                <div id="col-campaigns-table" style="overflow-x:auto;">
+                                    <div class="loading-page" style="min-height:120px;">
+                                        <div class="spinner"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pending Campaigns Pane -->
+                        <div id="pending-campaigns-pane" style="display:none;">
+                            <div id="pending-campaigns-list" class="space-y-4">
+                                <div class="loading-page" style="min-height:120px;">
+                                    <div class="spinner"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -596,6 +621,19 @@
         </div>
     </div>
 
+    <!-- Campaign Details Modal (Collector Verification) -->
+    <div class="modal-overlay" id="camp-details-modal">
+        <div class="modal" style="max-width:600px;">
+            <div class="modal-header">
+                <div class="modal-title">Campaign Verification Details</div>
+                <button class="modal-close" onclick="document.getElementById('camp-details-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body" id="camp-details-body" style="max-height: 80vh; overflow-y: auto; padding: 20px;">
+                <!-- Details injected here -->
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
@@ -634,7 +672,11 @@
             document.getElementById('issues-filters').style.display = (name === 'issues' || name === 'map') ? 'flex' : 'none';
 
             if (name === 'reviews') loadReviews();
-            if (name === 'campaigns' && !campaignsLoaded) { campaignsLoaded = true; loadCollectorCampaigns(); }
+            if (name === 'campaigns' && !campaignsLoaded) { 
+                campaignsLoaded = true; 
+                loadCollectorCampaigns(); 
+                loadPendingCampaigns(); // To show badge
+            }
             if (name === 'leaderboard' && !leaderboardLoaded) { leaderboardLoaded = true; loadCollectorLeaderboard(); }
             if (name === 'analytics' && !analyticsLoaded) {
                 analyticsLoaded = true;
@@ -920,6 +962,157 @@
             }
         }
 
+        /**
+         * ── Campaign Verification Logic ──
+         */
+        const subAllCampsBtn = document.getElementById('sub-tab-all-camps-btn');
+        const subPendingCampsBtn = document.getElementById('sub-tab-pending-camps-btn');
+        const allCampsPane = document.getElementById('all-campaigns-pane');
+        const pendingCampsPane = document.getElementById('pending-campaigns-pane');
+
+        subAllCampsBtn.addEventListener('click', () => {
+            subAllCampsBtn.classList.add('active');
+            subPendingCampsBtn.classList.remove('active');
+            allCampsPane.style.display = 'block';
+            pendingCampsPane.style.display = 'none';
+            loadCollectorCampaigns();
+        });
+
+        subPendingCampsBtn.addEventListener('click', () => {
+            subPendingCampsBtn.classList.add('active');
+            subAllCampsBtn.classList.remove('active');
+            allCampsPane.style.display = 'none';
+            pendingCampsPane.style.display = 'block';
+            loadPendingCampaigns();
+        });
+
+        async function loadPendingCampaigns() {
+            const container = document.getElementById('pending-campaigns-list');
+            container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
+            try {
+                const data = await campaignsAPI.getPending();
+                const campaigns = data.campaigns || [];
+                
+                // Update badge
+                const badge = document.getElementById('camp-pending-badge');
+                if (campaigns.length > 0) {
+                    badge.style.display = 'block';
+                } else {
+                    badge.style.display = 'none';
+                }
+
+                if (campaigns.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>All clear!</h3><p>No pending campaign requests.</p></div>`;
+                    return;
+                }
+                container.innerHTML = campaigns.map(c => `
+                    <div class="verify-card" id="ccard-${c.id}" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;justify-content:space-between;align-items:center;">
+                        <div class="verify-info">
+                            <h3 style="font-size:1.05rem;margin-bottom:4px;">${c.title}</h3>
+                            <p class="text-muted text-sm" style="margin:4px 0;">👤 ${c.created_by_name} | 📍 ${c.location_name || 'No location'}</p>
+                            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+                                <span class="badge badge-blue">Needed: ${c.volunteers_needed}</span>
+                                <button class="btn btn-outline btn-sm" onclick="openCampaignDetails('${c.id}')">👁️ View Details</button>
+                            </div>
+                        </div>
+                        <div class="verify-actions" style="display:flex;gap:10px;">
+                            <button class="btn btn-primary btn-sm" onclick="approveCampaign('${c.id}', 'approved')">✅ Approve</button>
+                            <button class="btn btn-danger btn-sm" onclick="approveCampaign('${c.id}', 'rejected')">❌ Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                toast.error('Failed to load campaigns', err.message);
+                container.innerHTML = `<div class="empty-state"><p>${err.message}</p></div>`;
+            }
+        }
+
+        window.openCampaignDetails = async (id) => {
+            const container = document.getElementById('camp-details-body');
+            container.innerHTML = '<div class="spinner"></div>';
+            document.getElementById('camp-details-modal').classList.add('open');
+            
+            try {
+                // We find it in the pending list if it's there
+                const data = await campaignsAPI.getPending();
+                const campaigns = data.campaigns || [];
+                const c = campaigns.find(item => item.id === id);
+                
+                if (!c) {
+                    container.innerHTML = 'Campaign details not found.';
+                    return;
+                }
+                
+                container.innerHTML = `
+                    <div style="display:flex;flex-direction:column;gap:16px;">
+                        ${c.image_url ? `<img src="${c.image_url}" style="width:100%;border-radius:12px;max-height:220px;object-fit:cover;border:1px solid var(--border);">` : '<div style="width:100%;height:140px;background:#f1f5f9;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:2rem;">📣</div>'}
+                        <div>
+                            <h2 style="font-size:1.25rem;font-weight:700;margin-bottom:4px;">${c.title}</h2>
+                            <p style="color:var(--text-muted);">${c.description}</p>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#f8fafc;padding:16px;border-radius:12px;border:1px solid var(--border);">
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Created By</label>
+                                <div style="font-weight:600;">${c.created_by_name}</div>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Mobile Number</label>
+                                <div style="font-weight:600;">${c.contact_number || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Location</label>
+                                <div style="font-weight:600;">📍 ${c.location_name || 'N/A'}</div>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;">Created At</label>
+                                <div style="font-weight:600;">📅 ${new Date(c.created_at).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;background:#eff6ff;padding:16px;border-radius:12px;border:1px solid #dbeafe;">
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:#1e40af;text-transform:uppercase;font-weight:700;">Start Date & Time</label>
+                                <div style="font-weight:600;color:#1e40af;">🗓️ ${c.start_date} ${c.start_time}</div>
+                            </div>
+                            <div>
+                                <label style="display:block;font-size:0.75rem;color:#1e40af;text-transform:uppercase;font-weight:700;">End Date & Time</label>
+                                <div style="font-weight:600;color:#1e40af;">🗓️ ${c.end_date} ${c.end_time}</div>
+                            </div>
+                        </div>
+                        <div style="background:#f0fdf4;padding:16px;border-radius:12px;border:1px solid #dcfce7;text-align:center;">
+                            <label style="display:block;font-size:0.75rem;color:#166534;text-transform:uppercase;font-weight:700;">Volunteers Needed</label>
+                            <div style="font-size:1.5rem;font-weight:800;color:#166534;">${c.volunteers_needed}</div>
+                        </div>
+                        <div style="display:flex;gap:12px;margin-top:8px;">
+                            <button class="btn btn-primary" style="flex:1;" onclick="approveCampaign('${c.id}', 'approved'); document.getElementById('camp-details-modal').classList.remove('open');">✅ Approve</button>
+                            <button class="btn btn-danger" style="flex:1;" onclick="approveCampaign('${c.id}', 'rejected'); document.getElementById('camp-details-modal').classList.remove('open');">❌ Reject</button>
+                        </div>
+                    </div>
+                `;
+            } catch (err) {
+                container.innerHTML = `<p style="color:var(--danger);">${err.message}</p>`;
+            }
+        };
+
+        window.approveCampaign = async (id, status) => {
+            try {
+                await campaignsAPI.verify(id, status);
+                toast.success(status === 'approved' ? 'Campaign Approved ✅' : 'Campaign Rejected ❌', `Campaign has been ${status}.`);
+                document.getElementById('ccard-' + id)?.remove();
+                
+                // Refresh counts
+                loadCollectorCampaigns();
+                
+                // Check if still pending
+                const data = await campaignsAPI.getPending();
+                if ((data.campaigns || []).length === 0) {
+                    document.getElementById('camp-pending-badge').style.display = 'none';
+                    document.getElementById('pending-campaigns-list').innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>All clear!</h3><p>No pending campaign requests.</p></div>`;
+                }
+            } catch (err) {
+                toast.error('Update Failed', err.message);
+            }
+        };
+
         window.openColCampaignVolunteers = async (id, title) => {
             const modal = document.getElementById('col-volunteers-modal');
             modal.classList.add('open');
@@ -1091,6 +1284,51 @@
                     dataLabels: { enabled: false },
                 });
                 colPerfChart.render();
+                
+                // Download Campaign Data Setup
+                document.getElementById('download-campaigns-btn').onclick = async () => {
+                    const fromDate = prompt("Enter Start Date (YYYY-MM-DD):", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
+                    if (!fromDate) return;
+                    const toDate = prompt("Enter End Date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
+                    if (!toDate) return;
+                    
+                    try {
+                        const data = await campaignsAPI.getAll();
+                        const allCamps = data.campaigns || [];
+                        
+                        // Filter by date range
+                        const filtered = allCamps.filter(c => {
+                            const campStart = new Date(c.start_date);
+                            return campStart >= new Date(fromDate) && campStart <= new Date(toDate);
+                        });
+                        
+                        if (filtered.length === 0) {
+                            return toast.error("No Data", "No campaigns found for the selected date range.");
+                        }
+                        
+                        const now = new Date();
+                        let csvContent = "data:text/csv;charset=utf-8,Category,Title,Organizer,Contact,Location,Start Date,End Date,Volunteers Needed,Registered,Status\n";
+                        
+                        filtered.forEach(c => {
+                            const start = new Date(`${c.start_date}T${c.start_time}`);
+                            const end = new Date(`${c.end_date}T${c.end_time}`);
+                            const status = now < start ? 'UPCOMING' : now <= end ? 'ACTIVE' : 'ENDED';
+                            
+                            csvContent += `"${status}","${c.title.replace(/"/g, '""')}","${c.created_by_name || ''}","${c.contact_number || ''}","${(c.location_name || '').replace(/"/g, '""')}","${c.start_date} ${c.start_time}","${c.end_date} ${c.end_time}","${c.volunteers_needed}","${c.registered_count}","${status}"\n`;
+                        });
+                        
+                        const encodedUri = encodeURI(csvContent);
+                        const link = document.createElement("a");
+                        link.setAttribute("href", encodedUri);
+                        link.setAttribute("download", `Campaign_Data_${fromDate}_to_${toDate}.csv`);
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                        toast.success("Download Complete", "Campaign data has been exported successfully.");
+                    } catch (err) {
+                        toast.error("Download Failed", err.message);
+                    }
+                };
 
             } catch (err) {
                 toast.error('Analytics Error', err.message);

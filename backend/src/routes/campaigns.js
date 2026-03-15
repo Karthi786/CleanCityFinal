@@ -46,7 +46,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
     const {
         title, description, locationName, latitude, longitude,
         startDate, startTime, endDate, endTime,
-        volunteersNeeded, imageUrl
+        volunteersNeeded, imageUrl, contactNumber
     } = req.body;
 
     if (!title || !description || !startDate || !startTime || !endDate || !endTime || !volunteersNeeded) {
@@ -86,6 +86,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
                 verification_status: 'pending',
                 created_by_id: req.userId,
                 created_by_name: req.user.name,
+                contact_number: contactNumber || null,
             })
             .select()
             .single();
@@ -501,7 +502,7 @@ router.delete('/:id', verifyToken, requireApproved, async (req, res) => {
  * GET /api/campaigns/pending
  * Returns campaigns waiting for admin approval
  */
-router.get('/pending', verifyToken, requireApproved, requireRole('ADMIN', 'COLLECTOR'), async (req, res) => {
+router.get('/pending', verifyToken, requireApproved, requireRole('COLLECTOR'), async (req, res) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('campaigns')
@@ -521,7 +522,7 @@ router.get('/pending', verifyToken, requireApproved, requireRole('ADMIN', 'COLLE
  * PUT /api/campaigns/:id/verify
  * Approve or reject a campaign
  */
-router.put('/:id/verify', verifyToken, requireApproved, requireRole('ADMIN', 'COLLECTOR'), async (req, res) => {
+router.put('/:id/verify', verifyToken, requireApproved, requireRole('COLLECTOR'), async (req, res) => {
     const { id } = req.params;
     const { status } = req.body; // 'approved' or 'rejected'
 
