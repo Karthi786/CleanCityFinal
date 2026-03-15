@@ -111,6 +111,148 @@
             }
         }
 
+        /* ── Notification Dropdown ── */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 5px;
+            border-radius: 10px;
+            border: 2px solid white;
+            display: none;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 320px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            border: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            max-height: 480px;
+            overflow: hidden;
+            animation: fadeInScale 0.2s ease forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95); transform-origin: top right; }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .notification-dropdown.open {
+            display: flex;
+        }
+
+        .notification-header {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .notification-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .notification-item {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f1f5f9;
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .notification-item.unread {
+            background: #f0f9ff;
+            border-left: 3px solid var(--primary);
+        }
+
+        .notification-delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 2;
+            border: none;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: #f8fafc;
+        }
+
+        .notification-item:hover .notification-delete-btn {
+            opacity: 1;
+        }
+
+        .notification-delete-btn:hover {
+            background: #ef4444;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .notification-item-title {
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+
+        .notification-item-msg {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .notification-item-time {
+            font-size: 0.72rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        .notification-empty {
+            padding: 32px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .header-bell {
+            font-size: 1.2rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
         /* ── Analytics Tab ── */
         .analytics-grid-4 {
             display: grid;
@@ -314,11 +456,32 @@
                         <button class="hamburger" id="hamburger">☰</button>
                         <span class="dash-header-title" data-i18n="lbl_dist_overview">District Collector Overview</span>
                     </div>
-                    <div class="header-actions" style="display:flex;align-items:center;gap:12px;">
+                    <div class="header-actions" style="display:flex;align-items:center;gap:20px;">
                         <select class="select lang-switcher" style="padding:4px 8px; font-size:0.85rem;">
                             <option value="en">English</option>
                             <option value="ta">தமிழ்</option>
                         </select>
+
+                        <!-- Notification Bell -->
+                        <div class="notification-wrapper">
+                            <div class="header-bell" id="notification-bell">
+                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                                <span class="notification-badge" id="notification-count">0</span>
+                            </div>
+                            <div class="notification-dropdown" id="notification-dropdown">
+                                <div class="notification-header">
+                                    <span>Notifications</span>
+                                    <button id="mark-all-read" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; color: var(--primary);">Mark all as read</button>
+                                </div>
+                                <div class="notification-list" id="notification-list">
+                                    <!-- Notifications here -->
+                                </div>
+                            </div>
+                        </div>
+
                         <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn"
                             data-i18n="nav_logout">Logout</button>
                     </div>
@@ -621,6 +784,62 @@
         </div>
     </div>
 
+    <!-- Download Campaign Data Modal -->
+    <div class="modal-overlay" id="download-camp-modal">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header">
+                <div class="modal-title">Export Campaign Data</div>
+                <button class="modal-close" onclick="document.getElementById('download-camp-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date range for the campaign data export. The file will be downloaded in CSV format.</p>
+                
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                    <div class="form-group">
+                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start Date</label>
+                        <input type="date" id="dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:8px;border:1px solid var(--border);">
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End Date</label>
+                        <input type="date" id="dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:8px;border:1px solid var(--border);">
+                    </div>
+                    
+                    <button id="confirm-dl-btn" class="btn btn-primary" style="width:100%;margin-top:8px;height:44px;font-weight:700;">
+                        📥 Download CSV Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Download Reports Modal (Issue/Reports) -->
+    <div class="modal-overlay" id="download-reports-modal">
+        <div class="modal" style="max-width:400px;">
+            <div class="modal-header">
+                <div class="modal-title">Export Reports Data</div>
+                <button class="modal-close" onclick="document.getElementById('download-reports-modal').classList.remove('open')">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date range for the reports export. The file will be downloaded in Excel (.xlsx) format.</p>
+                
+                <div style="display:flex;flex-direction:column;gap:16px;">
+                    <div class="form-group">
+                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start Date</label>
+                        <input type="date" id="rep-dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:8px;border:1px solid var(--border);">
+                    </div>
+                    <div class="form-group">
+                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End Date</label>
+                        <input type="date" id="rep-dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:8px;border:1px solid var(--border);">
+                    </div>
+                    
+                    <button id="confirm-reports-dl-btn" class="btn btn-primary" style="width:100%;margin-top:8px;height:44px;font-weight:700;">
+                        📥 Download Excel Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Campaign Details Modal (Collector Verification) -->
     <div class="modal-overlay" id="camp-details-modal">
         <div class="modal" style="max-width:600px;">
@@ -637,7 +856,7 @@
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI, analyticsAPI, campaignsAPI, leaderboardAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, analyticsAPI, campaignsAPI, leaderboardAPI, notificationsAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t } from './js/i18n.js';
 
@@ -646,8 +865,117 @@
 
         document.getElementById('sidebar-name').textContent = user.name;
         document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
-        document.getElementById('logout-btn').addEventListener('click', logout);
-        document.getElementById('mobile-logout-btn').addEventListener('click', logout);
+        const logoutBtn = document.getElementById('logout-btn');
+        const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
+        if (logoutBtn) logoutBtn.addEventListener('click', logout);
+        if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', logout);
+
+        // ─── Notification System ───
+        const bellBtn = document.getElementById('notification-bell');
+        const notificationDropdown = document.getElementById('notification-dropdown');
+        const notificationList = document.getElementById('notification-list');
+        const notificationCount = document.getElementById('notification-count');
+        const markAllReadBtn = document.getElementById('mark-all-read');
+
+        async function loadNotifications() {
+            try {
+                const { notifications } = await notificationsAPI.getAll();
+                const unreadCount = notifications.filter(n => !n.is_read).length;
+                
+                if (unreadCount > 0) {
+                    notificationCount.textContent = unreadCount;
+                    notificationCount.style.display = 'block';
+                } else {
+                    notificationCount.style.display = 'none';
+                }
+
+                if (notifications.length === 0) {
+                    notificationList.innerHTML = '<div class="notification-empty">No notifications yet</div>';
+                } else {
+                    notificationList.innerHTML = notifications.map(n => `
+                        <div class="notification-item ${n.is_read ? '' : 'unread'}" data-id="${n.id}" data-type="${n.type}" data-related="${n.related_id}" style="position:relative;">
+                            <div class="notification-item-title">${n.title}</div>
+                            <div class="notification-item-msg">${n.message}</div>
+                            <div class="notification-item-time">${new Date(n.created_at).toLocaleString()}</div>
+                            <button class="notification-delete-btn" title="Delete notification">✕</button>
+                        </div>
+                    `).join('');
+
+                    // Add click events to items
+                    document.querySelectorAll('.notification-item').forEach(item => {
+                        // Delete logic
+                        const deleteBtn = item.querySelector('.notification-delete-btn');
+                        deleteBtn.addEventListener('click', async (e) => {
+                            e.stopPropagation();
+                            const id = item.dataset.id;
+                            try {
+                                const ok = confirm('Delete this notification?');
+                                if (!ok) return;
+                                
+                                await notificationsAPI.delete(id);
+                                loadNotifications();
+                                toast.success('Deleted', 'Notification removed.');
+                            } catch (err) {
+                                console.error('Delete notification error:', err);
+                                toast.error('Error', 'Failed to delete notification.');
+                            }
+                        });
+
+                        item.addEventListener('click', async () => {
+                            const id = item.dataset.id;
+                            const type = item.dataset.type;
+                            const relatedId = item.dataset.related;
+
+                            try {
+                                if (item.classList.contains('unread')) {
+                                    await notificationsAPI.markAsRead(id);
+                                }
+                                
+                                // Redirect based on type
+                                if (type === 'campaign') {
+                                    switchTab('verifications');
+                                } else if (type === 'report') {
+                                    switchTab('issues');
+                                }
+                                
+                                notificationDropdown.classList.remove('open');
+                                loadNotifications();
+                            } catch (err) {
+                                console.error('Notification action error:', err);
+                            }
+                        });
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load notifications:', err);
+            }
+        }
+
+        bellBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            notificationDropdown.classList.toggle('open');
+            if (notificationDropdown.classList.contains('open')) {
+                loadNotifications();
+            }
+        });
+
+        markAllReadBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            try {
+                await notificationsAPI.markAllRead();
+                loadNotifications();
+            } catch (err) {
+                console.error('Failed to mark all as read:', err);
+            }
+        });
+
+        document.addEventListener('click', () => {
+            notificationDropdown.classList.remove('open');
+        });
+
+        // Initial load and periodic refresh
+        loadNotifications();
+        setInterval(loadNotifications, 60000); // Every minute
 
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
@@ -781,8 +1109,42 @@
                 toast.error('No Data', 'No reports available to download.');
                 return;
             }
+            
+            // Set default dates
+            const now = new Date();
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('rep-dl-from-date').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('rep-dl-to-date').value = now.toISOString().split('T')[0];
+            
+            document.getElementById('download-reports-modal').classList.add('open');
+        });
 
-            const exportData = allIssues.map(issue => {
+        document.getElementById('confirm-reports-dl-btn').addEventListener('click', () => {
+            const fromDateStr = document.getElementById('rep-dl-from-date').value;
+            const toDateStr = document.getElementById('rep-dl-to-date').value;
+            
+            if (!fromDateStr || !toDateStr) {
+                toast.error('Selection Required', 'Please select both start and end dates.');
+                return;
+            }
+
+            const fromDate = new Date(fromDateStr);
+            const toDate = new Date(toDateStr);
+            fromDate.setHours(0,0,0,0);
+            toDate.setHours(23,59,59,999);
+
+            const filteredReports = allIssues.filter(issue => {
+                const issueDate = new Date(issue.created_at);
+                return issueDate >= fromDate && issueDate <= toDate;
+            });
+
+            if (filteredReports.length === 0) {
+                toast.error('No Data', 'No reports found for the selected date range.');
+                return;
+            }
+
+            const exportData = filteredReports.map(issue => {
                 const createdDate = new Date(issue.created_at).toLocaleString('en-IN');
                 const lastUpdated = issue.updated_at ? new Date(issue.updated_at).toLocaleString('en-IN') : 'N/A';
                 let pendingDate = createdDate;
@@ -812,10 +1174,11 @@
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, 'District Reports');
 
-            const dateStr = new Date().toISOString().split('T')[0];
-            const fileName = `District_All_Department_Reports_${dateStr}.xlsx`;
+            const dateStr = `${fromDateStr}_to_${toDateStr}`;
+            const fileName = `District_Reports_${dateStr}.xlsx`;
 
             XLSX.writeFile(workbook, fileName);
+            document.getElementById('download-reports-modal').classList.remove('open');
             toast.success('Download Complete', 'Excel file has been downloaded successfully.');
         });
 
@@ -1093,6 +1456,84 @@
             }
         };
 
+        // Download Campaign Data Setup - Moved here to ensure it works in all tabs
+        const downloadCampaignsBtn = document.getElementById('download-campaigns-btn');
+        if (downloadCampaignsBtn) {
+            downloadCampaignsBtn.onclick = () => {
+                // Set default dates
+                const now = new Date();
+                const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+                
+                document.getElementById('dl-from-date').value = thirtyDaysAgo.toISOString().split('T')[0];
+                document.getElementById('dl-to-date').value = now.toISOString().split('T')[0];
+                
+                document.getElementById('download-camp-modal').classList.add('open');
+            };
+        }
+
+        // Handle the actual download from the modal
+        document.getElementById('confirm-dl-btn').onclick = async () => {
+            const fromDate = document.getElementById('dl-from-date').value;
+            const toDate = document.getElementById('dl-to-date').value;
+            
+            if (!fromDate || !toDate) {
+                return toast.error("Selection Required", "Please select both start and end dates.");
+            }
+
+            const btn = document.getElementById('confirm-dl-btn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-sm"></span> Processing...';
+
+            try {
+                const data = await campaignsAPI.getAll();
+                const allCamps = data.campaigns || [];
+                
+                const filtered = allCamps.filter(c => {
+                    const campDate = new Date(c.start_date);
+                    const start = new Date(fromDate);
+                    const end = new Date(toDate);
+                    campDate.setHours(0,0,0,0);
+                    start.setHours(0,0,0,0);
+                    end.setHours(23,59,59,999);
+                    return campDate >= start && campDate <= end;
+                });
+                
+                if (filtered.length === 0) {
+                    toast.error("No Data", "No campaigns found for the selected date range.");
+                    return;
+                }
+                
+                const now = new Date();
+                let csvContent = "data:text/csv;charset=utf-8,Category,Title,Organizer,Contact,Location,Reg Date,Start Date,End Date,Volunteers Needed,Registered,Status\n";
+                
+                filtered.forEach(c => {
+                    const start = new Date(`${c.start_date}T${c.start_time}`);
+                    const end = new Date(`${c.end_date}T${c.end_time}`);
+                    const status = now < start ? 'UPCOMING' : now <= end ? 'ACTIVE' : 'ENDED';
+                    const regDate = new Date(c.created_at).toLocaleDateString();
+                    
+                    csvContent += `"${status}","${c.title.replace(/"/g, '""')}","${c.created_by_name || ''}","${c.contact_number || ''}","${(c.location_name || '').replace(/"/g, '""')}","${regDate}","${c.start_date} ${c.start_time}","${c.end_date} ${c.end_time}","${c.volunteers_needed}","${c.registered_count}","${status}"\n`;
+                });
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Campaign_Data_${fromDate}_to_${toDate}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                document.getElementById('download-camp-modal').classList.remove('open');
+                toast.success("Download Complete", "Campaign data exported successfully.");
+            } catch (err) {
+                toast.error("Download Failed", err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+
         window.approveCampaign = async (id, status) => {
             try {
                 await campaignsAPI.verify(id, status);
@@ -1284,51 +1725,6 @@
                     dataLabels: { enabled: false },
                 });
                 colPerfChart.render();
-                
-                // Download Campaign Data Setup
-                document.getElementById('download-campaigns-btn').onclick = async () => {
-                    const fromDate = prompt("Enter Start Date (YYYY-MM-DD):", new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]);
-                    if (!fromDate) return;
-                    const toDate = prompt("Enter End Date (YYYY-MM-DD):", new Date().toISOString().split('T')[0]);
-                    if (!toDate) return;
-                    
-                    try {
-                        const data = await campaignsAPI.getAll();
-                        const allCamps = data.campaigns || [];
-                        
-                        // Filter by date range
-                        const filtered = allCamps.filter(c => {
-                            const campStart = new Date(c.start_date);
-                            return campStart >= new Date(fromDate) && campStart <= new Date(toDate);
-                        });
-                        
-                        if (filtered.length === 0) {
-                            return toast.error("No Data", "No campaigns found for the selected date range.");
-                        }
-                        
-                        const now = new Date();
-                        let csvContent = "data:text/csv;charset=utf-8,Category,Title,Organizer,Contact,Location,Start Date,End Date,Volunteers Needed,Registered,Status\n";
-                        
-                        filtered.forEach(c => {
-                            const start = new Date(`${c.start_date}T${c.start_time}`);
-                            const end = new Date(`${c.end_date}T${c.end_time}`);
-                            const status = now < start ? 'UPCOMING' : now <= end ? 'ACTIVE' : 'ENDED';
-                            
-                            csvContent += `"${status}","${c.title.replace(/"/g, '""')}","${c.created_by_name || ''}","${c.contact_number || ''}","${(c.location_name || '').replace(/"/g, '""')}","${c.start_date} ${c.start_time}","${c.end_date} ${c.end_time}","${c.volunteers_needed}","${c.registered_count}","${status}"\n`;
-                        });
-                        
-                        const encodedUri = encodeURI(csvContent);
-                        const link = document.createElement("a");
-                        link.setAttribute("href", encodedUri);
-                        link.setAttribute("download", `Campaign_Data_${fromDate}_to_${toDate}.csv`);
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-                        toast.success("Download Complete", "Campaign data has been exported successfully.");
-                    } catch (err) {
-                        toast.error("Download Failed", err.message);
-                    }
-                };
 
             } catch (err) {
                 toast.error('Analytics Error', err.message);

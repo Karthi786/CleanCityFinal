@@ -1,6 +1,7 @@
 const express = require('express');
 const { supabaseAdmin } = require('../config/supabase');
 const { verifyToken, requireRole, requireApproved } = require('../middleware/auth');
+const { createNotification } = require('./notifications');
 
 const router = express.Router();
 
@@ -100,6 +101,27 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
             console.log('[Info] users.reports_count column might not exist yet.');
         }
 
+        // Send notification to Department
+        try {
+            const { data: deptUser } = await supabaseAdmin
+                .from('users')
+                .select('id')
+                .eq('role', department)
+                .limit(1);
+
+            if (deptUser && deptUser.length > 0) {
+                await createNotification({
+                    userId: deptUser[0].id,
+                    title: 'New Issue Reported',
+                    message: `A new issue "${title}" has been reported in your department and requires attention.`,
+                    type: 'report',
+                    relatedId: data.id
+                });
+            }
+        } catch (nErr) {
+            console.error('Failed to send Dept notification:', nErr);
+        }
+
         return res.status(201).json({ message: 'Issue reported successfully.', issue: data });
     } catch (err) {
         console.error('Create issue error:', err);
@@ -187,6 +209,17 @@ router.put('/:id/status', verifyToken, requireApproved,
                 .single();
 
             if (error) throw error;
+
+            // Trigger notification for User when issue is COMPLETED
+            if (status === 'COMPLETED' && issueToUpdate && issueToUpdate.reported_by_id) {
+                await createNotification({
+                    userId: issueToUpdate.reported_by_id,
+                    title: 'Issue Resolved',
+                    message: `Your reported issue "${issueToUpdate.title || 'Civic Issue'}" has been resolved.`,
+                    type: 'report',
+                    relatedId: id
+                });
+            }
 
             return res.json({ message: 'Status updated.', issue: data });
         } catch (err) {

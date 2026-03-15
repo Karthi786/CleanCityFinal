@@ -184,3 +184,11 @@ export const campaignsAPI = {
 export const leaderboardAPI = {
     getTop100: () => apiFetch('/leaderboard')
 };
+
+/* ── Notifications Endpoints ── */
+export const notificationsAPI = {
+    getAll: () => apiFetch('/notifications'),
+    markAsRead: (id) => apiFetch(`/notifications/${id}/read`, { method: 'PUT' }),
+    markAllRead: () => apiFetch('/notifications/read-all', { method: 'POST' }),
+    delete: (id) => apiFetch(`/notifications/${id}`, { method: 'DELETE' }),
+};

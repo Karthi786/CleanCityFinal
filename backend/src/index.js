@@ -60,6 +60,7 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 app.use('/api/leaderboard', require('./routes/leaderboard'));
+app.use('/api/notifications', require('./routes/notifications').router);
 
 /*
 ========================================
@@ -104,12 +105,16 @@ app.use((err, req, res, next) => {
     });
 });
 
+const { startScheduler } = require('./utils/scheduler');
+
 /*
 ========================================
 START SERVER
 ========================================
 */
 app.listen(PORT, () => {
+    // Start background scheduler for stale issues
+    startScheduler();
 
     console.log(`
 ╔══════════════════════════════════════════════╗

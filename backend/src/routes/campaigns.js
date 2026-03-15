@@ -1,6 +1,7 @@
 const express = require('express');
 const { supabaseAdmin } = require('../config/supabase');
 const { verifyToken, requireRole, requireApproved } = require('../middleware/auth');
+const { createNotification } = require('./notifications');
 
 const router = express.Router();
 
@@ -92,6 +93,27 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
             .single();
 
         if (error) throw error;
+
+        // Notify Collector
+        try {
+            const { data: collector } = await supabaseAdmin
+                .from('users')
+                .select('id')
+                .eq('role', 'COLLECTOR')
+                .limit(1);
+
+            if (collector && collector.length > 0) {
+                await createNotification({
+                    userId: collector[0].id,
+                    title: 'Campaign Verification Required',
+                    message: `A new campaign "${title}" has been submitted and requires verification.`,
+                    type: 'campaign',
+                    relatedId: data.id
+                });
+            }
+        } catch (nErr) {
+            console.error('Failed to notify collector:', nErr);
+        }
 
         return res.status(201).json({ message: 'Campaign created successfully.', campaign: data });
     } catch (err) {
@@ -537,6 +559,31 @@ router.put('/:id/verify', verifyToken, requireApproved, requireRole('COLLECTOR')
             .eq('id', id);
 
         if (error) throw error;
+
+        // Notify Creator
+        try {
+            const { data: campaign } = await supabaseAdmin
+                .from('campaigns')
+                .select('created_by_id, title')
+                .eq('id', id)
+                .single();
+
+            if (campaign) {
+                const isApproved = status === 'approved';
+                await createNotification({
+                    userId: campaign.created_by_id,
+                    title: isApproved ? 'Campaign Approved' : 'Campaign Rejected',
+                    message: isApproved 
+                        ? `Your campaign "${campaign.title}" has been verified and approved.`
+                        : `Your campaign "${campaign.title}" has been declined.`,
+                    type: 'campaign',
+                    relatedId: id
+                });
+            }
+        } catch (nErr) {
+            console.error('Failed to notify creator:', nErr);
+        }
+
         return res.json({ message: `Campaign ${status} successfully.` });
     } catch (err) {
         console.error('Verify campaign error:', err);
