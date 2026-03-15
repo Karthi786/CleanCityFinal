@@ -1,3 +1,7 @@
+const dns = require('dns');
+// Force IPv4 for Node fetch/undici (fixes UND_ERR_CONNECT_TIMEOUT to Supabase)
+try { dns.setDefaultResultOrder('ipv4first'); } catch (e) {}
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');

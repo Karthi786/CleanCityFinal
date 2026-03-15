@@ -1,6 +1,18 @@
 const express = require('express');
+const fs = require('fs');
+const os = require('os');
+const path = require('path');
+const crypto = require('crypto');
 const { supabaseAdmin } = require('../config/supabase');
 const { verifyToken, requireRole, requireApproved } = require('../middleware/auth');
+const { checkImageAI } = require('../utils/sightengineVerify');
+const { extractExif } = require('../utils/exifExtract');
+const multer = require('multer');
+
+const upload = multer({ 
+    dest: os.tmpdir(),
+    limits: { fileSize: 10 * 1024 * 1024 } // 10 MB limit
+});
 
 const router = express.Router();
 
@@ -47,6 +59,102 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
         return res.status(500).json({ error: 'Failed to fetch issues.' });
     }
 });
+
+
+/**
+ * POST /api/issues/verify-ai
+ * Full image verification pipeline:
+ *   1. Sightengine AI-generated image check
+ *   2. HF CLIP Anime/Cartoon/Illustration/Document check
+ *   3. EXIF metadata extraction (date/time taken)
+ *
+ * Accepts multipart/form-data with an `image` file.
+ */
+router.post('/verify-ai', verifyToken, requireApproved, requireRole('USER'), upload.single('image'), async (req, res) => {
+    
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'Image verification failed. Please check the image.' });
+    }
+
+    const tempFilePath = req.file.path;
+
+    // Helper — clean up temp file safely
+    function cleanTempFile() {
+        try {
+            if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+        } catch (_) { /* non-fatal */ }
+    }
+
+    try {
+        // Validate mime type roughly before sending everywhere
+        if (!req.file.mimetype.startsWith('image/')) {
+            cleanTempFile();
+            return res.json({ success: false, message: 'Invalid file type. Please upload a valid image file.' });
+        }
+
+        // ── STEP 1: Sightengine AI-generated image check ──────────────────────
+        const aiResult = await checkImageAI(tempFilePath);
+
+        if (!aiResult.success) {
+            cleanTempFile();
+            console.warn('Sightengine verification failed:', aiResult.error);
+            return res.json({ success: false, message: 'Image verification failed. Please try again.' });
+        }
+
+        if (aiResult.aiGenerated) {
+            cleanTempFile();
+            return res.json({
+                success: true,
+                isAiImage: true,
+                metadataAvailable: false,
+                isRelevant: false,
+                topLabel: null,
+                detectedProblem: "Unknown / irrelevant image",
+                confidence: null,
+                dateTaken: null,
+                timeTaken: null,
+                message: "This is an AI-generated image. You cannot submit this report."
+            });
+        }
+
+        // ── STEP 2: EXIF metadata extraction ──────────────────────────────────
+        const exifResult = await extractExif(tempFilePath);
+        
+        const hasMetadata = !!(exifResult.dateTaken && exifResult.timeTaken);
+
+        if (!hasMetadata) {
+            cleanTempFile();
+            return res.json({
+                success: true,
+                isAiImage: false,
+                metadataAvailable: false,
+                isRelevant: false,
+                topLabel: null,
+                detectedProblem: "Unknown / irrelevant image",
+                confidence: null,
+                dateTaken: null,
+                timeTaken: null,
+                message: "This image is not taken in this device." // Explicit requested block
+            });
+        }
+
+        // ── All checks passed ──────────────────────────────────────────────────
+        return res.json({
+            success: true,
+            isAiImage: false,
+            metadataAvailable: true,
+            dateTaken: exifResult.dateTaken,
+            timeTaken: exifResult.timeTaken,
+            message: "Image verified successfully."
+        });
+
+    } catch (err) {
+        cleanTempFile();
+        console.error('Image verification error:', err);
+        return res.json({ success: false, message: 'Image verification failed. Please try again.' });
+    }
+});
+
 
 
 /**

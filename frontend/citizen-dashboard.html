@@ -957,14 +957,37 @@
                         <div class="form-group" style="grid-column:1/-1;">
                             <label class="label" for="issue-image">Upload Image *</label>
                             <input id="issue-image" class="input" type="file" accept="image/*" required />
+
+                            <!-- Image preview (shown after file selected) -->
+                            <div id="image-preview-wrap" style="display:none; margin-top:12px;">
+                                <img id="image-preview-img" src="" alt="Preview"
+                                    style="max-width:100%; max-height:200px; border-radius:8px; border:1px solid var(--border); object-fit:cover;" />
+                            </div>
+
+                            <!-- Status message line -->
                             <div id="image-verify-status"
                                 style="margin-top:8px; font-size:0.85rem; font-weight:600; display:flex; align-items:center; gap:6px;">
+                            </div>
+
+                            <!-- Check Image button -->
+                            <button type="button" id="check-image-btn" class="btn btn-outline btn-sm"
+                                style="margin-top:12px; border-radius:6px;" disabled>Check Image</button>
+
+
+                            <!-- Image Metadata box (hidden until check runs) -->
+                            <div id="image-metadata-box"
+                                style="display:none; margin-top:14px; background:#f8fafc; border:1px solid var(--border); border-radius:10px; padding:14px 16px;">
+                                <div style="font-size:0.72rem; font-weight:800; text-transform:uppercase; letter-spacing:0.05em; color:var(--cm-text-gray); margin-bottom:8px;">
+                                    📅 Image Metadata
+                                </div>
+                                <div id="image-metadata-content"
+                                    style="font-size:0.88rem; color:var(--cm-text-dark); line-height:1.7;"></div>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer" style="padding:0; border:none; margin-top:8px;">
                         <button type="button" class="btn btn-outline" id="modal-cancel">Cancel</button>
-                        <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;">
+                        <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;" disabled>
                             <span id="submit-text">Submit Report</span>
                             <div class="spinner spinner-sm" id="submit-spinner" style="display:none;"></div>
                         </button>
@@ -1277,43 +1300,156 @@
             }
         }
 
-        // Image Processor
-        function processImageFile(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_SIZE = 800;
-                        let { width, height } = img;
+        // Image preview on selection & Reset Verification State
+        document.getElementById('issue-image').addEventListener('change', (e) => {
+            resetVerificationState();
+            const file = e.target.files[0];
+            const checkBtn = document.getElementById('check-image-btn');
+            const previewWrap = document.getElementById('image-preview-wrap');
+            const previewImg = document.getElementById('image-preview-img');
 
-                        if (width > height && width > MAX_SIZE) {
-                            height *= MAX_SIZE / width;
-                            width = MAX_SIZE;
-                        } else if (height > MAX_SIZE) {
-                            width *= MAX_SIZE / height;
-                            height = MAX_SIZE;
-                        }
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        resolve(canvas.toDataURL('image/jpeg', 0.7));
-                    };
-                    img.onerror = () => reject(new Error('Failed to load image for processing'));
-                    img.src = e.target.result;
+            if (file) {
+                // Show image preview immediately on selection
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    previewImg.src = ev.target.result;
+                    previewWrap.style.display = 'block';
                 };
-                reader.onerror = () => reject(new Error('Failed to read file'));
                 reader.readAsDataURL(file);
-            });
+                checkBtn.disabled = false;
+            } else {
+                previewWrap.style.display = 'none';
+                previewImg.src = '';
+                checkBtn.disabled = true;
+            }
+        });
+
+        document.getElementById('issue-category').addEventListener('change', () => {
+            resetVerificationState();
+            const file = document.getElementById('issue-image').files[0];
+            document.getElementById('check-image-btn').disabled = !file;
+        });
+
+        function resetVerificationState() {
+            document.getElementById('submit-btn').disabled = true;
+            verifiedImageUrl = null;
+
+            // Reset status line
+            const statusEl = document.getElementById('image-verify-status');
+            statusEl.innerHTML = '';
+            statusEl.style.color = 'inherit';
+
+
+            // Hide and clear Metadata box
+            const metadataBox = document.getElementById('image-metadata-box');
+            metadataBox.style.display = 'none';
+            document.getElementById('image-metadata-content').innerHTML = '';
         }
 
-        // Image preview on selection
-        document.getElementById('issue-image').addEventListener('change', (e) => {
-            const file = e.target.files[0];
+        let verifiedImageUrl = null;
+
+        document.getElementById('check-image-btn').addEventListener('click', async () => {
+            const fileInput = document.getElementById('issue-image');
+            const categoryInput = document.getElementById('issue-category');
+
+            const file = fileInput.files[0];
+            const category = categoryInput.value;
+
+            if (!file) {
+                toast.error('Image Required', 'Please select an image first.');
+                return;
+            }
+            if (!category) {
+                toast.error('Category Required', 'Please select an issue category first.');
+                return;
+            }
+
+            const checkBtn = document.getElementById('check-image-btn');
+            const statusEl = document.getElementById('image-verify-status');
             const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = !file;
+            const metadataBox = document.getElementById('image-metadata-box');
+            const metadataContent = document.getElementById('image-metadata-content');
+
+            // Reset boxes before each check
+            metadataBox.style.display = 'none';
+            submitBtn.disabled = true;
+            checkBtn.disabled = true;
+            statusEl.innerHTML = '<div class="spinner spinner-sm" style="border-top-color: var(--cm-text-gray); width: 14px; height: 14px;"></div> Checking image...';
+            statusEl.style.color = 'var(--cm-text-gray)';
+
+            try {
+                // Read original file as base64 for later submission (to not break the existing saving logic)
+                const reader = new FileReader();
+                const base64Promise = new Promise((resolve) => {
+                    reader.onload = (e) => resolve(e.target.result);
+                });
+                reader.readAsDataURL(file);
+                const imageUrl = await base64Promise;
+
+                // Create FormData for the verification endpoint to preserve EXIF
+                const formData = new FormData();
+                formData.append('image', file);
+                formData.append('category', category);
+
+                const verifyRes = await issuesAPI.verifyImage(formData);
+
+                // ── API-level failure (network / server crash) ────────────────
+                if (!verifyRes.success) {
+                    statusEl.innerHTML = '⚠️ Verification failed. Please try again.';
+                    statusEl.style.color = '#d97706';
+                    toast.error('Verification Error', verifyRes.message || 'Image verification failed. Please try again.');
+                    checkBtn.disabled = false;
+                    return;
+                }
+
+                // ── Populate Metadata box (always after a check) ─────────────
+                if (verifyRes.metadataAvailable) {
+                    metadataContent.innerHTML =
+                        `<div>📷 <strong>Date Taken:</strong> ${verifyRes.dateTaken}</div>` +
+                        `<div>🕒 <strong>Time Taken:</strong> ${verifyRes.timeTaken}</div>`;
+                } else {
+                    metadataContent.innerHTML = 
+                        `<div style="color:var(--cm-text-gray);"><div>📷 <strong>Date Taken:</strong> Not Available</div>` +
+                        `<div>🕒 <strong>Time Taken:</strong> Not Available</div></div>` +
+                        `<div style="color:#ef4444; margin-top:8px; font-weight:600;">This image is not taken in this device.</div>`;
+                }
+                metadataBox.style.display = 'block';
+
+
+                // ── Handle AI-generated image ────────────────────────────────
+                if (verifyRes.isAiImage) {
+                    statusEl.innerHTML = '🤖 AI-generated image detected.';
+                    statusEl.style.color = '#ef4444';
+                    toast.error('Verification Failed', verifyRes.message || 'This is an AI-generated image. You cannot submit this report.');
+                    checkBtn.disabled = false;
+                    return;
+                }
+
+                // ── Handle Missing Metadata ──────────────────────────────────
+                if (!verifyRes.metadataAvailable) {
+                    statusEl.innerHTML = '❌ This image is not taken in this device.';
+                    statusEl.style.color = '#ef4444';
+                    toast.error('Verification Failed', verifyRes.message);
+                    checkBtn.disabled = false;
+                    return;
+                }
+
+
+                // ── All checks passed ─────────────────────────────────────────
+                statusEl.innerHTML = '✅ ' + (verifyRes.message || 'Image verified successfully.');
+                statusEl.style.color = 'var(--cm-green)';
+                toast.success('Verification Complete', verifyRes.message || 'Image verified successfully.');
+
+                verifiedImageUrl = imageUrl;
+                submitBtn.disabled = false;
+                checkBtn.disabled = false;
+
+            } catch (err) {
+                statusEl.innerHTML = '⚠️ Verification failed. Please try again.';
+                statusEl.style.color = '#d97706';
+                toast.error('Error', err.message);
+                checkBtn.disabled = false;
+            }
         });
 
 
@@ -1410,18 +1546,19 @@
         document.getElementById('report-form').addEventListener('submit', async e => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
-            btn.disabled = true;
-
-            const fileInput = document.getElementById('issue-image');
-            const file = fileInput.files[0];
-            if (!file) {
-                toast.error('Image Required', 'Please upload an image for the issue.');
-                btn.disabled = false;
-                return;
+            const submitText = document.getElementById('submit-text');
+            const spinner = document.getElementById('submit-spinner');
+            
+            if (!verifiedImageUrl) {
+                 toast.error('Verification Required', 'Please check the image before submitting.');
+                 return;
             }
 
+            btn.disabled = true;
+            submitText.textContent = 'Submitting...';
+            spinner.style.display = 'block';
+
             try {
-                const imageUrl = await processImageFile(file);
                 const lat = document.getElementById('issue-lat').value;
                 const lng = document.getElementById('issue-lng').value;
 
@@ -1432,15 +1569,29 @@
                     locationName: document.getElementById('issue-location').value.trim(),
                     latitude: lat ? parseFloat(lat) : null,
                     longitude: lng ? parseFloat(lng) : null,
-                    imageUrl: imageUrl,
+                    imageUrl: verifiedImageUrl,
                 });
+                
                 toast.success('Report Submitted! 🎉', 'Your issue has been sent.');
                 modal.classList.remove('open');
+                
+                // Complete reset — form fields, verification state, preview
                 document.getElementById('report-form').reset();
+                resetVerificationState();
+                verifiedImageUrl = null;
+                document.getElementById('check-image-btn').disabled = true;
+
+                // Hide image preview
+                document.getElementById('image-preview-wrap').style.display = 'none';
+                document.getElementById('image-preview-img').src = '';
+                
+                submitText.textContent = 'Submit Report';
+                spinner.style.display = 'none';
                 await loadIssues();
             } catch (err) {
                 toast.error('Submission Failed', err.message);
-            } finally {
+                submitText.textContent = 'Submit Report';
+                spinner.style.display = 'none';
                 btn.disabled = false;
             }
         });

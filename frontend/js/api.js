@@ -12,10 +12,13 @@ const API_BASE = window.location.hostname === 'localhost' || window.location.hos
  */
 async function apiFetch(path, options = {}) {
     const token = localStorage.getItem('cm_token');
-    const headers = {
-        'Content-Type': 'application/json',
-        ...(options.headers || {}),
-    };
+    const headers = { ...options.headers };
+
+    // Auto-set Content-Type to JSON ONLY if we're not sending FormData
+    if (!(options.body instanceof FormData)) {
+        headers['Content-Type'] = headers['Content-Type'] || 'application/json';
+    }
+
     if (token) headers['Authorization'] = `Bearer ${token}`;
 
     const res = await fetch(`${API_BASE}${path}`, {
@@ -77,6 +80,12 @@ export const issuesAPI = {
     create: (payload) => apiFetch('/issues', {
         method: 'POST',
         body: JSON.stringify(payload),
+    }),
+
+    // FormData upload for image verification
+    verifyImage: (formData) => apiFetch('/issues/verify-ai', {
+        method: 'POST',
+        body: formData,
     }),
 
     updateStatus: (id, status, completionImageUrl) => apiFetch(`/issues/${id}/status`, {
