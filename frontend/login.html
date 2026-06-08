@@ -4,33 +4,117 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Sign In — CleanMadurai</title>
+    <title>Sign In — MaduraiSevi</title>
     <meta name="description"
-        content="Sign in to your CleanMadurai account to report civic issues and manage city services." />
+        content="Sign in to your MaduraiSevi account to report civic issues and manage city services." />
     <link rel="stylesheet" href="css/styles.css" />
     <!-- Language Script -->
     <script type="module" src="js/i18n.js"></script>
+    <style>
+        body {
+            background: #F8F9FB;
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse at 20% 80%, rgba(176, 0, 0, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 208, 0, 0.08) 0%, transparent 55%),
+                linear-gradient(160deg, #F8F9FB 0%, #FFFFFF 50%, #F8F9FB 100%);
+        }
+
+        .auth-header-row {
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .auth-card {
+            width: 100%;
+            max-width: 440px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 30px;
+            box-shadow: var(--shadow-md);
+            padding: 40px;
+            transition: all var(--transition);
+            animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .auth-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(176, 0, 0, 0.15);
+        }
+
+        .auth-card-header {
+            margin-bottom: 30px;
+        }
+
+        .auth-card-header h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .auth-card-header p {
+            color: var(--text-muted);
+            font-size: 0.92rem;
+        }
+
+        .auth-card-footer {
+            margin-top: 24px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            padding-top: 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.35rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 1.45rem;
+        }
+    </style>
 </head>
 
 <body>
     <div class="auth-page">
-        <div
-            style="margin-bottom:28px; animation: fadeInUp 0.5s ease; display:flex; justify-content:space-between; align-items:center;">
-            <a href="index.html" class="logo" style="font-size:1.3rem; justify-content:center; text-decoration:none;">
-                <div class="logo-icon">♻</div>
-                <span style="color:white; font-weight:700;">CleanMadurai</span>
+        <div class="auth-header-row">
+            <a href="index.html" class="logo">
+                <span>MaduraiSevi</span>
             </a>
             <select class="select lang-switcher"
-                style="padding:4px 8px; font-size:0.85rem; background:rgba(255,255,255,0.1); color:white; border:1px solid rgba(255,255,255,0.2);">
-                <option value="en" style="color:black;">English</option>
-                <option value="ta" style="color:black;">தமிழ்</option>
+                style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
+                <option value="en">English</option>
+                <option value="ta">தமிழ்</option>
             </select>
         </div>
 
-        <div class="auth-card glass animate-in">
+        <div class="auth-card">
             <div class="auth-card-header">
-                <h1 style="font-size:1.7rem; margin-bottom:6px;" data-i18n="auth_login_title">Welcome Back 👋</h1>
-                <p class="text-muted text-sm" data-i18n="app_title">Sign in to access your civic dashboard</p>
+                <h1 data-i18n="auth_login_title">Welcome Back 👋</h1>
+                <p data-i18n="app_title">Sign in to access your civic dashboard</p>
             </div>
 
             <div class="auth-card-body">
@@ -48,22 +132,22 @@
                     </div>
 
                     <button id="login-btn" type="submit" class="btn btn-primary btn-full btn-lg"
-                        style="margin-top:4px;">
+                        style="margin-top: 10px;">
                         <span id="login-btn-text" data-i18n="btn_signin">🔑 Sign In</span>
-                        <div id="login-spinner" class="spinner spinner-sm" style="display:none;"></div>
+                        <div id="login-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
                     </button>
                 </form>
             </div>
 
             <div class="auth-card-footer">
-                <p class="text-sm text-muted">
+                <p style="font-size: 0.9rem; color: var(--text-muted);">
                     <span data-i18n="lbl_no_account">Don't have an account? Sign up</span>
-                    <a href="register.html" class="text-primary font-bold" style="text-decoration:none;">&nbsp;→</a>
+                    <a href="register.html" class="font-bold" style="color: var(--primary); font-weight: 700; text-decoration: none;">&nbsp;→</a>
                 </p>
             </div>
         </div>
 
-        <p class="text-xs text-muted" style="margin-top:20px; opacity:0.7;">
+        <p style="margin-top: 32px; opacity: 0.6; font-size: 0.8rem; color: var(--text-muted);">
             © 2024 Madurai District Administration
         </p>
     </div>
@@ -116,7 +200,7 @@
                 const errData = err.data || {};
                 if (errData.status === 'pending') {
                     toast.warning('Pending Approval', 'Your account is awaiting admin approval.');
-                    setTimeout(() => { window.location.href = '/pending.html'; }, 1200);
+                    setTimeout(() => { window.location.href = 'pending.html'; }, 1200);
                 } else {
                     toast.error('Login Failed', err.message || 'Invalid email or password.');
                 }

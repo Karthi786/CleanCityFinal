@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Department Dashboard — CleanMadurai</title>
+    <title>Department Dashboard — MaduraiSevi</title>
     <link rel="stylesheet" href="css/styles.css" />
     <!-- ApexCharts & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -12,7 +12,303 @@
     <!-- Language Script -->
     <script type="module" src="js/i18n.js"></script>
     <style>
-        /* Reviews Tab */
+        body {
+            background-color: #F8F9FB;
+        }
+
+        :root {
+            --sidebar-width: 0px;
+        }
+
+        .dash-main {
+            margin-left: 0 !important;
+            padding-top: 90px;
+        }
+
+        /* ── Floating Nav Bar Overrides ── */
+        .nav-island-container {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+
+        .nav-island {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1300px;
+            height: 68px;
+            padding: 0 16px 0 24px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-island.scrolled {
+            height: 60px;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-island .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .nav-island .logo-icon {
+            font-size: 1.35rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .nav-link-item {
+            padding: 8px 18px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 99px;
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .nav-link-item:hover, .nav-link-item.active {
+            color: var(--primary);
+        }
+
+        .nav-link-item.active {
+            background: rgba(176, 0, 0, 0.05);
+        }
+
+        .nav-link-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 99px;
+            box-shadow: 0 2px 6px var(--primary-glow);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* ── Notification Dropdown ── */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .header-bell {
+            position: relative;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.04);
+            transition: all 0.2s;
+        }
+
+        .header-bell:hover {
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--text);
+        }
+
+        .notification-badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.65rem;
+            font-weight: 800;
+            padding: 2px 6px;
+            border-radius: 10px;
+            border: 2px solid white;
+            display: none;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 50px;
+            right: 0;
+            width: 340px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            max-height: 480px;
+            overflow: hidden;
+            animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeInScale {
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); transform-origin: top right; }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .notification-dropdown.open {
+            display: flex;
+        }
+
+        .notification-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
+        }
+
+        .notification-list {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .notification-item {
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.04);
+            cursor: pointer;
+            transition: background 0.2s;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .notification-item.unread {
+            background: var(--primary-light);
+            border-left: 3px solid var(--primary);
+        }
+
+        .notification-delete-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: rgba(220, 38, 38, 0.08);
+            color: var(--danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: all 0.2s;
+            z-index: 2;
+            border: none;
+            cursor: pointer;
+        }
+
+        .notification-item:hover {
+            background: rgba(15, 23, 42, 0.02);
+        }
+
+        .notification-item:hover .notification-delete-btn {
+            opacity: 1;
+        }
+
+        .notification-delete-btn:hover {
+            background: var(--danger);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .notification-item-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.88rem;
+            color: var(--text);
+        }
+
+        .notification-item-msg {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        .notification-item-time {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .notification-empty {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.88rem;
+        }
+
+        /* ── Page Layout ── */
+        .dash-content {
+            padding: 32px 40px !important;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px !important;
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Reviews Tab ── */
         .reviews-list {
             display: flex;
             flex-direction: column;
@@ -21,59 +317,104 @@
 
         .review-card {
             background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px 20px;
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 20px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(176, 0, 0, 0.12);
         }
 
         .review-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 12px;
         }
 
         .stars {
             color: #f59e0b;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
             letter-spacing: 2px;
         }
 
         .review-meta {
-            font-size: 0.78rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
+            margin-top: 4px;
         }
 
         .review-issue-title {
-            font-weight: 700;
-            font-size: 0.9rem;
-            margin-bottom: 4px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--text);
+            margin-bottom: 6px;
         }
 
         .review-comment {
-            color: var(--text-muted);
-            font-size: 0.87rem;
-            margin-top: 6px;
+            background: rgba(15, 23, 42, 0.02);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 10px;
         }
 
-        .tab-list {
+        /* ── Issue Row ── */
+        .issue-row {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 20px;
+            padding: 20px 24px;
             display: flex;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+
+        .issue-row:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(176, 0, 0, 0.12);
+        }
+
+        .issue-row-info {
+            flex: 1;
+        }
+
+        .issue-row-title {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .issue-row-meta {
+            display: flex;
+            align-items: center;
             gap: 8px;
-        }
-
-        .tab-pane {
-            display: none;
-        }
-
-        .tab-pane.active {
-            display: block;
+            flex-wrap: wrap;
+            font-size: 0.82rem;
+            color: var(--text-muted);
         }
 
         /* File input style */
         .file-input-wrap {
             border: 2px dashed var(--border);
-            border-radius: 8px;
-            padding: 16px;
+            border-radius: 20px;
+            padding: 24px;
             text-align: center;
             cursor: pointer;
             transition: border-color 0.2s;
@@ -104,7 +445,7 @@
             color: white;
             border: none;
             padding: 8px 20px;
-            border-radius: 6px;
+            border-radius: 99px;
             font-size: 0.85rem;
             font-weight: 600;
             cursor: pointer;
@@ -144,8 +485,8 @@
 
         .cit-img-box {
             width: 100%;
-            height: 180px;
-            border-radius: 12px;
+            height: 200px;
+            border-radius: 20px;
             background: #f1f5f9;
             overflow: hidden;
             margin-bottom: 24px;
@@ -171,7 +512,7 @@
             justify-content: space-between;
             padding: 14px 16px;
             border: 1.5px solid var(--border);
-            border-radius: 12px;
+            border-radius: 16px;
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -186,7 +527,7 @@
         }
 
         .status-radio.selected {
-            border-color: var(--cm-green);
+            border-color: var(--success);
             background: #e6f6ec;
         }
 
@@ -201,7 +542,8 @@
         }
 
         .sr-text {
-            font-weight: 600;
+            font-weight: 700;
+            font-family: var(--font-display);
             font-size: 0.95rem;
             color: var(--text);
         }
@@ -217,23 +559,24 @@
         }
 
         .status-radio.selected .sr-indicator {
-            border-color: var(--cm-green);
+            border-color: var(--success);
         }
 
         .status-radio.selected .sr-indicator::after {
             content: '';
             width: 10px;
             height: 10px;
-            background: var(--cm-green);
+            background: var(--success);
             border-radius: 50%;
         }
 
         .section-title {
-            font-size: 1.1rem;
+            font-family: var(--font-display);
+            font-size: 1.15rem;
             font-weight: 800;
             color: var(--text);
             margin-bottom: 16px;
-            border-bottom: 1px solid var(--border);
+            border-bottom: 1.5px solid var(--border);
             padding-bottom: 8px;
         }
 
@@ -258,33 +601,32 @@
 
         .chart-card {
             background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 20px 24px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 24px;
+            padding: 24px;
+            box-shadow: var(--shadow-sm);
         }
 
         .chart-card-title {
-            font-size: 0.88rem;
-            font-weight: 700;
-            color: #64748b;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
+            font-family: var(--font-display);
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text);
             margin-bottom: 4px;
         }
 
         .chart-card-subtitle {
-            font-size: 0.78rem;
-            color: #94a3b8;
+            font-size: 0.8rem;
+            color: var(--text-muted);
             margin-bottom: 16px;
         }
 
         .kpi-card {
             background: #fff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 20px;
             padding: 20px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+            box-shadow: var(--shadow-sm);
             display: flex;
             flex-direction: column;
             gap: 8px;
@@ -299,7 +641,7 @@
             left: 0;
             right: 0;
             height: 3px;
-            border-radius: 16px 16px 0 0;
+            border-radius: 20px 20px 0 0;
         }
 
         .kpi-card.kpi-blue::before {
@@ -323,13 +665,14 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .kpi-value {
+            font-family: var(--font-display);
             font-size: 2.2rem;
             font-weight: 800;
-            color: #0f172a;
+            color: var(--text);
             line-height: 1;
         }
 
@@ -346,6 +689,7 @@
             font-weight: 600;
             padding: 2px 8px;
             border-radius: 99px;
+            width: fit-content;
         }
 
         .kpi-badge.green {
@@ -358,252 +702,82 @@
             color: #dc2626;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .analytics-fadein {
-            animation: fadeInUp 0.45s ease both;
-        }
-
-        @media (max-width: 900px) {
-            .analytics-grid-4 {
-                grid-template-columns: repeat(2, 1fr);
-            }
-
-            .analytics-grid-2 {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .dash-header {
-                height: auto;
-                padding-top: 16px;
-                padding-bottom: 16px;
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            #issues-filter-wrap {
-                margin-top: 12px;
-                width: 100%;
-                flex-direction: column;
-            }
-
-            #status-filter {
-                width: 100% !important;
-            }
-
-            .analytics-grid-4 {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        /* ── Notification Dropdown ── */
-        .notification-wrapper {
-            position: relative;
-        }
-
-        .notification-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: #ef4444;
-            color: white;
-            font-size: 0.65rem;
-            font-weight: 800;
-            padding: 2px 5px;
-            border-radius: 10px;
-            border: 2px solid white;
+        .tab-pane {
             display: none;
         }
 
-        .notification-dropdown {
-            position: absolute;
-            top: 40px;
-            right: 0;
-            width: 320px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            border: 1px solid var(--border);
-            display: none;
-            flex-direction: column;
-            z-index: 1000;
-            max-height: 480px;
-            overflow: hidden;
-            animation: fadeInScale 0.2s ease forwards;
-        }
-
-        @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); transform-origin: top right; }
-            to { opacity: 1; transform: scale(1); }
-        }
-
-        .notification-dropdown.open {
-            display: flex;
-        }
-
-        .notification-header {
-            padding: 16px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .notification-list {
-            overflow-y: auto;
-            flex: 1;
-        }
-
-        .notification-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .notification-item.unread {
-            background: #f0f9ff;
-            border-left: 3px solid var(--primary);
-        }
-
-        .notification-delete-btn {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.8rem;
-            opacity: 0;
-            transition: all 0.2s;
-            z-index: 2;
-            border: none;
-            cursor: pointer;
-        }
-
-        .notification-item:hover {
-            background: #f8fafc;
-        }
-
-        .notification-item:hover .notification-delete-btn {
-            opacity: 1;
-        }
-
-        .notification-delete-btn:hover {
-            background: #ef4444;
-            color: white;
-            transform: scale(1.1);
-        }
-
-        .notification-item-title {
-            font-weight: 700;
-            font-size: 0.88rem;
-            color: var(--text);
-        }
-
-        .notification-item-msg {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            line-height: 1.4;
-        }
-
-        .notification-item-time {
-            font-size: 0.72rem;
-            color: #94a3b8;
-            margin-top: 4px;
-        }
-
-        .notification-empty {
-            padding: 32px;
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-        }
-
-        .header-bell {
-            font-size: 1.2rem;
-            color: var(--text-muted);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
+        .tab-pane.active {
+            display: block;
         }
     </style>
 </head>
 
 <body>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo">
-                <div class="logo-icon">♻</div><span>CleanMadurai</span>
-            </div>
+    <!-- Hidden elements for backward compatibility of js sidebar/hamburger methods -->
+    <div style="display: none;">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div id="sidebar-name"></div>
+            <div id="sidebar-role"></div>
+            <div id="sidebar-avatar"></div>
+            <button id="logout-btn-hidden"></button>
+        </aside>
+        <button id="hamburger"></button>
+        <button id="mobile-logout-btn"></button>
+        <div class="tab-list">
+            <button id="tab-issues-btn" onclick="switchTab('issues')"></button>
+            <button id="tab-reviews-btn" onclick="switchTab('reviews')"></button>
+            <button id="tab-analytics-btn" onclick="switchTab('analytics')"></button>
         </div>
-        <nav class="sidebar-nav">
-            <div class="sidebar-section-label" data-i18n="dept_panel">Department Panel</div>
-            <a class="sidebar-link" data-tab="issues" href="#" id="nav-issues"
-                onclick="event.preventDefault();switchTab('issues');"><span class="icon">🏛️</span> My Issues</a>
-            <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews"
-                onclick="event.preventDefault();switchTab('reviews');"><span class="icon">⭐</span> Reviews</a>
-            <a class="sidebar-link" data-tab="analytics" href="#" id="nav-analytics"
-                onclick="event.preventDefault();switchTab('analytics');"><span class="icon">📊</span> <span
-                    data-i18n="tab_analytics">Analytics</span></a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="sidebar-user">
-                <div class="user-avatar-sidebar" id="sidebar-avatar">D</div>
-                <div>
-                    <div class="sidebar-user-name" id="sidebar-name">Department Staff</div>
-                    <div class="sidebar-user-role" id="sidebar-role">Department</div>
-                </div>
-            </div>
-            <button id="logout-btn" class="btn btn-ghost btn-full"
-                style="color:rgba(255,255,255,0.5);margin-top:8px;font-size:0.82rem;" data-i18n="nav_logout">🚪 Sign
-                Out</button>
-        </div>
-    </aside>
+    </div>
 
     <div class="dash-layout">
         <main class="dash-main">
-            <header class="dash-header glass">
-                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <button class="hamburger" id="hamburger">☰</button>
-                        <span class="dash-header-title" id="dept-title" data-i18n="lbl_dept_overview">Department
-                            Overview</span>
+            <!-- Floating Nav Island -->
+            <div class="nav-island-container">
+                <nav class="nav-island">
+                    <div class="logo">
+                        <span>MaduraiSevi</span>
                     </div>
-                    <div class="header-actions" style="display:flex;align-items:center;gap:20px;">
-                        <select class="select lang-switcher" style="padding:4px 8px; font-size:0.85rem;">
+
+                    <!-- Top Doc Navigation Links -->
+                    <ul class="nav-links">
+                        <li>
+                            <a class="nav-link-item active" href="#" id="nav-issues" onclick="event.preventDefault(); switchTab('issues');">
+                                My Issues
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link-item" href="#" id="nav-reviews" onclick="event.preventDefault(); switchTab('reviews');">
+                                Reviews
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link-item" href="#" id="nav-analytics" onclick="event.preventDefault(); switchTab('analytics');">
+                                Analytics
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="nav-actions">
+                        <!-- Mobile Burger Button -->
+                        <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+                        
+                        <select class="select lang-switcher" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
                             <option value="en">English</option>
                             <option value="ta">தமிழ்</option>
                         </select>
-                        
+
                         <!-- Notification Bell -->
                         <div class="notification-wrapper">
                             <div class="header-bell" id="notification-bell">
-                                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                                 </svg>
@@ -615,40 +789,81 @@
                                     <button id="mark-all-read" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; color: var(--primary);">Mark all as read</button>
                                 </div>
                                 <div class="notification-list" id="notification-list">
-                                    <!-- Notifications here -->
+                                    <!-- Dynamic -->
                                 </div>
                             </div>
                         </div>
 
-                        <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn"
-                            data-i18n="nav_logout">Logout</button>
+                        <!-- User Info Profile Circle & Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
+                            <div class="user-avatar-sidebar"
+                                style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2);"
+                                id="sidebar-avatar-visible">
+                                D
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:2px; font-family:var(--font-display); display: none;">
+                                <span id="sidebar-name-visible" style="font-weight:700; font-size:0.85rem; color:var(--text);">Staff</span>
+                                <span id="sidebar-role-visible" style="font-size:0.7rem; color:var(--text-muted);">Dept</span>
+                            </div>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Mobile Drawer Navigation -->
+                <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+                    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+                        <div class="mobile-drawer-header">
+                            <div class="logo">
+                                <span>MaduraiSevi</span>
+                            </div>
+                            <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
+                        </div>
+                        <div class="mobile-drawer-nav">
+                            <a href="#" class="mobile-drawer-link active" id="drawer-issues">
+                                <span class="drawer-icon">📋</span> My Issues
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-reviews">
+                                <span class="drawer-icon">⭐</span> Reviews
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-analytics">
+                                <span class="drawer-icon">📊</span> Analytics
+                            </a>
+                        </div>
+                        <div class="mobile-drawer-footer">
+                            <div class="mobile-drawer-user">
+                                <div class="mobile-drawer-user-avatar" id="drawer-avatar">D</div>
+                                <div class="mobile-drawer-user-info">
+                                    <div class="mobile-drawer-user-name" id="drawer-name">Department User</div>
+                                    <div class="mobile-drawer-user-role">Staff</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;" id="drawer-logout-btn">Logout</button>
+                        </div>
                     </div>
                 </div>
-                <div class="header-filters" id="issues-filter-wrap" style="display:flex;gap:12px;align-items:center;">
-                    <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem;">
-                        <option value="">All Statuses</option>
-                        <option value="PENDING">Pending</option>
-                        <option value="IN_PROGRESS">Processing</option>
-                        <option value="COMPLETED">Done</option>
-                    </select>
-                    <button id="download-excel-btn" class="btn btn-primary btn-sm"
-                        style="display:flex;align-items:center;gap:6px;" data-i18n="btn_download">
-                        📊 Download Excel
-                    </button>
-                </div>
-            </header>
+            </div>
 
+            <!-- Content Area -->
             <div class="dash-content animate-in">
+                <!-- Header Filters/Controls inside visual wrapper -->
                 <div class="page-header animate-in stagger-1">
                     <div id="page-header-text">
                         <h2 class="page-title" id="page-title">Issues Management</h2>
-                        <p class="page-subtitle">Review, update and resolve civic complaints in your area.</p>
+                        <p class="page-subtitle" id="dept-title">Review, update and resolve civic complaints in your area.</p>
                     </div>
-                    <div class="tab-list">
-                        <button class="tab-btn active" id="tab-issues-btn" onclick="switchTab('issues')">Issues</button>
-                        <button class="tab-btn" id="tab-reviews-btn" onclick="switchTab('reviews')">Reviews</button>
-                        <button class="tab-btn" id="tab-analytics-btn" onclick="switchTab('analytics')">📊
-                            Analytics</button>
+                    
+                    <div class="header-filters" id="issues-filter-wrap" style="display:flex;gap:12px;align-items:center;">
+                        <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
+                            <option value="">All Statuses</option>
+                            <option value="PENDING">Pending</option>
+                            <option value="IN_PROGRESS">Processing</option>
+                            <option value="COMPLETED">Done</option>
+                        </select>
+                        <button id="download-excel-btn" class="btn btn-primary btn-sm"
+                            style="display:flex;align-items:center;gap:6px; border-radius:99px;" data-i18n="btn_download">
+                            📊 Download Excel
+                        </button>
                     </div>
                 </div>
 
@@ -660,21 +875,21 @@
                                 <div class="stat-label">Assigned Issues</div>
                                 <div class="stat-value" id="s-total">—</div>
                             </div>
-                            <div class="stat-icon blue">📋</div>
+                            <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">📋</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" style="border-color: rgba(255, 208, 0, 0.25);">
                             <div>
                                 <div class="stat-label" style="color:var(--warning);">Pending</div>
                                 <div class="stat-value" id="s-pending" style="color:var(--warning);">—</div>
                             </div>
-                            <div class="stat-icon yellow">⏳</div>
+                            <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">⏳</div>
                         </div>
-                        <div class="stat-card">
+                        <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.25);">
                             <div>
                                 <div class="stat-label" style="color:var(--success);">Completed</div>
                                 <div class="stat-value" id="s-resolved" style="color:var(--success);">—</div>
                             </div>
-                            <div class="stat-icon green">✅</div>
+                            <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">✅</div>
                         </div>
                     </div>
                     <div id="issues-list" class="space-y-4"></div>
@@ -698,25 +913,25 @@
                                 <span class="kpi-icon">📋</span>
                                 <div class="kpi-label" data-i18n="lbl_total_reports">Total Complaints</div>
                                 <div class="kpi-value" id="ak-total">—</div>
-                                <span class="kpi-badge green" id="ak-total-badge">Loading…</span>
+                                <span class="kpi-badge green" id="ak-total-badge" style="margin-top: 4px;">Loading…</span>
                             </div>
                             <div class="kpi-card kpi-green">
                                 <span class="kpi-icon">✅</span>
                                 <div class="kpi-label">Resolved</div>
                                 <div class="kpi-value" id="ak-resolved" style="color:#10B981;">—</div>
-                                <span class="kpi-badge green" id="ak-res-badge">Loading…</span>
+                                <span class="kpi-badge green" id="ak-res-badge" style="margin-top: 4px;">Loading…</span>
                             </div>
                             <div class="kpi-card kpi-yellow">
                                 <span class="kpi-icon">⏳</span>
                                 <div class="kpi-label" data-i18n="lbl_pending_reports">Pending</div>
                                 <div class="kpi-value" id="ak-pending" style="color:#F59E0B;">—</div>
-                                <span class="kpi-badge red" id="ak-pend-badge">Loading…</span>
+                                <span class="kpi-badge red" id="ak-pend-badge" style="margin-top: 4px;">Loading…</span>
                             </div>
                             <div class="kpi-card kpi-purple">
                                 <span class="kpi-icon">🎯</span>
                                 <div class="kpi-label">Resolution Rate</div>
                                 <div class="kpi-value" id="ak-rate" style="color:#8B5CF6;">—</div>
-                                <span class="kpi-badge green">Efficiency</span>
+                                <span class="kpi-badge green" style="margin-top: 4px;">Efficiency</span>
                             </div>
                         </div>
 
@@ -751,32 +966,32 @@
                 <div class="modal-title">Update Issue Status</div>
                 <button class="modal-close" id="modal-close">✕</button>
             </div>
-            <div class="modal-body" style="max-height: 80vh; overflow-y: auto;">
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <form id="update-form" class="form-stack">
                     <div class="section-title">Issue Information</div>
 
                     <div class="detail-row">
                         <span class="detail-label">Issue Title</span>
-                        <span class="detail-val" id="modal-issue-title"></span>
+                        <span class="detail-val" id="modal-issue-title" style="font-weight:700;"></span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Issue Description</span>
                         <span class="detail-val" id="modal-issue-desc"
-                            style="font-size: 0.85rem; line-height: 1.5;"></span>
+                            style="font-size: 0.88rem; line-height: 1.5; color: var(--text-muted);"></span>
                     </div>
                     <div class="grid grid-2" style="gap:16px;">
                         <div class="detail-row">
                             <span class="detail-label">Location</span>
-                            <span class="detail-val" id="modal-issue-loc" style="font-size: 0.85rem;"></span>
+                            <span class="detail-val" id="modal-issue-loc" style="font-size: 0.88rem;"></span>
                         </div>
                         <div class="detail-row">
                             <span class="detail-label">Reported Date</span>
-                            <span class="detail-val" id="modal-issue-date" style="font-size: 0.85rem;"></span>
+                            <span class="detail-val" id="modal-issue-date" style="font-size: 0.88rem;"></span>
                         </div>
                     </div>
 
                     <div class="detail-row" style="margin-top:8px;">
-                        <span class="detail-label" style="margin-bottom:4px;">Citizen Uploaded Image</span>
+                        <span class="detail-label" style="margin-bottom:8px;">Citizen Uploaded Image</span>
                         <div class="cit-img-box">
                             <img id="modal-issue-img" src="" alt="Citizen image issue preview" />
                         </div>
@@ -813,7 +1028,7 @@
 
                     <!-- Proof image upload — only shown when Done is selected -->
                     <div class="form-group" id="completion-group"
-                        style="display:none;background:var(--bg-muted);padding:16px;border-radius:12px;border:1px dashed var(--border);">
+                        style="display:none;background:rgba(15,23,42,0.02);padding:16px;border-radius:20px;border:1px dashed var(--border);">
                         <label class="label">Upload Resolution Proof <span
                                 style="color:#ef4444;">*Required</span></label>
                         <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:12px;">Please upload an image
@@ -833,9 +1048,9 @@
             </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" id="modal-cancel">Cancel</button>
-                <button class="btn btn-primary" id="update-submit">
+                <button class="btn btn-primary btn-lg" id="update-submit">
                     <span id="update-text">Update Status</span>
-                    <div class="spinner spinner-sm" id="update-spinner" style="display:none;"></div>
+                    <div class="spinner spinner-sm" id="update-spinner" style="display:none; border-top-color: white;"></div>
                 </button>
             </div>
         </div>
@@ -843,7 +1058,7 @@
 
     <!-- Download Reports Modal (Issue/Reports) -->
     <div class="modal-overlay" id="download-reports-modal">
-        <div class="modal" style="max-width:400px;">
+        <div class="modal" style="max-width:420px;">
             <div class="modal-header">
                 <div class="modal-title">Export Reports Data</div>
                 <button class="modal-close" onclick="document.getElementById('download-reports-modal').classList.remove('open')">✕</button>
@@ -854,14 +1069,14 @@
                 <div style="display:flex;flex-direction:column;gap:16px;">
                     <div class="form-group">
                         <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start Date</label>
-                        <input type="date" id="rep-dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:8px;border:1px solid var(--border);">
+                        <input type="date" id="rep-dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
                     <div class="form-group">
                         <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End Date</label>
-                        <input type="date" id="rep-dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:8px;border:1px solid var(--border);">
+                        <input type="date" id="rep-dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
                     
-                    <button id="confirm-reports-dl-btn" class="btn btn-primary" style="width:100%;margin-top:8px;height:44px;font-weight:700;">
+                    <button id="confirm-reports-dl-btn" class="btn btn-primary btn-lg" style="width:100%;margin-top:8px;font-weight:700;">
                         📥 Download Excel Report
                     </button>
                 </div>
@@ -875,6 +1090,7 @@
         import { issuesAPI, reviewsAPI, analyticsAPI, notificationsAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t } from './js/i18n.js';
+        import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
         const DEPT_ROLES = ['MADURAI_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
         const user = guardPage(DEPT_ROLES);
@@ -886,11 +1102,12 @@
         document.getElementById('sidebar-name').textContent = user.name;
         document.getElementById('sidebar-role').textContent = deptLabel;
         document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById('sidebar-avatar-visible').textContent = user.name.charAt(0).toUpperCase();
         const deptTitleEl = document.getElementById('dept-title');
         if (deptTitleEl) deptTitleEl.textContent = `${deptLabel} Dashboard`;
         document.getElementById('page-title').textContent = `${deptLabel} Issues`;
 
-        // Wire up both logout buttons
+        // Wire up logout buttons
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         if (logoutBtn) logoutBtn.addEventListener('click', logout);
@@ -1009,18 +1226,19 @@
 
         // Tab switching
         let analyticsLoaded = false;
+        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', analytics: 'drawer-analytics' };
         window.switchTab = (name) => {
+            sessionStorage.setItem('departmentDashboardTab', name);
             ['issues', 'reviews', 'analytics'].forEach(t => {
-                document.getElementById('tab-' + t).classList.remove('active');
-                document.getElementById('tab-' + t + '-btn').classList.remove('active');
-                const navEl = document.getElementById('nav-' + t);
-                if (navEl) navEl.classList.remove('active');
+                const pane = document.getElementById('tab-' + t);
+                pane.style.display = t === name ? 'block' : 'none';
+                
+                const navLink = document.getElementById('nav-' + t);
+                if (navLink) navLink.classList.toggle('active', t === name);
             });
-            document.getElementById('tab-' + name).classList.add('active');
-            document.getElementById('tab-' + name + '-btn').classList.add('active');
-            const navEl = document.getElementById('nav-' + name);
-            if (navEl) navEl.classList.add('active');
+
             document.getElementById('issues-filter-wrap').style.display = name === 'issues' ? 'flex' : 'none';
+            syncDrawerActive(drawerByTab[name]);
             if (name === 'reviews') loadReviews();
             if (name === 'analytics' && !analyticsLoaded) {
                 analyticsLoaded = true;
@@ -1086,25 +1304,24 @@
             const statusLabelKey = issue.status === 'COMPLETED' ? 'status_completed' :
                 (issue.status === 'IN_PROGRESS' ? 'status_in_progress' :
                     (issue.status === 'PENDING' ? 'status_pending' : issue.status));
-            const safeTitle = issue.title.replace(/'/g, "\\'").replace(/"/g, "&quot;");
             return `
-        <div class="issue-row" style="cursor:pointer;" onclick="openUpdate('${issue.id}')">
-          <div style="width:44px;height:44px;border-radius:10px;background:var(--bg-muted);display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;">
+        <div class="issue-row animate-in" style="cursor:pointer;" onclick="openUpdate('${issue.id}')">
+          <div style="width:48px;height:48px;border-radius:14px;background:rgba(15,23,42,0.04);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">
             ${catIcons[issue.category] || '📋'}
           </div>
           <div class="issue-row-info">
             <div class="issue-row-title">${issue.title}</div>
             <div class="issue-row-meta">
-              <span>${issue.category}</span><span>•</span>
+              <span style="font-weight:700;color:var(--primary);">${issue.category}</span><span>•</span>
               <span>📍 ${issue.location_name || 'No location'}</span><span>•</span>
               <span>👍 ${issue.supports_count || 0} supports</span><span>•</span>
               <span>By ${issue.reported_by_name || 'Citizen'}</span>
             </div>
-            <div style="margin-top:6px;"><p class="text-sm text-muted" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;">${issue.description}</p></div>
+            <div style="margin-top:6px;"><p class="text-sm text-muted" style="display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden; font-size:0.85rem; line-height:1.4;">${issue.description}</p></div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
-            <span class="badge badge-${issue.status}">${t(statusLabelKey)}</span>
-            <button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openUpdate('${issue.id}')">✏️ ${t('btn_update')}</button>
+            <span class="badge badge-${issue.status}" style="font-size:0.75rem; padding:3px 10px; border-radius:99px;">${t(statusLabelKey)}</span>
+            <button class="btn btn-outline btn-sm" style="border-radius:99px; font-size:0.8rem; padding:4px 12px;" onclick="event.stopPropagation();openUpdate('${issue.id}')">✏️ ${t('btn_update')}</button>
           </div>
         </div>
       `;
@@ -1171,7 +1388,7 @@
             const filtered = status ? allIssues.filter(i => i.status === status) : allIssues;
             const container = document.getElementById('issues-list');
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>No issues found</h3><p>No ${status || ''} issues for your department.</p></div>`;
+                container.innerHTML = `<div class="empty-state" style="padding: 40px; text-align: center; border-radius:24px; border:1.5px dashed var(--border); background: var(--bg-card);"><div class="empty-state-icon" style="font-size: 2.5rem; margin-bottom:12px;">✅</div><h3 style="font-family: var(--font-display); font-weight:800; font-size:1.2rem; color:var(--text);">No issues found</h3><p style="color:var(--text-muted); font-size:0.9rem;">No ${status || ''} issues for your department.</p></div>`;
             } else {
                 container.innerHTML = filtered.map(renderIssueRow).join('');
             }
@@ -1279,18 +1496,18 @@
                 const data = await reviewsAPI.get({ department: user.role });
                 const reviews = data.reviews || [];
                 if (reviews.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⭐</div><h3>No Reviews Yet</h3><p>Citizens will leave reviews once issues are marked as Done.</p></div>`;
+                    container.innerHTML = `<div class="empty-state" style="padding: 40px; text-align: center; border-radius:24px; border:1.5px dashed var(--border); background: var(--bg-card);"><div class="empty-state-icon" style="font-size: 2.5rem; margin-bottom:12px;">⭐</div><h3 style="font-family: var(--font-display); font-weight:800; font-size:1.2rem; color:var(--text);">No Reviews Yet</h3><p style="color:var(--text-muted); font-size:0.9rem;">Citizens will leave reviews once issues are marked as Done.</p></div>`;
                     return;
                 }
                 container.innerHTML = reviews.map(r => `
-          <div class="review-card">
+          <div class="review-card animate-in">
             <div class="review-issue-title">📋 ${r.issues?.title || 'Issue'}</div>
             <div class="review-header">
               <div>
                 <div class="stars">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div>
                 <div class="review-meta">By ${r.user_name} · ${new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
               </div>
-              <span class="badge badge-green">${r.rating}/5</span>
+              <span class="badge badge-green" style="font-size: 0.72rem; padding: 3px 10px; border-radius: 99px;">${r.rating}/5</span>
             </div>
             ${r.comment ? `<div class="review-comment">"${r.comment}"</div>` : ''}
           </div>
@@ -1320,8 +1537,6 @@
                 document.getElementById('ak-total-badge').textContent = stats.inProgress + ' In Progress';
                 document.getElementById('ak-res-badge').textContent = stats.resolutionRate + '% Rate';
                 document.getElementById('ak-pend-badge').textContent = stats.pending + ' Open';
-
-
 
                 // Chart: Status Distribution (Donut)
                 if (deptStatusChart) deptStatusChart.destroy();
@@ -1355,7 +1570,7 @@
                     tooltip: { theme: 'light' }
                 });
                 deptMonthlyChart.render();
-                analyticsLoaded = true; // Set to true after successful load
+                analyticsLoaded = true;
             } catch (err) {
                 console.error('Analytics error:', err);
                 toast.error('Failed to load analytics', err.message);
@@ -1367,8 +1582,29 @@
             if (analyticsLoaded) loadAnalytics();
         });
 
-        // Init: start on issues tab
-        switchTab('issues');
+        // Scroll effect for island navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav-island');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        initDashboardDrawer({
+            linkMap: {
+                'drawer-issues': 'nav-issues',
+                'drawer-reviews': 'nav-reviews',
+                'drawer-analytics': 'nav-analytics'
+            },
+            onLogout: logout
+        });
+
+        // Init: restore the last selected tab when the page is refreshed.
+        const departmentTabs = ['issues', 'reviews', 'analytics'];
+        const savedDepartmentTab = sessionStorage.getItem('departmentDashboardTab');
+        switchTab(departmentTabs.includes(savedDepartmentTab) ? savedDepartmentTab : 'issues');
         loadData();
     </script>
 </body>

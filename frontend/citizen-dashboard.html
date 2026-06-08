@@ -4,205 +4,126 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Citizen dashboard — CleanMadurai</title>
+    <title>Citizen Dashboard — MaduraiSevi</title>
     <meta name="description"
-        content="CleanMadurai citizen dashboard — report, track and support civic issues in Madurai." />
+        content="MaduraiSevi citizen dashboard — report, track and support civic issues in Madurai." />
     <!-- Global CSS -->
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/chatbot.css" />
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Language Script -->
     <script type="module" src="js/i18n.js"></script>
     <script src="js/chatbot.js"></script>
     <style>
-        :root {
-            --cm-green: #16a34a;
-            --cm-green-light: #e6f6ec;
-            --cm-text-dark: #111827;
-            --cm-text-gray: #6b7280;
-            --cm-bg-gray: #f9fafb;
-            --font-inter: 'Inter', sans-serif;
-        }
-
         body {
-            font-family: var(--font-inter);
-            background-color: #ffffff;
-            /* Clean white bg as per screenshot */
+            background-color: #F8F9FB;
         }
 
-        /* ── Sidebar Overrides (Light Theme) ── */
-        .sidebar {
-            background-color: #ffffff;
-            color: var(--cm-text-dark);
-            border-right: 1px solid var(--border);
-            box-shadow: none;
-            width: 280px;
+        /* Override sidebar width for full-width layout */
+        :root {
+            --sidebar-width: 0px;
         }
 
-        .sidebar-logo {
-            padding: 24px 20px;
-            border-bottom: 1px solid var(--border);
+        .dash-main {
+            margin-left: 0 !important;
+            padding-top: 90px;
+        }
+
+        /* ── Floating Nav Bar Overrides ── */
+        .nav-island-container {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
             display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .sidebar-logo .logo-icon-img {
-            width: 44px;
-            height: 44px;
-            border-radius: 4px;
-            object-fit: cover;
-            background: #e2e8f0;
-        }
-
-        .sidebar-logo-text {
-            display: flex;
-            flex-direction: column;
             justify-content: center;
+            padding: 0 20px;
+            pointer-events: none;
         }
 
-        .sidebar-logo-title {
-            color: var(--cm-green);
-            font-weight: 800;
-            font-size: 1.05rem;
-            line-height: 1.2;
-        }
-
-        .sidebar-logo-sub {
-            color: #94a3b8;
-            font-size: 0.65rem;
-            font-weight: 700;
-            margin-top: 2px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .sidebar-nav {
-            padding: 24px 16px;
-        }
-
-        .sidebar-link {
-            color: var(--cm-text-dark);
-            font-weight: 600;
-            font-size: 0.95rem;
-            padding: 12px 16px;
-            border-radius: 8px;
-        }
-
-        .sidebar-link:hover {
-            background-color: var(--cm-bg-gray);
-            color: var(--cm-text-dark);
-        }
-
-        .sidebar-link.active {
-            background-color: var(--cm-green);
-            color: #ffffff;
-            box-shadow: none;
-        }
-
-        .sidebar-link .icon {
-            color: inherit;
-        }
-
-        .sidebar-footer {
-            border-top: 1px solid var(--border);
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-top: auto;
-        }
-
-        .user-avatar-sidebar {
-            width: 40px;
-            height: 40px;
-            background: #333;
-            color: white;
-            font-weight: 600;
-        }
-
-        .logout-text {
-            color: #ef4444;
-            font-weight: 600;
-            font-size: 0.9rem;
-            text-decoration: none;
-            background: none;
-            border: none;
-            padding: 0;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-        }
-
-        .logout-text:hover {
-            text-decoration: underline;
-        }
-
-        /* ── Header Overrides ── */
-        .dash-header {
-            background: #ffffff;
-            border-bottom: 1px solid var(--border);
-            height: 70px;
-            padding: 0 32px;
+        .nav-island {
+            pointer-events: auto;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            width: 100%;
+            max-width: 1300px;
+            height: 68px;
+            padding: 0 16px 0 24px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .dash-header-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--cm-text-dark);
+        .nav-island.scrolled {
+            height: 60px;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 255, 255, 0.6);
         }
 
-        .header-search {
-            background: #f1f5f9;
-            border-radius: 8px;
-            padding: 8px 16px;
+        .nav-island .logo {
             display: flex;
             align-items: center;
             gap: 8px;
-            width: 100%;
-            max-width: 320px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
         }
 
-        .header-search input {
-            border: none;
-            background: transparent;
-            outline: none;
-            font-size: 0.9rem;
-            width: 100%;
+        .nav-island .logo-icon {
+            font-size: 1.35rem;
         }
 
-        .header-actions {
+        .nav-links {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 4px;
+            list-style: none;
         }
 
-        .header-bell {
-            font-size: 1.2rem;
-            color: var(--cm-text-gray);
+        .nav-link-item {
+            padding: 8px 18px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 99px;
+            position: relative;
             cursor: pointer;
+            transition: all var(--transition);
         }
 
-        .header-user {
+        .nav-link-item:hover, .nav-link-item.active {
+            color: var(--primary);
+        }
+
+        .nav-link-item.active {
+            background: rgba(176, 0, 0, 0.05);
+        }
+
+        .nav-link-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 99px;
+            box-shadow: 0 2px 6px var(--primary-glow);
+        }
+
+        .nav-actions {
             display: flex;
             align-items: center;
             gap: 12px;
-            text-align: right;
-        }
-
-        .header-user-info .name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: var(--cm-text-dark);
-        }
-
-        .header-user-info .role {
-            font-size: 0.75rem;
-            color: var(--cm-text-gray);
         }
 
         /* ── Notification Dropdown ── */
@@ -210,15 +131,34 @@
             position: relative;
         }
 
+        .header-bell {
+            position: relative;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.04);
+            transition: all 0.2s;
+        }
+
+        .header-bell:hover {
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--text);
+        }
+
         .notification-badge {
             position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--danger);
+            top: 2px;
+            right: 2px;
+            background: var(--primary);
             color: white;
             font-size: 0.65rem;
             font-weight: 800;
-            padding: 2px 5px;
+            padding: 2px 6px;
             border-radius: 10px;
             border: 2px solid white;
             display: none;
@@ -226,24 +166,25 @@
 
         .notification-dropdown {
             position: absolute;
-            top: 40px;
+            top: 50px;
             right: 0;
-            width: 320px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
-            border: 1px solid var(--border);
+            width: 340px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(15, 23, 42, 0.06);
             display: none;
             flex-direction: column;
             z-index: 1000;
             max-height: 480px;
             overflow: hidden;
-            animation: fadeInScale 0.2s ease forwards;
+            animation: fadeInScale 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95); transform-origin: top right; }
-            to { opacity: 1; transform: scale(1); }
+            from { opacity: 0; transform: scale(0.95) translateY(-10px); transform-origin: top right; }
+            to { opacity: 1; transform: scale(1) translateY(0); }
         }
 
         .notification-dropdown.open {
@@ -251,12 +192,15 @@
         }
 
         .notification-header {
-            padding: 16px;
+            padding: 16px 20px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            font-family: var(--font-display);
             font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
         }
 
         .notification-list {
@@ -265,8 +209,8 @@
         }
 
         .notification-item {
-            padding: 12px 16px;
-            border-bottom: 1px solid #f1f5f9;
+            padding: 14px 20px;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.04);
             cursor: pointer;
             transition: background 0.2s;
             display: flex;
@@ -275,7 +219,7 @@
         }
 
         .notification-item.unread {
-            background: #f0f9ff;
+            background: var(--primary-light);
             border-left: 3px solid var(--primary);
         }
 
@@ -286,8 +230,8 @@
             width: 24px;
             height: 24px;
             border-radius: 50%;
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
+            background: rgba(220, 38, 38, 0.08);
+            color: var(--danger);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -300,7 +244,7 @@
         }
 
         .notification-item:hover {
-            background: #f8fafc;
+            background: rgba(15, 23, 42, 0.02);
         }
 
         .notification-item:hover .notification-delete-btn {
@@ -308,48 +252,36 @@
         }
 
         .notification-delete-btn:hover {
-            background: #ef4444;
+            background: var(--danger);
             color: white;
             transform: scale(1.1);
         }
 
         .notification-item-title {
+            font-family: var(--font-display);
             font-weight: 700;
             font-size: 0.88rem;
-            color: var(--cm-text-dark);
+            color: var(--text);
         }
 
         .notification-item-msg {
-            font-size: 0.8rem;
-            color: var(--cm-text-gray);
-            line-height: 1.4;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.45;
         }
 
         .notification-item-time {
             font-size: 0.72rem;
-            color: #94a3b8;
+            color: var(--text-light);
             margin-top: 4px;
         }
 
         .notification-empty {
-            padding: 32px;
+            padding: 40px;
             text-align: center;
-            color: var(--cm-text-gray);
-            font-size: 0.85rem;
+            color: var(--text-light);
+            font-size: 0.88rem;
         }
-
-        /* ── Main Layout ── */
-        .dash-main {
-            margin-left: 280px;
-        }
-
-        .dash-content {
-            padding: 32px 40px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Redundant layout overrides removed - now handled by global styles.css */
 
         /* ── Welcome Section ── */
         .welcome-header {
@@ -360,117 +292,27 @@
         }
 
         .welcome-title {
-            font-size: 2rem;
+            font-family: var(--font-display);
+            font-size: 2.2rem;
             font-weight: 800;
-            color: var(--cm-green);
-            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .welcome-title span {
+            color: var(--primary);
         }
 
         .welcome-sub {
             font-size: 0.95rem;
-            color: var(--cm-text-gray);
-            font-style: italic;
-        }
-
-        /* ── Stat Cards Grid (Screenshot match) ── */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        @media (max-width: 1024px) {
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        @media (max-width: 640px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .welcome-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-        }
-
-        .stat-box {
-            background: #ffffff;
-            border: 1px solid #f1f5f9;
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .stat-box-info {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .stat-box-label {
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-box-val {
-            font-size: 2.5rem;
-            font-weight: 800;
-            line-height: 1;
-            color: var(--cm-text-dark);
-        }
-
-        .stat-box-icon-wrapper {
-            width: 56px;
-            height: 56px;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-        }
-
-        /* Specific colors */
-        .stat-blue .stat-box-label {
-            color: var(--cm-text-gray);
-        }
-
-        .stat-blue .stat-box-icon-wrapper {
-            background: #e6f6ec;
-            color: var(--cm-green);
-        }
-
-        .stat-green .stat-box-label {
-            color: var(--cm-green);
-        }
-
-        .stat-green .stat-box-icon-wrapper {
-            background: #e6f6ec;
-            color: var(--cm-green);
-        }
-
-        .stat-orange .stat-box-label {
-            color: #d97706;
-        }
-
-        .stat-orange .stat-box-icon-wrapper {
-            background: #fef3c7;
-            color: #d97706;
+            color: var(--text-muted);
         }
 
         /* ── Layout Cols for Issues & Trending ── */
         .content-cols {
             display: grid;
-            grid-template-columns: 1fr 340px;
+            grid-template-columns: 1fr 360px;
             gap: 32px;
         }
 
@@ -485,9 +327,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0;
+            margin-bottom: 24px;
+            border-bottom: 1.5px solid var(--border);
         }
 
         .tabs-nav {
@@ -497,289 +338,90 @@
 
         .tab-item {
             padding: 12px 0;
+            font-family: var(--font-display);
+            font-weight: 700;
             font-size: 0.95rem;
-            font-weight: 600;
-            color: var(--cm-text-gray);
+            color: var(--text-muted);
             cursor: pointer;
             display: flex;
             align-items: center;
             gap: 8px;
             border-bottom: 3px solid transparent;
-            margin-bottom: -1px;
+            margin-bottom: -1.5px;
+            transition: all var(--transition);
         }
 
         .tab-item:hover {
-            color: var(--cm-text-dark);
+            color: var(--primary);
         }
 
         .tab-item.active {
-            color: var(--cm-text-dark);
-            border-bottom: 3px solid var(--cm-green);
-        }
-
-        .filter-btn {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--cm-text-gray);
-            font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer;
-            background: none;
-            border: none;
-            padding: 12px 0;
-        }
-
-        /* ── Issue Cards ── */
-        .issues-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        @media (max-width: 640px) {
-            .issues-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .cm-issue-card {
-            background: #ffffff;
-            border-radius: 16px;
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(0, 0, 0, 0.02);
-            transition: transform 0.2s;
-        }
-
-        .cm-issue-card:hover {
-            transform: translateY(-4px);
-        }
-
-        .ic-image-wrap {
-            position: relative;
-            width: 100%;
-            height: 180px;
-            background: #e2e8f0;
-        }
-
-        .ic-image-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .ic-badges {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            align-items: flex-end;
-        }
-
-        .ic-badge-status {
-            background: #fef08a;
-            color: #854d0e;
-            padding: 4px 10px;
-            border-radius: 99px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .ic-badge-pri {
-            background: rgba(0, 0, 0, 0.6);
-            color: white;
-            padding: 4px 10px;
-            border-radius: 99px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            backdrop-filter: blur(4px);
-        }
-
-        .ic-body {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .ic-row-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .ic-cat {
-            border: 1px solid var(--border);
-            padding: 4px 12px;
-            border-radius: 99px;
-            font-size: 0.65rem;
-            font-weight: 700;
-            color: var(--cm-text-gray);
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-
-        .ic-support-cta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: var(--cm-green);
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
-
-        .ic-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--cm-text-dark);
-            margin-bottom: 12px;
-        }
-
-        .ic-meta {
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            color: #94a3b8;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-        }
-
-        .ic-meta.location {
-            color: #94a3b8;
-        }
-
-        .ic-meta.location .ic-icon {
-            color: var(--cm-green);
-            font-size: 1rem;
-        }
-
-        .ic-meta.time .ic-icon {
-            color: #94a3b8;
-            font-size: 1rem;
-        }
-
-        .ic-desc {
-            font-size: 0.9rem;
-            color: var(--cm-text-gray);
-            margin-top: 12px;
-            margin-bottom: 24px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .ic-footer {
-            margin-top: auto;
-            display: flex;
-            gap: 12px;
-        }
-
-        .ic-btn {
-            flex: 1;
-            padding: 10px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            cursor: pointer;
-            border: none;
-            transition: all 0.2s;
-        }
-
-        .ic-btn-outline {
-            background: transparent;
-            border: 1.5px solid #e5e7eb;
-            color: #6b7280;
-        }
-
-        .ic-btn-supported {
-            background: var(--cm-green-light);
-            color: var(--cm-green);
-            border: 1.5px solid transparent;
-        }
-
-        .ic-btn-solid {
-            background: var(--cm-green);
-            color: white;
-            border: 1.5px solid transparent;
-        }
-
-        .ic-btn-solid:hover {
-            background: #15803d;
-        }
-
-        .ic-btn-outline:hover {
-            background: var(--cm-bg-gray);
-            border-color: #cbd5e1;
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
         }
 
         /* ── Most Supported Panel ── */
         .ms-panel {
-            background: var(--cm-green);
-            border-radius: 16px;
-            padding: 24px;
-            color: white;
-            box-shadow: 0 10px 30px rgba(22, 163, 74, 0.2);
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            box-shadow: var(--shadow-md);
             position: sticky;
-            top: 100px;
+            top: 110px;
         }
 
         .ms-header {
             display: flex;
             align-items: center;
             gap: 8px;
-            font-size: 1.2rem;
-            font-weight: 700;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.25rem;
+            color: var(--text);
             margin-bottom: 6px;
         }
 
         .ms-sub {
             font-size: 0.85rem;
-            color: rgba(255, 255, 255, 0.85);
+            color: var(--text-muted);
             margin-bottom: 20px;
-            line-height: 1.4;
         }
 
         .ms-item {
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 12px;
+            background: rgba(15, 23, 42, 0.03);
+            border: 1px solid rgba(15, 23, 42, 0.04);
+            border-radius: 16px;
             padding: 16px;
             display: flex;
             gap: 16px;
             align-items: center;
-            backdrop-filter: blur(8px);
             margin-bottom: 12px;
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all var(--transition);
         }
 
         .ms-item:hover {
-            background: rgba(255, 255, 255, 0.25);
+            background: #ffffff;
+            border-color: rgba(176, 0, 0, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.03);
         }
 
         .ms-num {
-            width: 36px;
-            height: 36px;
-            background: rgba(255, 255, 255, 0.2);
+            width: 32px;
+            height: 32px;
+            background: var(--primary-light);
+            color: var(--primary);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-family: var(--font-display);
             font-weight: 800;
-            font-size: 1rem;
+            font-size: 0.95rem;
             flex-shrink: 0;
         }
 
@@ -788,22 +430,20 @@
         }
 
         .ms-title {
-            font-weight: 800;
-            font-size: 1rem;
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: var(--text);
             margin-bottom: 4px;
+            text-transform: capitalize;
         }
 
         .ms-meta {
-            font-size: 0.8rem;
-            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.78rem;
+            color: var(--text-muted);
             display: flex;
             align-items: center;
-            gap: 6px;
-        }
-
-        /* Report Modal adjustments */
-        .modal {
-            border-radius: 16px;
+            gap: 4px;
         }
 
         .tab-pane {
@@ -814,23 +454,17 @@
             display: block;
         }
 
-        /* Generic utilities */
-        .ic-icon-svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-
         /* Map */
         #issue-map {
-            height: 200px;
+            height: 220px;
             width: 100%;
-            border-radius: 8px;
-            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            border: 1.5px solid var(--border);
             margin-top: 8px;
             z-index: 10;
         }
-        /* ── Premium Campaign Cards ── */
+
+        /* ── Premium Campaign Cards Grid ── */
         .vm-campaign-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -838,145 +472,12 @@
             margin-top: 24px;
         }
 
-        .vm-campaign-card {
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            border: 1px solid #f1f5f9;
-            position: relative;
-        }
-
-        .vm-campaign-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 20px 40px rgba(124, 58, 237, 0.12);
-            border-color: #ddd6fe;
-        }
-
-        .vm-banner {
-            height: 140px;
-            position: relative;
-            background-size: cover;
-            background-position: center;
-        }
-
-        .vm-status-badge {
-            position: absolute;
-            top: 12px;
-            left: 12px;
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            backdrop-filter: blur(4px);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-        }
-
-        .vm-body {
-            padding: 20px;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .vm-title {
-            font-size: 1.15rem;
-            font-weight: 800;
-            color: #1e293b;
-            margin-bottom: 8px;
-        }
-
-        .vm-meta {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            color: #64748b;
-            font-size: 0.8rem;
-            margin-bottom: 6px;
-        }
-
-        .vm-progress-section {
-            margin-top: 12px;
-            margin-bottom: 16px;
-        }
-
-        .vm-progress-bar {
-            height: 6px;
-            background: #f1f5f9;
-            border-radius: 10px;
-            overflow: hidden;
-            margin-bottom: 6px;
-        }
-
-        .vm-progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #7c3aed, #a78bfa);
-            border-radius: 10px;
-        }
-
-        .vm-stats {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #475569;
-        }
-
-        .vm-desc {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 16px;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .vm-footer {
-            margin-top: auto;
-            display: flex;
-            gap: 10px;
-        }
-
-        .vm-btn {
-            flex: 1;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.85rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-        }
-
-        .vm-btn-primary {
-            background: #7c3aed;
-            color: white;
-        }
-
-        .vm-btn-primary:hover {
-            background: #6d28d9;
-        }
-
-        .vm-btn-outline {
-            background: #f5f3ff;
-            color: #7c3aed;
-        }
-
-        .vm-creator {
-            margin-top: 12px;
-            font-size: 0.75rem;
-            color: #94a3b8;
-            border-top: 1px solid #f1f5f9;
-            padding-top: 10px;
+        @media (max-width: 640px) {
+            .welcome-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+            }
         }
     </style>
     <!-- Leaflet CSS -->
@@ -985,168 +486,186 @@
 </head>
 
 <body>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            <div class="sidebar-logo-text">
-                <div class="sidebar-logo-title">Smart & Clean<br>Madurai</div>
-                <div class="sidebar-logo-sub">Government of Tamil Nadu</div>
-            </div>
-        </div>
-        <nav class="sidebar-nav">
-            <a class="sidebar-link active" href="#" id="nav-dashboard-link">
-                <span style="display:flex;align-items:center;gap:12px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="3" width="7" height="7"></rect>
-                        <rect x="14" y="14" width="7" height="7"></rect>
-                        <rect x="3" y="14" width="7" height="7"></rect>
-                    </svg>
-                    <span data-i18n="nav_dashboard">Citizen Dashboard</span>
-                </span>
-            </a>
-            <a class="sidebar-link" href="#" id="nav-campaigns-link">
-                <span style="display:flex;align-items:center;gap:12px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M3 11l19-9-9 19-2-8-8-2z"></path>
-                    </svg>
-                    <span>Campaigns</span>
-                </span>
-            </a>
-            <a class="sidebar-link" href="#" id="nav-leaderboard-link">
-                <span style="display:flex;align-items:center;gap:12px;">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 15l-3 4-4-4v-8h14v8l-4 4-3-4z"></path>
-                    </svg>
-                    <span>Leaderboard</span>
-                </span>
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="user-avatar-sidebar"
-                style="display:flex;align-items:center;justify-content:center;border-radius:50%;" id="sidebar-avatar">N
-            </div>
-            <button id="logout-btn" class="logout-text">Logout</button>
-        </div>
-    </aside>
+    <!-- Hidden elements for backward compatibility of js sidebar/hamburger methods -->
+    <div style="display: none;">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <a class="sidebar-link" href="#" id="nav-dashboard-link-hidden"></a>
+            <a class="sidebar-link" href="#" id="nav-campaigns-link-hidden"></a>
+            <a class="sidebar-link" href="#" id="nav-leaderboard-link-hidden"></a>
+            <div id="sidebar-avatar-hidden"></div>
+            <button id="logout-btn-hidden"></button>
+        </aside>
+        <button id="hamburger"></button>
+        <button id="mobile-logout-btn"></button>
+    </div>
 
     <div class="dash-layout">
         <main class="dash-main">
-            <!-- Header -->
-            <header class="dash-header glass">
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <button class="hamburger" id="hamburger">☰</button>
-                    <div class="dash-header-title" data-i18n="cit_panel">Citizen Portal</div>
-                </div>
-                <div class="header-actions">
-                    <select class="select lang-switcher" style="padding:4px 8px; font-size:0.85rem;">
-                        <option value="en">English</option>
-                        <option value="ta">தமிழ்</option>
-                    </select>
+            <!-- Floating Nav Island -->
+            <div class="nav-island-container">
+                <nav class="nav-island">
+                    <div class="logo">
+                        <span>MaduraiSevi</span>
+                    </div>
 
-                    <!-- Notification Bell -->
-                    <div class="notification-wrapper">
-                        <div class="header-bell" id="notification-bell">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
-                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                    <!-- Top Doc Navigation Links -->
+                    <ul class="nav-links">
+                        <li><a class="nav-link-item active" href="#" id="nav-dashboard-link">Dashboard</a></li>
+                        <li><a class="nav-link-item" href="#" id="nav-campaigns-link">Campaigns</a></li>
+                        <li><a class="nav-link-item" href="#" id="nav-leaderboard-link">Leaderboard</a></li>
+                    </ul>
+
+                    <div class="nav-actions">
+                        <!-- Mobile Burger Button -->
+                        <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
-                            <span class="notification-badge" id="notification-count">0</span>
-                        </div>
-                        <div class="notification-dropdown" id="notification-dropdown">
-                            <div class="notification-header">
-                                <span>Notifications</span>
-                                <button id="mark-all-read" class="btn btn-ghost btn-sm" style="font-size: 0.75rem;">Mark all as read</button>
-                            </div>
-                            <div class="notification-list" id="notification-list">
-                                <!-- Notifications here -->
-                            </div>
-                        </div>
-                    </div>
+                        </button>
+                        
+                        <select class="select lang-switcher" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
+                            <option value="en">English</option>
+                            <option value="ta">தமிழ்</option>
+                        </select>
 
-                    <div class="header-user">
-                        <div class="header-user-info">
-                            <div class="name" id="header-name">kevin</div>
-                            <div class="role">Citizen</div>
+                        <!-- Notification Bell -->
+                        <div class="notification-wrapper">
+                            <div class="header-bell" id="notification-bell">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                    <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                                </svg>
+                                <span class="notification-badge" id="notification-count">0</span>
+                            </div>
+                            <div class="notification-dropdown" id="notification-dropdown">
+                                <div class="notification-header">
+                                    <span>Notifications</span>
+                                    <button id="mark-all-read" class="btn btn-ghost btn-sm" style="font-size: 0.75rem;">Mark all as read</button>
+                                </div>
+                                <div class="notification-list" id="notification-list">
+                                    <!-- Dynamic -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Info Profile Circle & Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
+                            <div class="user-avatar-sidebar"
+                                style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2);"
+                                id="sidebar-avatar">
+                                N
+                            </div>
+                            <span id="header-name" style="font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--text); display: none;"></span>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
                         </div>
                     </div>
-                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn"
-                        data-i18n="nav_logout">Logout</button>
+                </nav>
+
+                <!-- Mobile Drawer Navigation -->
+                <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+                    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+                        <div class="mobile-drawer-header">
+                            <div class="logo">
+                                <span>MaduraiSevi</span>
+                            </div>
+                            <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
+                        </div>
+                        <div class="mobile-drawer-nav">
+                            <a href="#" class="mobile-drawer-link active" id="drawer-dashboard-link">
+                                <span class="drawer-icon">🏠</span> Dashboard
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-campaigns-link">
+                                <span class="drawer-icon">📣</span> Campaigns
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-leaderboard-link">
+                                <span class="drawer-icon">🏆</span> Leaderboard
+                            </a>
+                        </div>
+                        <div class="mobile-drawer-footer">
+                            <div class="mobile-drawer-user">
+                                <div class="mobile-drawer-user-avatar" id="drawer-avatar">N</div>
+                                <div class="mobile-drawer-user-info">
+                                    <div class="mobile-drawer-user-name" id="drawer-name">User</div>
+                                    <div class="mobile-drawer-user-role">Citizen</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;" id="drawer-logout-btn">Logout</button>
+                        </div>
+                    </div>
                 </div>
-            </header>
+            </div>
 
+            <!-- ── Dashboard View ── -->
             <div class="dash-content animate-in" id="main-dashboard-view">
-                <!-- Welcome -->
+                <!-- Welcome Banner -->
                 <div class="welcome-header animate-in stagger-1">
                     <div>
-                        <h1 class="welcome-title text-primary" id="welcome-msg">Welcome back, <span id="welcome-name">kevin</span>!</h1>
+                        <h1 class="welcome-title" id="welcome-msg">Welcome back, <span id="welcome-name">kevin</span>!</h1>
                         <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Madurai. Report. Support. Impact.</p>
                     </div>
-                    <button id="report-btn" class="btn btn-primary" style="border-radius:8px; padding:12px 24px;"
-                        data-i18n="lbl_report_name">
+                    <button id="report-btn" class="btn btn-primary btn-lg" style="box-shadow: var(--shadow-primary);">
                         ＋ Report New Issue
                     </button>
                 </div>
 
                 <!-- Stats Grid -->
-                <div class="stats-grid animate-in stagger-2">
-                    <div class="stat-box stat-blue">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label">Reports Submitted</div>
-                            <div class="stat-box-val" id="stat-reports-submitted">0</div>
-                            <div style="font-size:0.75rem;color:#64748b;margin-top:4px;">Resolved: <span id="stat-reports-resolved">0</span></div>
+                <div class="grid grid-4 animate-in stagger-2" style="margin-bottom: 32px;">
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-label">Reports Submitted</div>
+                            <div class="stat-value" id="stat-reports-submitted">0</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Resolved: <strong id="stat-reports-resolved" style="color:var(--success);">0</strong></div>
                         </div>
-                        <div class="stat-box-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                        </div>
-                    </div>
-                    <div class="stat-box stat-purple" style="border-right: 4px solid #7c3aed;">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label">Campaigns Participated</div>
-                            <div class="stat-box-val" id="stat-campaigns-participated">0</div>
-                        </div>
-                        <div class="stat-box-icon-wrapper" style="background:#f5f3ff;color:#7c3aed;">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                        <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         </div>
                     </div>
-                    <div class="stat-box stat-orange">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label">Campaigns Created</div>
-                            <div class="stat-box-val" id="stat-campaigns-organized">0</div>
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-label">Campaigns Participated</div>
+                            <div class="stat-value" id="stat-campaigns-participated">0</div>
                         </div>
-                        <div class="stat-box-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <div class="stat-icon purple" style="background: rgba(124, 58, 237, 0.08); color: #7c3aed;">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         </div>
                     </div>
-                    <div class="stat-box stat-green" style="border-right: 4px solid var(--cm-green);">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label" style="font-weight:800;color:var(--cm-green);">Total Points</div>
-                            <div class="stat-box-val" id="stat-total-points" style="color:var(--cm-green);">0</div>
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-label">Campaigns Created</div>
+                            <div class="stat-value" id="stat-campaigns-organized">0</div>
                         </div>
-                        <div class="stat-box-icon-wrapper">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.25);">
+                        <div>
+                            <div class="stat-label" style="color:var(--success);">Total Points</div>
+                            <div class="stat-value" id="stat-total-points" style="color:var(--success);">0</div>
+                        </div>
+                        <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
                         </div>
                     </div>
                 </div>
 
                 <div class="content-cols animate-in stagger-3">
-                    <!-- Left: Tabs + Grid -->
+                    <!-- Left: Tabs & Feed -->
                     <div>
                         <div class="tabs-header">
                             <div class="tabs-nav">
                                 <div class="tab-item active" data-tab="community">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
                                     </svg>
                                     Community Feed
                                 </div>
                                 <div class="tab-item" data-tab="mine">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                                         <polyline points="14 2 14 8 20 8"></polyline>
@@ -1167,7 +686,7 @@
                         </div>
                     </div>
 
-                    <!-- Right: Trending -->
+                    <!-- Right: Trending Panel -->
                     <div>
                         <div class="ms-panel">
                             <div class="ms-header">
@@ -1178,51 +697,49 @@
                                 </svg>
                                 <span data-i18n="lbl_assigned_issues">Most Supported</span>
                             </div>
-                            <div class="ms-sub" data-i18n="lbl_city_wide_desc">Issues receiving the most attention right
-                                now.</div>
+                            <div class="ms-sub" data-i18n="lbl_city_wide_desc">Issues receiving the most attention right now.</div>
                             <div id="trending-list">
-                                <!-- Populated dynamically -->
+                                <!-- Dynamically populated -->
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ═══════════════════════════════════ CAMPAIGNS PAGE ═══════════════════════════════════ -->
+            <!-- ── Campaigns View ── -->
             <div class="dash-content animate-in" id="campaigns-section" style="display:none;">
                 <div class="welcome-header animate-in stagger-1">
                     <div>
-                        <h1 class="welcome-title" style="color:#7c3aed;">📣 Community Campaigns</h1>
-                        <p class="welcome-sub">Join civic drives, tree plantations, cleanups and more. Be the change!
-                        </p>
+                        <h1 class="welcome-title">📣 Community Campaigns</h1>
+                        <p class="welcome-sub">Join civic drives, tree plantations, cleanups and more. Be the change!</p>
                     </div>
-                    <button id="create-campaign-btn" class="btn btn-primary"
-                        style="border-radius:8px;padding:12px 24px;background:#7c3aed;border-color:#7c3aed;">＋ Create
-                        Campaign</button>
+                    <button id="create-campaign-btn" class="btn btn-primary btn-lg" style="background:#7c3aed; box-shadow: 0 10px 25px rgba(124, 58, 237, 0.25);">
+                        ＋ Create Campaign
+                    </button>
                 </div>
 
                 <!-- Campaign Stats -->
-                <div class="stats-grid animate-in stagger-2" style="margin-bottom:32px;">
-                    <div class="stat-box" style="border-color:#ede9fe;">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label" style="color:#7c3aed;">Total Campaigns</div>
-                            <div class="stat-box-val" id="camp-stat-total">0</div>
+                <div class="grid grid-3 animate-in stagger-2" style="margin-bottom:32px;">
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-label">Total Campaigns</div>
+                            <div class="stat-value" id="camp-stat-total">0</div>
                         </div>
-                        <div class="stat-box-icon-wrapper" style="background:#ede9fe;color:#7c3aed;font-size:1.5rem;">📣</div>
+                        <div class="stat-icon purple" style="background:#ede9fe; color:#7c3aed; font-size:1.4rem;">📣</div>
                     </div>
-                    <div class="stat-box" style="border-color:#dbeafe;">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label" style="color:#2563eb;">Upcoming</div>
-                            <div class="stat-box-val" id="camp-stat-upcoming">0</div>
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-label">Upcoming</div>
+                            <div class="stat-value" id="camp-stat-upcoming">0</div>
                         </div>
-                        <div class="stat-box-icon-wrapper" style="background:#dbeafe;color:#2563eb;font-size:1.5rem;">🗓️</div>
+                        <div class="stat-icon blue" style="background:#dbeafe; color:#2563eb; font-size:1.4rem;">🗓️</div>
                     </div>
-                    <div class="stat-box" style="border-color:#dcfce7;">
-                        <div class="stat-box-info">
-                            <div class="stat-box-label" style="color:var(--cm-green);">Active Now</div>
-                            <div class="stat-box-val" id="camp-stat-active">0</div>
+                    <div class="stat-card">
+                        <div>
+                            <div class="stat-label">Active Now</div>
+                            <div class="stat-value" id="camp-stat-active">0</div>
                         </div>
-                        <div class="stat-box-icon-wrapper" style="background:#dcfce7;color:var(--cm-green);font-size:1.5rem;">🏃</div>
+                        <div class="stat-icon green" style="background:#dcfce7; color:var(--success); font-size:1.4rem;">🏃</div>
                     </div>
                 </div>
 
@@ -1241,40 +758,29 @@
                 <div id="campaigns-grid" class="vm-campaign-grid"></div>
             </div>
 
-            <!-- Leaderboard Section -->
+            <!-- ── Leaderboard View ── -->
             <div class="dash-content animate-in" id="leaderboard-section" style="display:none;">
                 <div class="welcome-header animate-in stagger-1">
                     <div>
-                        <h1 class="welcome-title text-primary"
-                            style="display:flex;align-items:center;gap:12px;">🏆 Top Contributors</h1>
+                        <h1 class="welcome-title">🏆 Top Contributors</h1>
                         <p class="welcome-sub">The heroes making our city a better place.</p>
                     </div>
                 </div>
 
-                <div
-                    style="background:#fff;border-radius:16px;border:1px solid var(--border);padding:24px;box-shadow:0 10px 30px rgba(0,0,0,0.03);">
-                    <table class="table" style="width:100%;text-align:left;border-collapse:collapse;">
+                <div class="table-wrap">
+                    <table class="table">
                         <thead>
-                            <tr style="border-bottom:2px solid var(--border);">
-                                <th style="padding:16px 12px;color:var(--cm-text-gray);font-weight:700;">Rank
-                                </th>
-                                <th style="padding:16px 12px;color:var(--cm-text-gray);font-weight:700;">Citizen
-                                    Name</th>
-                                <th style="padding:16px 12px;color:var(--cm-text-gray);font-weight:700;">Total
-                                    Points</th>
-                                <th
-                                    style="padding:16px 12px;color:var(--cm-text-gray);font-weight:600;font-size:0.85rem;">
-                                    Issues Resolved</th>
-                                <th
-                                    style="padding:16px 12px;color:var(--cm-text-gray);font-weight:600;font-size:0.85rem;">
-                                    Campaigns Joined</th>
-                                <th
-                                    style="padding:16px 12px;color:var(--cm-text-gray);font-weight:600;font-size:0.85rem;">
-                                    Campaigns Run</th>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Citizen Name</th>
+                                <th>Total Points</th>
+                                <th>Issues Resolved</th>
+                                <th>Campaigns Joined</th>
+                                <th>Campaigns Run</th>
                             </tr>
                         </thead>
                         <tbody id="leaderboard-tbody">
-                            <!-- Leaderboard rows -->
+                            <!-- Populated dynamically -->
                         </tbody>
                     </table>
                 </div>
@@ -1282,37 +788,36 @@
         </main>
     </div>
 
-    <!-- Report / Campaign Modal -->
+    <!-- ── Report / Campaign Modal ── -->
     <div class="modal-overlay" id="report-modal">
-        <div class="modal modal-lg">
+        <div class="modal">
             <div class="modal-header">
                 <div>
                     <div class="modal-title" id="modal-main-title">Report New Issue</div>
-                    <p class="text-muted text-sm" style="margin-top:4px;">Help Madurai grow cleaner and greener.</p>
+                    <p style="margin-top:4px; font-size: 0.88rem; color: var(--text-muted);">Help Madurai grow cleaner and greener.</p>
                 </div>
                 <button class="modal-close" id="modal-close">✕</button>
             </div>
             <div class="modal-body">
-                <!-- Mode Toggle -->
-                <div style="display:flex;gap:8px;margin-bottom:20px;background:#f1f5f9;padding:4px;border-radius:10px;">
+                <!-- Mode Toggle tab pill style -->
+                <div style="display:flex; gap:8px; margin-bottom:24px; background:rgba(15,23,42,0.04); padding:6px; border-radius:99px;">
                     <button type="button" id="toggle-issue"
-                        style="flex:1;padding:10px 0;border-radius:8px;border:none;font-weight:700;font-size:0.9rem;background:var(--cm-green);color:#fff;cursor:pointer;transition:all 0.2s;">🚨
+                        style="flex:1; padding:10px 0; border-radius:99px; border:none; font-weight:700; font-family: var(--font-display); font-size:0.9rem; background:var(--primary); color:#fff; cursor:pointer; transition:all var(--transition);">🚨
                         Report Issue</button>
                     <button type="button" id="toggle-campaign"
-                        style="flex:1;padding:10px 0;border-radius:8px;border:none;font-weight:700;font-size:0.9rem;background:transparent;color:var(--cm-text-gray);cursor:pointer;transition:all 0.2s;">📣
+                        style="flex:1; padding:10px 0; border-radius:99px; border:none; font-weight:700; font-family: var(--font-display); font-size:0.9rem; background:transparent; color:var(--text-muted); cursor:pointer; transition:all var(--transition);">📣
                         Run Campaign</button>
                 </div>
 
-                <!-- Issue Form Section -->
+                <!-- Issue Form -->
                 <div id="issue-form-section">
                     <form id="report-form" class="form-stack">
-                        <div class="grid grid-2" style="gap:16px;">
-                            <div class="form-group" style="grid-column:1/-1;">
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div class="form-group">
                                 <label class="label" for="issue-title" data-i18n="lbl_report_name">Issue Title *</label>
-                                <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop"
-                                    required />
+                                <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop" required />
                             </div>
-                            <div class="form-group" style="grid-column:1/-1;">
+                            <div class="form-group">
                                 <label class="label" for="issue-category" data-i18n="lbl_department">Category *</label>
                                 <select id="issue-category" class="select" required>
                                     <option value="">— Select Category —</option>
@@ -1324,77 +829,65 @@
                                     <option value="Fire" data-i18n="cat_fire">🔥 Fire</option>
                                 </select>
                             </div>
-                            <div class="form-group" style="grid-column:1/-1;">
-                                <label class="label" for="issue-location" data-i18n="lbl_location">Location Address
-                                    *</label>
-                                <div style="display:flex;gap:8px;">
-                                    <input id="issue-location" class="input" placeholder="e.g. Coimbatore North..."
-                                        required style="flex:1;" />
-                                    <button type="button" class="btn btn-outline" id="detect-location-btn"
-                                        style="white-space:nowrap;padding:0 16px;border-radius:8px;">📍
-                                        Auto-Detect</button>
+                            <div class="form-group">
+                                <label class="label" for="issue-location" data-i18n="lbl_location">Location Address *</label>
+                                <div style="display:flex; gap:8px; margin-bottom: 8px;">
+                                    <input id="issue-location" class="input" placeholder="e.g. Mattuthavani Bus Stand..." required style="flex:1;" />
+                                    <button type="button" class="btn btn-outline" id="detect-location-btn" style="white-space:nowrap;">📍 Auto-Detect</button>
                                 </div>
                                 <div id="issue-map"></div>
                                 <input type="hidden" id="issue-lat" />
                                 <input type="hidden" id="issue-lng" />
                             </div>
-                            <div class="form-group" style="grid-column:1/-1;">
+                            <div class="form-group">
                                 <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Description *</label>
-                                <textarea id="issue-desc" class="textarea" placeholder="Describe the issue..."
-                                    required></textarea>
+                                <textarea id="issue-desc" class="textarea" placeholder="Describe the issue in detail..." required></textarea>
                             </div>
-                            <div class="form-group" style="grid-column:1/-1;">
-                                <label class="label" for="issue-image">Upload Image *</label>
-                                <div style="display:flex;gap:12px;align-items:center;">
+                            <div class="form-group">
+                                <label class="label">Upload Image *</label>
+                                <div style="display:flex; gap:12px; align-items:center;">
                                     <input id="issue-image" class="input" type="file" accept="image/*" required style="flex:1;" />
-                                    <button type="button" id="image-check-btn" class="btn btn-outline" style="white-space:nowrap;padding:12px 20px;border-radius:8px;display:none;font-weight:700;">
+                                    <button type="button" id="image-check-btn" class="btn btn-outline" style="white-space:nowrap; display:none; font-weight:700;">
                                         🔍 Image Check
                                     </button>
                                 </div>
                                 <div id="image-verify-status"
-                                    style="margin-top:12px;padding:12px;border-radius:10px;font-size:0.88rem;display:none;flex-direction:column;gap:6px;">
+                                    style="margin-top:12px; padding:16px; border-radius:20px; font-size:0.88rem; display:none; flex-direction:column; gap:6px;">
                                 </div>
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding:0;border:none;margin-top:8px;">
-                            <button type="button" class="btn btn-outline" id="modal-cancel"
-                                data-i18n="btn_cancel">Cancel</button>
-                            <button type="submit" id="submit-btn" class="btn btn-primary" style="border-radius:8px;">
+                        <div class="modal-footer" style="padding-top: 24px; margin-top: 12px;">
+                            <button type="button" class="btn btn-ghost" id="modal-cancel" data-i18n="btn_cancel">Cancel</button>
+                            <button type="submit" id="submit-btn" class="btn btn-primary btn-lg">
                                 <span id="submit-text" data-i18n="btn_submit">Submit Report</span>
-                                <div class="spinner spinner-sm" id="submit-spinner" style="display:none;"></div>
+                                <div class="spinner spinner-sm" id="submit-spinner" style="display:none; border-top-color: white;"></div>
                             </button>
                         </div>
                     </form>
                 </div>
 
-                <!-- Campaign Form Section -->
+                <!-- Campaign Form -->
                 <div id="campaign-form-section" style="display:none;">
                     <form id="campaign-form" class="form-stack">
-                        <div style="display:grid;gap:16px;">
+                        <div style="display:flex; flex-direction: column; gap:16px;">
                             <div class="form-group">
                                 <label class="label" for="camp-title">Campaign Title *</label>
-                                <input id="camp-title" class="input"
-                                    placeholder="e.g. Tree Plantation Drive at Anna Nagar" required />
+                                <input id="camp-title" class="input" placeholder="e.g. Tree Plantation Drive at Anna Nagar" required />
                             </div>
                             <div class="form-group">
                                 <label class="label" for="camp-desc">Campaign Description *</label>
-                                <textarea id="camp-desc" class="textarea"
-                                    placeholder="Describe the campaign goals, activities, and what volunteers will do..."
-                                    required style="min-height:90px;"></textarea>
+                                <textarea id="camp-desc" class="textarea" placeholder="Describe the campaign goals..." required></textarea>
                             </div>
                             <div class="form-group">
                                 <label class="label" for="camp-location">Location *</label>
-                                <div style="display:flex;gap:8px;">
-                                    <input id="camp-location" class="input" placeholder="Campaign location address"
-                                        required style="flex:1;" />
-                                    <button type="button" class="btn btn-outline" id="camp-detect-location-btn"
-                                        style="white-space:nowrap;padding:0 16px;border-radius:8px;">📍
-                                        Auto-Detect</button>
+                                <div style="display:flex; gap:8px;">
+                                    <input id="camp-location" class="input" placeholder="Campaign location address" required style="flex:1;" />
+                                    <button type="button" class="btn btn-outline" id="camp-detect-location-btn" style="white-space:nowrap;">📍 Auto-Detect</button>
                                 </div>
                                 <input type="hidden" id="camp-lat" />
                                 <input type="hidden" id="camp-lng" />
                             </div>
-                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
                                 <div class="form-group">
                                     <label class="label" for="camp-start-date">Start Date *</label>
                                     <input id="camp-start-date" class="input" type="date" required />
@@ -1414,25 +907,22 @@
                             </div>
                             <div class="form-group">
                                 <label class="label" for="camp-volunteers">Volunteers Needed *</label>
-                                <input id="camp-volunteers" class="input" type="number" min="1" placeholder="e.g. 50"
-                                    required />
+                                <input id="camp-volunteers" class="input" type="number" min="1" placeholder="e.g. 50" required />
                             </div>
                             <div class="form-group">
                                 <label class="label" for="camp-contact">Contact Mobile Number *</label>
-                                <input id="camp-contact" class="input" type="tel" placeholder="e.g. 9876543210"
-                                    required />
+                                <input id="camp-contact" class="input" type="tel" placeholder="e.g. 9876543210" required />
                             </div>
                             <div class="form-group">
                                 <label class="label" for="camp-image">Campaign Banner (Optional)</label>
                                 <input id="camp-image" class="input" type="file" accept="image/*" />
                             </div>
                         </div>
-                        <div class="modal-footer" style="padding:0;border:none;margin-top:8px;">
-                            <button type="button" class="btn btn-outline" id="camp-cancel">Cancel</button>
-                            <button type="submit" id="camp-submit-btn" class="btn btn-primary"
-                                style="border-radius:8px;background:#7c3aed;">
+                        <div class="modal-footer" style="padding-top: 24px; margin-top: 12px;">
+                            <button type="button" class="btn btn-ghost" id="camp-cancel">Cancel</button>
+                            <button type="submit" id="camp-submit-btn" class="btn btn-primary btn-lg" style="background:#7c3aed;">
                                 <span id="camp-submit-text">🚀 Launch Campaign</span>
-                                <div class="spinner spinner-sm" id="camp-submit-spinner" style="display:none;"></div>
+                                <div class="spinner spinner-sm" id="camp-submit-spinner" style="display:none; border-top-color: white;"></div>
                             </button>
                         </div>
                     </form>
@@ -1441,63 +931,55 @@
         </div>
     </div>
 
-    <!-- Details/Timeline Modal -->
+    <!-- ── Details/Timeline Modal ── -->
     <div class="modal-overlay" id="details-modal">
         <div class="modal">
             <div class="modal-header">
                 <div class="modal-title" data-i18n="btn_view_details">Issue Details</div>
-                <button class="modal-close"
-                    onclick="document.getElementById('details-modal').classList.remove('open')">✕</button>
+                <button class="modal-close" onclick="document.getElementById('details-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <h3 id="det-title" style="font-size:1.1rem;margin-bottom:16px;"></h3>
+                <h3 id="det-title" style="font-size:1.15rem; margin-bottom:18px; font-family: var(--font-display); color: var(--text);"></h3>
 
                 <!-- Timeline -->
-                <div style="margin-bottom:24px;background:var(--cm-bg-gray);border-radius:12px;padding:20px;">
-                    <h4 style="margin-bottom:16px;font-size:0.95rem;">Issue Timeline</h4>
-                    <div id="det-timeline" style="display:flex;flex-direction:column;gap:12px;"></div>
+                <div style="margin-bottom:24px; background:rgba(15,23,42,0.03); border-radius:20px; padding:20px; border: 1px solid var(--border);">
+                    <h4 style="margin-bottom:14px; font-size:0.95rem; font-family: var(--font-display);">Issue Timeline</h4>
+                    <div id="det-timeline" style="display:flex; flex-direction:column; gap:12px; font-size: 0.9rem;"></div>
                 </div>
 
                 <!-- Before & After Images Section -->
-                <div id="det-images-sec" style="margin-bottom:24px;display:none;">
-                    <h4
-                        style="margin-bottom:16px;font-size:0.95rem;border-top:1px solid var(--border);padding-top:16px;">
+                <div id="det-images-sec" style="margin-bottom:24px; display:none;">
+                    <h4 style="margin-bottom:16px; font-size:0.95rem; font-family: var(--font-display); border-top:1px solid var(--border); padding-top:16px;">
                         Issue Resolution</h4>
                     <div class="grid grid-2" style="gap:16px;">
                         <div>
-                            <div
-                                style="font-size:0.8rem;font-weight:600;color:var(--cm-text-gray);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                            <div style="font-size:0.8rem; font-weight:700; color:var(--text-muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">
                                 Before Fix</div>
-                            <div
-                                style="width:100%;height:150px;border-radius:8px;background:#f1f5f9;overflow:hidden;border:1px solid var(--border);">
-                                <img id="det-img-before" src="" style="width:100%;height:100%;object-fit:cover;" />
+                            <div style="width:100%; height:160px; border-radius:16px; overflow:hidden; border:1px solid var(--border);">
+                                <img id="det-img-before" src="" style="width:100%; height:100%; object-fit:cover;" />
                             </div>
                         </div>
                         <div id="det-img-after-container" style="display:none;">
-                            <div
-                                style="font-size:0.8rem;font-weight:600;color:var(--cm-green);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.05em;">
+                            <div style="font-size:0.8rem; font-weight:700; color:var(--success); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.05em;">
                                 After Fix</div>
-                            <div
-                                style="width:100%;height:150px;border-radius:8px;background:#e6f6ec;overflow:hidden;border:1px solid var(--border);position:relative;">
-                                <img id="det-img-after" src="" style="width:100%;height:100%;object-fit:cover;" />
+                            <div style="width:100%; height:160px; border-radius:16px; overflow:hidden; border:1px solid var(--border); position:relative;">
+                                <img id="det-img-after" src="" style="width:100%; height:100%; object-fit:cover;" />
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Reviews Section -->
-                <div id="det-reviews-sec" style="display:none;margin-top:24px;">
-                    <h4
-                        style="margin-bottom:16px;font-size:1.05rem;border-top:1px solid var(--border);padding-top:16px;">
+                <div id="det-reviews-sec" style="display:none; margin-top:24px;">
+                    <h4 style="margin-bottom:16px; font-size:1.05rem; font-family: var(--font-display); border-top:1px solid var(--border); padding-top:16px;">
                         Citizen Reviews</h4>
 
                     <!-- Write Review Form -->
                     <div id="det-my-review-form"
-                        style="display:none;margin-bottom:24px;background:#f8fafc;border:1px solid var(--border);border-radius:12px;padding:20px;">
-                        <h5 style="margin-bottom:8px;">Write a Review</h5>
-                        <p style="font-size:0.8rem;color:var(--cm-text-gray);margin-bottom:12px;">Rate the resolution of
-                            this issue.</p>
-                        <select id="rev-rating" class="select" style="margin-bottom:12px;">
+                        style="display:none; margin-bottom:24px; background:rgba(15,23,42,0.02); border:1px solid var(--border); border-radius:20px; padding:20px;">
+                        <h5 style="margin-bottom:6px; font-family: var(--font-display); font-size: 0.95rem;">Write a Review</h5>
+                        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">Rate the resolution of this issue.</p>
+                        <select id="rev-rating" class="select" style="margin-bottom:12px; width: 100%;">
                             <option value="5">⭐⭐⭐⭐⭐ 5 Stars</option>
                             <option value="4">⭐⭐⭐⭐ 4 Stars</option>
                             <option value="3">⭐⭐⭐ 3 Stars</option>
@@ -1505,12 +987,12 @@
                             <option value="1">⭐ 1 Star</option>
                         </select>
                         <textarea id="rev-comment" class="textarea" placeholder="Add a comment... (optional)"
-                            style="margin-bottom:12px;min-height:80px;"></textarea>
+                            style="margin-bottom:14px; min-height:80px;"></textarea>
                         <button id="rev-submit-btn" class="btn btn-primary btn-sm">Submit Review</button>
                     </div>
 
                     <!-- Reviews List -->
-                    <div id="det-reviews-list" style="display:flex;flex-direction:column;gap:12px;"></div>
+                    <div id="det-reviews-list" style="display:flex; flex-direction:column; gap:12px;"></div>
                 </div>
             </div>
         </div>
@@ -1521,24 +1003,22 @@
         <div class="modal">
             <div class="modal-header">
                 <div class="modal-title">Register as Volunteer</div>
-                <button class="modal-close"
-                    onclick="document.getElementById('volunteer-reg-modal').classList.remove('open')">✕</button>
+                <button class="modal-close" onclick="document.getElementById('volunteer-reg-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body">
                 <form id="volunteer-reg-form">
                     <input type="hidden" id="vol-camp-id" />
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 16px;">
                         <label class="label">Full Name</label>
                         <input id="vol-name" class="input" type="text" placeholder="John Doe" required />
                     </div>
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 24px;">
                         <label class="label">Phone Number</label>
                         <input id="vol-phone" class="input" type="text" placeholder="9876543210" required />
                     </div>
-                    <div class="modal-footer" style="padding:0;border:none;margin-top:24px;">
-                        <button type="button" class="btn btn-outline"
-                            onclick="document.getElementById('volunteer-reg-modal').classList.remove('open')">Cancel</button>
-                        <button type="submit" id="vol-reg-submit" class="btn btn-primary">Confirm Registration</button>
+                    <div class="modal-footer" style="padding:0; border:none;">
+                        <button type="button" class="btn btn-ghost" onclick="document.getElementById('volunteer-reg-modal').classList.remove('open')">Cancel</button>
+                        <button type="submit" id="vol-reg-submit" class="btn btn-primary btn-lg">Confirm Registration</button>
                     </div>
                 </form>
             </div>
@@ -1550,37 +1030,33 @@
         <div class="modal" style="max-width:800px;">
             <div class="modal-header">
                 <div class="modal-title">Campaign Volunteers</div>
-                <button class="modal-close"
-                    onclick="document.getElementById('creator-volunteers-modal').classList.remove('open')">✕</button>
+                <button class="modal-close" onclick="document.getElementById('creator-volunteers-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
-                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                     <div>
-                        <h3 id="cv-camp-title" style="margin-bottom:4px;"></h3>
-                        <p id="cv-camp-status" style="font-size:0.85rem;color:var(--cm-text-gray);"></p>
+                        <h3 id="cv-camp-title" style="margin-bottom:4px; font-family: var(--font-display); font-size: 1.15rem;"></h3>
+                        <p id="cv-camp-status" style="font-size:0.85rem; color:var(--text-muted);"></p>
                     </div>
-                    <div style="display:flex;gap:12px;">
-                        <button id="cv-complete-btn" class="btn btn-primary btn-sm" style="display:none;">Mark Complete
-                            & Claim Points</button>
-                        <button id="cv-export-btn" class="btn btn-outline btn-sm">⬇️ Download Excel/CSV</button>
+                    <div style="display:flex; gap:12px;">
+                        <button id="cv-complete-btn" class="btn btn-primary btn-sm" style="display:none;">Mark Complete</button>
+                        <button id="cv-export-btn" class="btn btn-outline btn-sm">⬇️ Export CSV</button>
                     </div>
                 </div>
 
-                <div style="background:#f1f5f9;border-radius:12px;border:1px solid var(--border);overflow:hidden;">
-                    <table class="table" style="width:100%;text-align:left;border-collapse:collapse;">
-                        <thead style="background:#e2e8f0;">
+                <div class="table-wrap">
+                    <table class="table">
+                        <thead>
                             <tr>
-                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Volunteer Name
-                                </th>
-                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Phone</th>
-                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Reg. Date</th>
-                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);">Status</th>
-                                <th style="padding:12px;font-size:0.85rem;color:var(--cm-text-dark);text-align:right;">
-                                    Action</th>
+                                <th>Volunteer Name</th>
+                                <th>Phone</th>
+                                <th>Reg. Date</th>
+                                <th>Status</th>
+                                <th style="text-align:right;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="cv-volunteers-body">
-                            <!-- Rows -->
+                            <!-- Dynamic -->
                         </tbody>
                     </table>
                 </div>
@@ -1594,6 +1070,7 @@
         import { issuesAPI, reviewsAPI, campaignsAPI, leaderboardAPI, usersAPI, notificationsAPI, imageAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t, getLang } from './js/i18n.js';
+        import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
         const user = guardPage(['USER']);
         if (!user) throw new Error('Not authorized');
@@ -1606,7 +1083,6 @@
         const avatarStr = firstName.substring(0, 2).toUpperCase();
         document.getElementById('sidebar-avatar').textContent = avatarStr.charAt(0);
         document.getElementById('logout-btn').addEventListener('click', logout);
-        document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
         // ─── Notification System ───
         const bellBtn = document.getElementById('notification-bell');
@@ -1671,9 +1147,7 @@
                                 
                                 // Redirect based on type
                                 if (type === 'report') {
-                                    // Citizen dashboard: for reports, we might want to show the details or just view the list
                                     showView('dashboard');
-                                    // Optionally open details modal if we have the logic accessible
                                     if (typeof openIssueDetails === 'function' && relatedId) {
                                         openIssueDetails(relatedId);
                                     }
@@ -1721,7 +1195,7 @@
         loadNotifications();
         setInterval(loadNotifications, 60000); // Every minute
 
-        // ─── Sidebar Navigation (Dashboard vs Campaigns vs Leaderboard) ───
+        // ─── Floating Island Navigation ───
         const mainDashView = document.getElementById('main-dashboard-view');
         const campaignsView = document.getElementById('campaigns-section');
         const leaderboardView = document.getElementById('leaderboard-section');
@@ -1731,6 +1205,7 @@
         const navLeadLink = document.getElementById('nav-leaderboard-link');
 
         function showView(view) {
+            sessionStorage.setItem('citizenDashboardView', view);
             mainDashView.style.display = view === 'dashboard' ? '' : 'none';
             campaignsView.style.display = view === 'campaigns' ? '' : 'none';
             leaderboardView.style.display = view === 'leaderboard' ? '' : 'none';
@@ -1738,6 +1213,11 @@
             navDashLink.classList.toggle('active', view === 'dashboard');
             navCampLink.classList.toggle('active', view === 'campaigns');
             navLeadLink.classList.toggle('active', view === 'leaderboard');
+            syncDrawerActive({
+                dashboard: 'drawer-dashboard-link',
+                campaigns: 'drawer-campaigns-link',
+                leaderboard: 'drawer-leaderboard-link'
+            }[view]);
         }
 
         navDashLink.addEventListener('click', (e) => { e.preventDefault(); showView('dashboard'); });
@@ -1762,10 +1242,10 @@
             if (mode === 'issue') {
                 issueFormSec.style.display = '';
                 campFormSec.style.display = 'none';
-                toggleIssueBtn.style.background = 'var(--cm-green)';
+                toggleIssueBtn.style.background = 'var(--primary)';
                 toggleIssueBtn.style.color = '#fff';
                 toggleCampBtn.style.background = 'transparent';
-                toggleCampBtn.style.color = 'var(--cm-text-gray)';
+                toggleCampBtn.style.color = 'var(--text-muted)';
                 document.getElementById('modal-main-title').textContent = 'Report New Issue';
             } else {
                 issueFormSec.style.display = 'none';
@@ -1773,7 +1253,7 @@
                 toggleCampBtn.style.background = '#7c3aed';
                 toggleCampBtn.style.color = '#fff';
                 toggleIssueBtn.style.background = 'transparent';
-                toggleIssueBtn.style.color = 'var(--cm-text-gray)';
+                toggleIssueBtn.style.color = 'var(--text-muted)';
                 document.getElementById('modal-main-title').textContent = 'Run a Campaign';
             }
         }
@@ -1898,8 +1378,8 @@
                     ${btnContent}
                   </button>
                   <button class="ic-btn ic-btn-solid" onclick="openIssueDetails('${issue.id}')">${t('btn_view_details')} →</button>
-                  ${isOwner ? `<button class="ic-btn btn-danger delete-btn-main" data-id="${issue.id}" style="border: 1.5px solid transparent; flex: 0.5;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  ${isOwner ? `<button class="ic-btn btn-danger delete-btn-main" data-id="${issue.id}" style="border: 1.5px solid transparent; flex: 0.5; background: rgba(220, 38, 38, 0.08); color: var(--danger);">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                   </button>` : ''}
                 </div>
               </div>
@@ -1907,13 +1387,13 @@
         }
 
         function renderEmpty(container, msg) {
-            container.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:#94a3b8; background:#fff; border-radius:16px; border:1px dashed #cbd5e1;">${msg}</div>`;
+            container.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--text-light); background:var(--bg-card); border-radius:24px; border:1.5px dashed var(--border);">${msg}</div>`;
         }
 
         function renderTrending() {
             const top3 = [...allIssues].sort((a, b) => (b.supports_count || 0) - (a.supports_count || 0)).slice(0, 3);
             const el = document.getElementById('trending-list');
-            if (top3.length === 0) { el.innerHTML = '<div>No issues yet</div>'; return; }
+            if (top3.length === 0) { el.innerHTML = '<div style="color:var(--text-light); font-size: 0.85rem;">No issues yet</div>'; return; }
 
             el.innerHTML = top3.map((issue, idx) => `
                 <div class="ms-item">
@@ -1921,7 +1401,7 @@
                     <div class="ms-content">
                         <div class="ms-title">${issue.category.toLowerCase()}</div>
                         <div class="ms-meta">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
                             ${issue.supports_count || 0} Supports • ${issue.category}
                         </div>
                     </div>
@@ -2192,7 +1672,6 @@
             }
         });
 
-
         // Location & Map logic
         let map, marker;
         const DEFAULT_LAT = 9.9252;
@@ -2241,7 +1720,6 @@
 
         document.getElementById('detect-location-btn').addEventListener('click', () => {
             const btn = document.getElementById('detect-location-btn');
-            const originalText = btn.innerHTML;
             btn.innerHTML = 'Detecting...';
             btn.disabled = true;
 
@@ -2653,18 +2131,18 @@
                 const list = data.volunteers || [];
 
                 if (list.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#94a3b8;">No volunteers have registered yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--text-light);">No volunteers have registered yet.</td></tr>';
                 } else {
                     tbody.innerHTML = list.map(v => `
                         <tr style="border-top:1px solid var(--border);">
                             <td style="padding:12px;font-size:0.9rem;font-weight:600;">${v.volunteer_name || 'Unknown'}</td>
                             <td style="padding:12px;font-size:0.9rem;">${v.phone_number || 'N/A'}</td>
-                            <td style="padding:12px;font-size:0.85rem;color:var(--cm-text-gray);">${new Date(v.created_at || v.registered_at).toLocaleDateString()}</td>
+                            <td style="padding:12px;font-size:0.85rem;color:var(--text-muted);">${new Date(v.created_at || v.registered_at).toLocaleDateString()}</td>
                             <td style="padding:12px;font-size:0.85rem;">
-                                ${v.participation_status === 'CONFIRMED' ? '<span style="color:var(--cm-green);font-weight:600;">✅ Confirmed</span>' : '<span style="color:#f59e0b;font-weight:600;">⏳ Pending</span>'}
+                                ${v.participation_status === 'CONFIRMED' ? '<span style="color:var(--success);font-weight:600;">✅ Confirmed</span>' : '<span style="color:var(--warning);font-weight:600;">⏳ Pending</span>'}
                             </td>
                             <td style="padding:12px;text-align:right;">
-                                ${!v.points_given ? `<button class="btn btn-sm" style="background:var(--cm-green-light);color:var(--cm-green);padding:4px 8px;" onclick="confirmVolunteer('${campId}', '${v.user_id}')">Confirm (+3 pts)</button>` : `<span style="font-size:0.8rem;color:#94a3b8;">✅ Points Awarded</span>`}
+                                ${!v.points_given ? `<button class="btn btn-sm" style="background:var(--primary-light);color:var(--primary);padding:4px 8px;" onclick="confirmVolunteer('${campId}', '${v.user_id}')">Confirm (+3 pts)</button>` : `<span style="font-size:0.8rem;color:var(--text-light);">✅ Points Awarded</span>`}
                             </td>
                         </tr>
                     `).join('');
@@ -2724,10 +2202,10 @@
             try {
                 const data = await leaderboardAPI.getTop100();
                 console.log('Leaderboard Data Received:', data);
-                const users = data.leaderboard || [];
+                const users = (data.leaderboard || []).slice(0, 10);
 
                 if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#94a3b8;">No ranking data available yet.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-light);">No ranking data available yet.</td></tr>';
                     return;
                 }
 
@@ -2744,17 +2222,17 @@
                     <tr style="border-bottom:1px solid #f1f5f9;${rowBg}">
                         <td style="padding:16px 12px;font-weight:700;">${rankDisplay}</td>
                         <td style="padding:16px 12px;font-weight:600;">
-                            ${isMe ? `<span style="color:var(--cm-green);">${u.name} (You)</span>` : u.name}
+                            ${isMe ? `<span style="color:var(--primary);">${u.name} (You)</span>` : u.name}
                         </td>
-                        <td style="padding:16px 12px;font-weight:800;color:var(--cm-green);font-size:1.1rem;">${u.total_points || 0}</td>
+                        <td style="padding:16px 12px;font-weight:800;color:var(--primary);font-size:1.1rem;">${u.total_points || 0}</td>
                         <td style="padding:16px 12px;">
-                            <span title="${u.reports_resolved || 0} resolved × 1pt">${u.reports_resolved || 0} <small style="color:#94a3b8;">(${u.reports_points || 0}pt)</small></span>
-                        </td>
-                        <td style="padding:16px 12px;">
-                            <span title="${u.campaigns_participated || 0} joined × 3pt">${u.campaigns_participated || 0} <small style="color:#94a3b8;">(${u.campaign_participated_points || 0}pt)</small></span>
+                            <span title="${u.reports_resolved || 0} resolved × 1pt">${u.reports_resolved || 0} <small style="color:var(--text-light);">(${u.reports_points || 0}pt)</small></span>
                         </td>
                         <td style="padding:16px 12px;">
-                            <span title="${u.campaigns_organized || 0} run × 5pt">${u.campaigns_organized || 0} <small style="color:#94a3b8;">(${u.campaign_created_points || 0}pt)</small></span>
+                            <span title="${u.campaigns_participated || 0} joined × 3pt">${u.campaigns_participated || 0} <small style="color:var(--text-light);">(${u.campaign_participated_points || 0}pt)</small></span>
+                        </td>
+                        <td style="padding:16px 12px;">
+                            <span title="${u.campaigns_organized || 0} run × 5pt">${u.campaigns_organized || 0} <small style="color:var(--text-light);">(${u.campaign_created_points || 0}pt)</small></span>
                         </td>
                     </tr>
                 `}).join('');
@@ -2773,15 +2251,15 @@
             // Build timeline
             const createdDate = new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
 
-            let timelineHtml = `<div style="display:flex;gap:8px;"><span style="color:var(--cm-green);">✔</span> <b>Arised</b> - ${createdDate}</div>`;
+            let timelineHtml = `<div style="display:flex;gap:8px;"><span style="color:var(--success);">✔</span> <b>Arised</b> - ${createdDate}</div>`;
 
             if (issue.status === 'IN_PROGRESS' || issue.status === 'COMPLETED') {
                 const updatedDate = new Date(issue.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-                timelineHtml += `<div style="display:flex;gap:8px;"><span style="color:var(--cm-green);">✔</span> <b>In Work</b> - ${issue.status === 'IN_PROGRESS' ? updatedDate : createdDate}</div>`;
+                timelineHtml += `<div style="display:flex;gap:8px;"><span style="color:var(--success);">✔</span> <b>In Work</b> - ${issue.status === 'IN_PROGRESS' ? updatedDate : createdDate}</div>`;
             }
             if (issue.status === 'COMPLETED') {
                 const updatedDate = new Date(issue.updated_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
-                timelineHtml += `<div style="display:flex;gap:8px;"><span style="color:var(--cm-green);">✔</span> <b>Done</b> - ${updatedDate}</div>`;
+                timelineHtml += `<div style="display:flex;gap:8px;"><span style="color:var(--success);">✔</span> <b>Done</b> - ${updatedDate}</div>`;
             }
 
             document.getElementById('det-timeline').innerHTML = timelineHtml;
@@ -2822,13 +2300,12 @@
                     reviews = data.reviews || [];
                 } catch (err) {
                     console.error('Reviews load error:', err);
-                    // Continue with empty array so user can still submit
                 }
 
                 const myReview = reviews.find(r => r.user_id === user.id);
 
                 if (myReview) {
-                    revForm.style.display = 'none'; // Already reviewed
+                    revForm.style.display = 'none';
                 } else {
                     revForm.style.display = 'block';
                     // Reset forms
@@ -2857,15 +2334,15 @@
                 }
 
                 if (reviews.length === 0) {
-                    revList.innerHTML = '<div style="color:var(--cm-text-gray);font-size:0.85rem;">No reviews yet.</div>';
+                    revList.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">No reviews yet.</div>';
                 } else {
                     revList.innerHTML = reviews.map(r => `
-                        <div style="background:var(--cm-bg-gray);padding:12px;border-radius:8px;border:1px solid var(--border);">
+                        <div style="background:rgba(15,23,42,0.02);padding:12px;border-radius:8px;border:1px solid var(--border);">
                             <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
                                 <strong>${r.user_name}</strong>
                                 <span style="color:#f59e0b;">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</span>
                             </div>
-                            ${r.comment ? `<div style="font-size:0.85rem;color:var(--cm-text-gray);">${r.comment}</div>` : ''}
+                            ${r.comment ? `<div style="font-size:0.85rem;color:var(--text-muted);">${r.comment}</div>` : ''}
                         </div>
                     `).join('');
                 }
@@ -2877,31 +2354,32 @@
             document.getElementById('details-modal').classList.add('open');
         };
 
-        // Hamburger Toggle Logic
-        const sidebar = document.getElementById('sidebar');
-        const overlay = document.getElementById('sidebar-overlay');
-        const hamburger = document.getElementById('hamburger');
-
-        hamburger.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
-            overlay.classList.toggle('show');
+        // Scroll effect for island navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav-island');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
         });
 
-        overlay.addEventListener('click', () => {
-            sidebar.classList.remove('open');
-            overlay.classList.remove('show');
+        // ══ Mobile Nav Drawer Logic ══
+        initDashboardDrawer({
+            linkMap: {
+                'drawer-dashboard-link': 'nav-dashboard-link',
+                'drawer-campaigns-link': 'nav-campaigns-link',
+                'drawer-leaderboard-link': 'nav-leaderboard-link'
+            },
+            onLogout: logout
         });
 
-        // Close sidebar on link click (mobile)
-        document.querySelectorAll('.sidebar-link').forEach(link => {
-            link.addEventListener('click', () => {
-                if (window.innerWidth <= 1024) {
-                    sidebar.classList.remove('open');
-                    overlay.classList.remove('show');
-                }
-            });
-        });
-
+        const citizenViews = ['dashboard', 'campaigns', 'leaderboard'];
+        const savedCitizenView = sessionStorage.getItem('citizenDashboardView');
+        const initialCitizenView = citizenViews.includes(savedCitizenView) ? savedCitizenView : 'dashboard';
+        showView(initialCitizenView);
+        if (initialCitizenView === 'campaigns') loadCampaigns();
+        if (initialCitizenView === 'leaderboard') loadLeaderboard();
         loadIssues();
 
         // Ensure toast styles support the new format if needed
@@ -2909,14 +2387,14 @@
         style.textContent = `
           .toast {
             background: #ffffff !important;
-            color: var(--cm-text-dark) !important;
-            border-radius: 12px !important;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1) !important;
-            border: 1px solid #e5e7eb !important;
+            color: var(--text) !important;
+            border-radius: 20px !important;
+            box-shadow: var(--shadow-lg) !important;
+            border: 1px solid rgba(15, 23, 42, 0.08) !important;
             padding: 16px 20px !important;
           }
-          .toast strong { color: var(--cm-text-dark) !important; font-size: 1rem !important; }
-          .toast p { color: var(--cm-text-gray) !important; font-size: 0.85rem !important; margin-top: 4px !important; }
+          .toast strong { color: var(--text) !important; font-size: 1rem !important; font-family: var(--font-display) !important; }
+          .toast p { color: var(--text-muted) !important; font-size: 0.85rem !important; margin-top: 4px !important; }
         `;
         document.head.appendChild(style);
     </script>

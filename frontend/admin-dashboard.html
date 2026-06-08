@@ -4,130 +4,305 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard — CleanMadurai</title>
+    <title>Admin Dashboard — MaduraiSevi</title>
     <link rel="stylesheet" href="css/styles.css" />
     <style>
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
+        body {
+            background-color: #F8F9FB;
         }
 
-        @media (max-width: 1024px) {
-            .charts-grid {
-                grid-template-columns: 1fr;
-            }
+        :root {
+            --sidebar-width: 0px;
         }
 
-        /* UI Tightening */
-        .dash-header {
-            height: 50px !important;
-        }
-        .dash-content {
-            padding: 16px !important;
-        }
-        .page-header {
-            margin-bottom: 12px !important;
-            gap: 8px !important;
-        }
-        .page-title {
-            margin-bottom: 0 !important;
-            line-height: 1 !important;
-        }
-        .tab-pane {
-            padding-top: 4px !important;
-        }
         .dash-main {
-            margin-top: 0 !important;
+            margin-left: 0 !important;
+            padding-top: 90px;
+        }
+
+        /* ── Floating Nav Bar Overrides ── */
+        .nav-island-container {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+
+        .nav-island {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1300px;
+            height: 68px;
+            padding: 0 16px 0 24px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nav-island.scrolled {
+            height: 60px;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 255, 255, 0.6);
+        }
+
+        .nav-island .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+        }
+
+        .nav-island .logo-icon {
+            font-size: 1.35rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .nav-link-item {
+            padding: 8px 18px;
+            font-size: 0.92rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            border-radius: 99px;
+            position: relative;
+            cursor: pointer;
+            transition: all var(--transition);
+        }
+
+        .nav-link-item:hover, .nav-link-item.active {
+            color: var(--primary);
+        }
+
+        .nav-link-item.active {
+            background: rgba(176, 0, 0, 0.05);
+        }
+
+        .nav-link-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 4px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 12px;
+            height: 3px;
+            background: var(--primary);
+            border-radius: 99px;
+            box-shadow: 0 2px 6px var(--primary-glow);
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dash-content {
+            padding: 32px 40px !important;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px !important;
+        }
+
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 2.2rem !important;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+        }
+
+        .verify-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 24px;
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+
+        .verify-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(176, 0, 0, 0.12);
+        }
+
+        .verify-info h3 {
+            font-family: var(--font-display);
+            font-weight: 800;
+            color: var(--text);
+        }
+
+        .verify-actions {
+            display: flex;
+            gap: 10px;
         }
     </style>
 </head>
 
 <body>
-    <div class="sidebar-overlay" id="sidebar-overlay"></div>
-
-    <aside class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            <div class="logo">
-                <div class="logo-icon">♻</div>
-                <span>CleanMadurai</span>
-            </div>
+    <!-- Hidden elements for backward compatibility of js sidebar/hamburger methods -->
+    <div style="display: none;">
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        <aside class="sidebar" id="sidebar">
+            <div id="sidebar-name"></div>
+            <div id="sidebar-avatar"></div>
+            <button id="logout-btn-hidden"></button>
+        </aside>
+        <button id="hamburger"></button>
+        <button id="mobile-logout-btn"></button>
+        <div class="tab-list">
+            <button id="tab-overview-btn"></button>
+            <button id="tab-verifications-btn"></button>
+            <button id="tab-users-btn"></button>
+            <span id="tab-badge"></span>
         </div>
-        <nav class="sidebar-nav">
-            <div class="sidebar-section-label">Admin Panel</div>
-            <a class="sidebar-link" data-tab="overview" href="#" id="nav-overview">
-                <span class="icon">📊</span> Analytics
-            </a>
-            <a class="sidebar-link" data-tab="verifications" href="#" id="nav-verify"
-                onclick="event.preventDefault(); document.getElementById('tab-verifications-btn').click();">
-                <span class="icon">🛡️</span> Verifications <span id="pending-badge" class="badge badge-red"
-                    style="margin-left:auto;display:none;">0</span>
-            </a>
-            <a class="sidebar-link" data-tab="users" href="#" id="nav-users"
-                onclick="event.preventDefault(); document.getElementById('tab-users-btn').click();">
-                <span class="icon">👥</span> All Users
-            </a>
-        </nav>
-        <div class="sidebar-footer">
-            <div class="sidebar-user">
-                <div class="user-avatar-sidebar" id="sidebar-avatar">A</div>
-                <div>
-                    <div class="sidebar-user-name" id="sidebar-name">Admin</div>
-                    <div class="sidebar-user-role">System Administrator</div>
-                </div>
-            </div>
-            <button id="logout-btn" class="btn btn-ghost btn-full"
-                style="color:rgba(255,255,255,0.5);margin-top:8px;font-size:0.82rem;">🚪 Sign Out</button>
-        </div>
-    </aside>
+    </div>
 
     <div class="dash-layout">
         <main class="dash-main">
-            <header class="dash-header glass">
-                <div style="display:flex;align-items:center;justify-content:space-between;width:100%;">
-                    <div style="display:flex;align-items:center;gap:12px;">
-                        <button class="hamburger" id="hamburger">☰</button>
-                        <span class="dash-header-title">System Administrator Panel</span>
+            <!-- Floating Nav Island -->
+            <div class="nav-island-container">
+                <nav class="nav-island">
+                    <div class="logo">
+                        <span>MaduraiSevi</span>
                     </div>
-                    <button id="mobile-logout-btn" class="btn btn-outline btn-sm mobile-logout-btn">Logout</button>
-                </div>
-                <div style="display:flex;align-items:center;gap:12px;">
-                    <button id="refresh-btn" class="btn btn-outline btn-sm">🔄 Refresh</button>
-                </div>
-            </header>
 
+                    <!-- Top Doc Navigation Links -->
+                    <ul class="nav-links">
+                        <li>
+                            <a class="nav-link-item active" href="#" id="nav-overview" onclick="event.preventDefault(); document.getElementById('tab-overview-btn').click();">
+                                Analytics
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link-item" href="#" id="nav-verify" onclick="event.preventDefault(); document.getElementById('tab-verifications-btn').click();">
+                                Verifications
+                                <span id="pending-badge" class="badge badge-red" style="margin-left:6px; display:none; padding: 2px 6px; border-radius:99px; font-size:0.75rem;">0</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link-item" href="#" id="nav-users" onclick="event.preventDefault(); document.getElementById('tab-users-btn').click();">
+                                All Users
+                            </a>
+                        </li>
+                    </ul>
+
+                    <div class="nav-actions">
+                        <!-- Mobile Burger Button -->
+                        <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+
+                        <button id="refresh-btn" class="btn btn-outline btn-sm" style="border-radius: 99px; padding: 6px 16px;">🔄 Refresh</button>
+                        
+                        <!-- User Info Profile Circle & Action Buttons -->
+                        <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
+                            <div class="user-avatar-sidebar"
+                                style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2);"
+                                id="sidebar-avatar-visible">
+                                A
+                            </div>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Sign Out</button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Mobile Drawer Navigation -->
+                <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+                    <div class="mobile-nav-drawer" id="mobile-nav-drawer">
+                        <div class="mobile-drawer-header">
+                            <div class="logo">
+                                <span>MaduraiSevi</span>
+                            </div>
+                            <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
+                        </div>
+                        <div class="mobile-drawer-nav">
+                            <a href="#" class="mobile-drawer-link active" id="drawer-overview">
+                                <span class="drawer-icon">📊</span> Analytics
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-verify">
+                                <span class="drawer-icon">✅</span> Verifications
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-users">
+                                <span class="drawer-icon">👥</span> All Users
+                            </a>
+                        </div>
+                        <div class="mobile-drawer-footer">
+                            <div class="mobile-drawer-user">
+                                <div class="mobile-drawer-user-avatar" id="drawer-avatar">A</div>
+                                <div class="mobile-drawer-user-info">
+                                    <div class="mobile-drawer-user-name" id="drawer-name">Admin</div>
+                                    <div class="mobile-drawer-user-role">Administrator</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;" id="drawer-logout-btn">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
             <div class="dash-content animate-in">
                 <div class="page-header animate-in stagger-1">
                     <div>
-                        <h2 class="page-title" style="font-size: 1.3rem;">Management Console</h2>
-                    </div>
-                    <div class="tab-list">
-                        <button class="tab-btn active" id="tab-overview-btn">Analytics</button>
-                        <button class="tab-btn" id="tab-verifications-btn" style="position:relative;">
-                            Verifications
-                            <span id="tab-badge" class="badge-dot" style="display:none;"></span>
-                        </button>
-                        <button class="tab-btn" id="tab-users-btn">All Users</button>
+                        <h2 class="page-title">Management Console</h2>
                     </div>
                 </div>
 
                 <!-- Analytics Tab -->
                 <div id="tab-overview" class="tab-pane active">
                     <div class="grid grid-3 mb-8 animate-in stagger-2" style="grid-template-columns: 1fr;">
-                        <div class="stat-card">
+                        <div class="stat-card" style="max-width: 420px; border-color: rgba(255, 208, 0, 0.25);">
                             <div>
-                                <div class="stat-label" style="color:var(--warning);">Pending User Verifications</div>
+                                <div class="stat-label">Pending User Verifications</div>
                                 <div class="stat-value" id="s-pending">—</div>
                             </div>
-                            <div class="stat-icon yellow">⏳</div>
+                            <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">⏳</div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Verifications Tab -->
-                <div id="tab-verifications" class="tab-pane">
-                    <div style="margin-bottom: 16px;">
-                        <button class="tab-sub-btn active" id="sub-tab-users-btn">User Verification</button>
+                <div id="tab-verifications" class="tab-pane" style="display:none;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--text);">User Verification Requests</h3>
                     </div>
                     
                     <div id="users-verification-pane">
@@ -136,7 +311,10 @@
                 </div>
 
                 <!-- All Users Tab -->
-                <div id="tab-users" class="tab-pane">
+                <div id="tab-users" class="tab-pane" style="display:none;">
+                    <div style="margin-bottom: 24px;">
+                        <h3 style="font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--text);">All Registered Users</h3>
+                    </div>
                     <div id="all-users-list" class="space-y-4"></div>
                 </div>
             </div>
@@ -148,6 +326,7 @@
         import { logout } from './js/auth.js';
         import { usersAPI } from './js/api.js';
         import { toast } from './js/toast.js';
+        import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
         const ROLE_LABELS = { USER: 'Citizen', MADURAI_CORPORATION: 'Madurai Corp.', TNEB: 'TNEB', POLICE: 'Police', FIRE_STATION: 'Fire Station', COLLECTOR: 'Collector', ADMIN: 'Admin' };
 
@@ -156,10 +335,11 @@
 
         document.getElementById('sidebar-name').textContent = user.name;
         document.getElementById('sidebar-avatar').textContent = user.name.charAt(0).toUpperCase();
+        document.getElementById('sidebar-avatar-visible').textContent = user.name.charAt(0).toUpperCase();
         document.getElementById('logout-btn').addEventListener('click', logout);
         document.getElementById('mobile-logout-btn').addEventListener('click', logout);
 
-        // Hamburger
+        // Sidebar compatibility
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebar-overlay');
         document.getElementById('hamburger').addEventListener('click', () => { sidebar.classList.toggle('open'); overlay.classList.toggle('show'); });
@@ -167,20 +347,30 @@
 
         // Tabs
         const tabs = ['overview', 'verifications', 'users'];
+        const drawerByTab = { overview: 'drawer-overview', verifications: 'drawer-verify', users: 'drawer-users' };
         function switchTab(name) {
+            sessionStorage.setItem('adminDashboardTab', name);
             tabs.forEach(t => {
-                document.getElementById('tab-' + t).classList.remove('active');
-                document.getElementById('tab-' + t + '-btn').classList.remove('active');
+                const pane = document.getElementById('tab-' + t);
+                pane.style.display = t === name ? 'block' : 'none';
+                
+                const navLink = document.getElementById('nav-' + (t === 'overview' ? 'overview' : (t === 'verifications' ? 'verify' : 'users')));
+                if (navLink) {
+                    navLink.classList.toggle('active', t === name);
+                }
             });
-            document.getElementById('tab-' + name).classList.add('active');
-            document.getElementById('tab-' + name + '-btn').classList.add('active');
+            syncDrawerActive(drawerByTab[name]);
         }
+
         document.getElementById('tab-overview-btn').addEventListener('click', () => { switchTab('overview'); loadData(); });
         document.getElementById('tab-verifications-btn').addEventListener('click', () => { switchTab('verifications'); loadPending(); });
         document.getElementById('tab-users-btn').addEventListener('click', () => { switchTab('users'); loadAllUsers(); });
 
         document.getElementById('refresh-btn').addEventListener('click', () => {
-            const activeTab = tabs.find(t => document.getElementById('tab-' + t).classList.contains('active'));
+            let activeTab = 'overview';
+            if (document.getElementById('tab-verifications').style.display === 'block') activeTab = 'verifications';
+            else if (document.getElementById('tab-users').style.display === 'block') activeTab = 'users';
+
             if (activeTab === 'verifications') loadPending();
             else if (activeTab === 'users') loadAllUsers();
             else loadData();
@@ -192,10 +382,10 @@
 
                 document.getElementById('s-pending').textContent = stats.pendingApprovals;
 
-                // Badge
-                document.getElementById('pending-badge').textContent = stats.pendingApprovals;
-                document.getElementById('pending-badge').style.display = stats.pendingApprovals > 0 ? 'inline-flex' : 'none';
-                document.getElementById('tab-badge').style.display = stats.pendingApprovals > 0 ? 'block' : 'none';
+                // Badges
+                const pendingBadge = document.getElementById('pending-badge');
+                pendingBadge.textContent = stats.pendingApprovals;
+                pendingBadge.style.display = stats.pendingApprovals > 0 ? 'inline-flex' : 'none';
 
             } catch (err) {
                 toast.error('Failed to load stats', err.message);
@@ -209,25 +399,25 @@
                 const data = await usersAPI.getPending();
                 const users = data.users || [];
                 if (users.length === 0) {
-                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><h3>All clear!</h3><p>No pending verification requests.</p></div>`;
+                    container.innerHTML = `<div class="empty-state" style="padding: 40px; text-align: center; border-radius:24px; border:1.5px dashed var(--border); background: var(--bg-card);"><div class="empty-state-icon" style="font-size: 2.5rem; margin-bottom:12px;">✅</div><h3 style="font-family: var(--font-display); font-weight:800; font-size:1.2rem; color:var(--text);">All clear!</h3><p style="color:var(--text-muted); font-size:0.9rem;">No pending verification requests.</p></div>`;
                     return;
                 }
                 container.innerHTML = users.map(u => `
-          <div class="verify-card" id="vcard-${u.id}">
-            <div class="verify-info">
-              <h3 style="font-size:1.05rem;">${u.name}</h3>
-              <p class="text-muted text-sm" style="margin:4px 0;">📧 ${u.email}</p>
-              <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
-                <span class="badge badge-yellow">${ROLE_LABELS[u.role] || u.role}</span>
-                <span class="text-xs text-muted">Registered: ${new Date(u.created_at).toLocaleDateString()}</span>
-              </div>
-            </div>
-            <div class="verify-actions">
-              <button class="btn btn-primary btn-sm" onclick="approveUser('${u.id}', 'approved')">✅ Approve</button>
-              <button class="btn btn-danger btn-sm" onclick="approveUser('${u.id}', 'rejected')">❌ Reject</button>
-            </div>
-          </div>
-        `).join('');
+                  <div class="verify-card animate-in" id="vcard-${u.id}">
+                    <div class="verify-info">
+                      <h3 style="font-size:1.1rem; font-weight:800;">${u.name}</h3>
+                      <p class="text-muted text-sm" style="margin:4px 0;">📧 ${u.email}</p>
+                      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px; align-items:center;">
+                        <span class="badge badge-yellow" style="font-size:0.75rem; padding:3px 10px; border-radius:99px;">${ROLE_LABELS[u.role] || u.role}</span>
+                        <span class="text-xs text-muted" style="font-size:0.78rem;">Registered: ${new Date(u.created_at).toLocaleDateString()}</span>
+                      </div>
+                    </div>
+                    <div class="verify-actions">
+                      <button class="btn btn-primary btn-sm" onclick="approveUser('${u.id}', 'approved')">✅ Approve</button>
+                      <button class="btn btn-danger btn-sm" onclick="approveUser('${u.id}', 'rejected')">❌ Reject</button>
+                    </div>
+                  </div>
+                `).join('');
             } catch (err) {
                 toast.error('Failed to load pending users', err.message);
                 container.innerHTML = `<div class="empty-state"><p>${err.message}</p></div>`;
@@ -245,7 +435,6 @@
             }
         };
 
-
         async function loadAllUsers() {
             const container = document.getElementById('all-users-list');
             container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
@@ -257,45 +446,67 @@
                     return;
                 }
                 container.innerHTML = `
-          <div class="card" style="box-shadow: var(--shadow-sm); border-radius: 12px; overflow: hidden;">
-            <div style="overflow-x:auto;">
-              <table style="width:100%;border-collapse:collapse;font-size:0.87rem;min-width:650px;">
-                <thead><tr style="background:var(--bg-muted);">
-                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Name</th>
-                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Email</th>
-                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Role / Dept</th>
-                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Status</th>
-                  <th style="padding:14px 16px;text-align:left;font-size:0.75rem;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);border-bottom:1px solid var(--border);">Joined</th>
-                </tr></thead>
-                <tbody>${users.map((u, i) => `
-                  <tr style="border-bottom:1px solid var(--border);${i % 2 === 0 ? '' : 'background:var(--bg-muted);'}">
-                    <td style="padding:14px 16px;font-weight:600;">${u.name}</td>
-                    <td style="padding:14px 16px;color:var(--text-muted);">${u.email}</td>
-                    <td style="padding:14px 16px;">
-                      <div style="display:flex;flex-direction:column;gap:4px;">
-                          <span class="badge ${u.role === 'ADMIN' ? 'badge-red' : 'badge-green'}" style="width:fit-content; font-size: 0.7rem; padding: 2px 8px;">${ROLE_LABELS[u.role] || u.role}</span>
-                          ${u.department ? `<span style="font-size:0.72rem;color:var(--text-muted); font-weight: 500;">🏢 ${u.department}</span>` : ''}
-                      </div>
-                    </td>
-                    <td style="padding:14px 16px;">
-                      <span class="badge ${u.verification_status === 'approved' ? 'badge-green' : u.verification_status === 'rejected' ? 'badge-red' : 'badge-yellow'}" style="font-size: 0.7rem; padding: 2px 8px;">
-                        ${u.verification_status}
-                      </span>
-                    </td>
-                    <td style="padding:14px 16px;color:var(--text-muted); font-size: 0.8rem;">${new Date(u.created_at).toLocaleDateString()}</td>
-                  </tr>
-                `).join('')}</tbody>
-              </table>
-            </div>
-          </div>
-        `;
+                  <div class="table-wrap">
+                      <table class="table">
+                        <thead><tr>
+                          <th>Name</th>
+                          <th>Email</th>
+                          <th>Role / Dept</th>
+                          <th>Status</th>
+                          <th>Joined</th>
+                        </tr></thead>
+                        <tbody>${users.map((u, i) => `
+                          <tr style="border-bottom:1px solid var(--border);">
+                            <td style="font-weight:700; color: var(--text);">${u.name}</td>
+                            <td>${u.email}</td>
+                            <td>
+                              <div style="display:flex;flex-direction:column;gap:4px;">
+                                  <span class="badge ${u.role === 'ADMIN' ? 'badge-red' : 'badge-green'}" style="width:fit-content; font-size: 0.72rem; padding: 3px 10px; border-radius: 99px;">${ROLE_LABELS[u.role] || u.role}</span>
+                                  ${u.department ? `<span style="font-size:0.75rem;color:var(--text-muted); font-weight: 500; margin-top:2px;">🏢 ${u.department}</span>` : ''}
+                              </div>
+                            </td>
+                            <td>
+                              <span class="badge ${u.verification_status === 'approved' ? 'badge-green' : u.verification_status === 'rejected' ? 'badge-red' : 'badge-yellow'}" style="font-size: 0.72rem; padding: 3px 10px; border-radius: 99px;">
+                                ${u.verification_status}
+                              </span>
+                            </td>
+                            <td style="font-size: 0.82rem; color: var(--text-muted);">${new Date(u.created_at).toLocaleDateString()}</td>
+                          </tr>
+                        `).join('')}</tbody>
+                      </table>
+                  </div>
+                `;
             } catch (err) {
                 toast.error('Failed to load users', err.message);
             }
         }
 
-        // Only load analytics on initial page load — other tabs load lazily on click
-        loadData();
+        // Scroll effect for island navbar
+        window.addEventListener('scroll', () => {
+            const nav = document.querySelector('.nav-island');
+            if (window.scrollY > 20) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
+
+        initDashboardDrawer({
+            linkMap: {
+                'drawer-overview': 'nav-overview',
+                'drawer-verify': 'nav-verify',
+                'drawer-users': 'nav-users'
+            },
+            onLogout: logout
+        });
+
+        const savedAdminTab = sessionStorage.getItem('adminDashboardTab');
+        const initialAdminTab = tabs.includes(savedAdminTab) ? savedAdminTab : 'overview';
+        document.getElementById({
+            overview: 'tab-overview-btn',
+            verifications: 'tab-verifications-btn',
+            users: 'tab-users-btn'
+        }[initialAdminTab]).click();
     </script>
 </body>
 

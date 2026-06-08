@@ -45,8 +45,9 @@ export async function register(payload) {
 /* ── Logout ── */
 export async function logout() {
     try { await authAPI.logout(); } catch (_) { }
-    localStorage.clear();
-    window.location.href = 'index.html';
+    clearSession();
+    sessionStorage.clear();
+    window.location.href = 'login.html';
 }
 
 /* ── Role-based redirect paths ── */

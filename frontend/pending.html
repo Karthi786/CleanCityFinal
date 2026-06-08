@@ -4,37 +4,101 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Account Pending — CleanMadurai</title>
+    <title>Account Pending — MaduraiSevi</title>
     <link rel="stylesheet" href="css/styles.css" />
+    <style>
+        body {
+            background: #F8F9FB;
+        }
+
+        .auth-page {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+            background: radial-gradient(ellipse at 20% 80%, rgba(176, 0, 0, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(255, 208, 0, 0.08) 0%, transparent 55%),
+                linear-gradient(160deg, #F8F9FB 0%, #FFFFFF 50%, #F8F9FB 100%);
+        }
+
+        .pending-card {
+            width: 100%;
+            max-width: 480px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 30px;
+            box-shadow: var(--shadow-md);
+            padding: 40px;
+            text-align: center;
+            transition: all var(--transition);
+            animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .pending-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(176, 0, 0, 0.15);
+        }
+
+        .pending-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .pending-card h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .pending-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 24px;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+    </style>
 </head>
 
 <body>
     <div class="auth-page">
-        <div class="pending-card glass animate-in">
+        <div class="pending-card">
             <div class="pending-icon">⏳</div>
-            <h1 style="font-size:1.6rem; margin-bottom:12px; color:var(--text);">Account Pending Approval</h1>
-            <p class="text-muted" style="margin-bottom:24px; font-size:0.95rem; line-height:1.7;">
+            <h1>Account Pending Approval</h1>
+            <p>
                 Your administrative account has been submitted and is currently under review by a system administrator.
                 You'll be able to access your dashboard once approved.
             </p>
-            <div class="card" style="text-align:left; margin-bottom:28px; border-left: 3px solid var(--warning);">
-                <div class="card-body">
-                    <p class="text-sm font-semibold" style="margin-bottom:8px; color:var(--warning);">📋 What happens
-                        next?</p>
-                    <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:16px; line-height:1.8;">
-                        <li>A system administrator will review your registration</li>
-                        <li>You'll gain access once your role is verified</li>
-                        <li>If rejected, you'll be notified. Contact support for help.</li>
-                    </ul>
-                </div>
+            <div class="card" style="text-align:left; margin-bottom:28px; border-left: 3.5px solid var(--warning); background: rgba(255,255,255,0.4); padding: 20px;">
+                <p style="margin-bottom:8px; color:var(--warning); font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.9rem;">
+                    📋 What happens next?
+                </p>
+                <ul style="font-size:0.85rem; color:var(--text-muted); padding-left:16px; line-height:1.8;">
+                    <li>A system administrator will review your registration details</li>
+                    <li>You'll gain access once your role is verified</li>
+                    <li>If rejected, you'll be notified. Contact support for help.</li>
+                </ul>
             </div>
 
             <div id="user-info"
-                style="margin-bottom:24px; padding:14px; background:var(--bg-muted); border-radius:var(--radius-sm); font-size:0.87rem; color:var(--text-muted); display:none;">
-                Logged in as: <strong id="user-email"></strong> (<span id="user-role"></span>)
+                style="margin-bottom:24px; padding:14px; background:rgba(15,23,42,0.03); border-radius:var(--radius-sm); font-size:0.87rem; color:var(--text-muted); display:none;">
+                Logged in as: <strong id="user-email" style="color: var(--text);"></strong> (<span id="user-role"></span>)
             </div>
 
-            <button id="logout-btn" class="btn btn-outline btn-full">
+            <button id="logout-btn" class="btn btn-outline btn-full btn-lg">
                 🚪 Sign Out & Return Home
             </button>
         </div>
