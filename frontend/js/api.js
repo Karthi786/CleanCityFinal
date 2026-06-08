@@ -192,3 +192,11 @@ export const notificationsAPI = {
     markAllRead: () => apiFetch('/notifications/read-all', { method: 'POST' }),
     delete: (id) => apiFetch(`/notifications/${id}`, { method: 'DELETE' }),
 };
+
+/* ── Image Endpoints ── */
+export const imageAPI = {
+    verifyExif: (payload) => apiFetch('/image/verify-exif', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    }),
+};

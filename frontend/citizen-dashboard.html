@@ -9,10 +9,12 @@
         content="CleanMadurai citizen dashboard — report, track and support civic issues in Madurai." />
     <!-- Global CSS -->
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/chatbot.css" />
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- Language Script -->
     <script type="module" src="js/i18n.js"></script>
+    <script src="js/chatbot.js"></script>
     <style>
         :root {
             --cm-green: #16a34a;
@@ -1343,9 +1345,14 @@
                             </div>
                             <div class="form-group" style="grid-column:1/-1;">
                                 <label class="label" for="issue-image">Upload Image *</label>
-                                <input id="issue-image" class="input" type="file" accept="image/*" required />
+                                <div style="display:flex;gap:12px;align-items:center;">
+                                    <input id="issue-image" class="input" type="file" accept="image/*" required style="flex:1;" />
+                                    <button type="button" id="image-check-btn" class="btn btn-outline" style="white-space:nowrap;padding:12px 20px;border-radius:8px;display:none;font-weight:700;">
+                                        🔍 Image Check
+                                    </button>
+                                </div>
                                 <div id="image-verify-status"
-                                    style="margin-top:8px;font-size:0.85rem;font-weight:600;display:flex;align-items:center;gap:6px;">
+                                    style="margin-top:12px;padding:12px;border-radius:10px;font-size:0.88rem;display:none;flex-direction:column;gap:6px;">
                                 </div>
                             </div>
                         </div>
@@ -1584,7 +1591,7 @@
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI, campaignsAPI, leaderboardAPI, usersAPI, notificationsAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, campaignsAPI, leaderboardAPI, usersAPI, notificationsAPI, imageAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t, getLang } from './js/i18n.js';
 
@@ -1821,6 +1828,13 @@
         document.getElementById('report-btn').addEventListener('click', () => {
             switchModalMode('issue');
             modal.classList.add('open');
+            // Reset verification UI
+            imageVerified = false;
+            if (imageCheckBtn) imageCheckBtn.style.display = 'none';
+            if (imageStatusDiv) {
+                imageStatusDiv.style.display = 'none';
+                imageStatusDiv.innerHTML = '';
+            }
         });
         document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
         document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
@@ -2073,11 +2087,109 @@
             });
         }
 
-        // Image preview on selection
+        // --- Image Verification Logic ---
+        let imageVerified = false;
+        const imageCheckBtn = document.getElementById('image-check-btn');
+        const imageStatusDiv = document.getElementById('image-verify-status');
+        const submitBtn = document.getElementById('submit-btn');
+
+        // Initial state
+        submitBtn.disabled = true;
+
         document.getElementById('issue-image').addEventListener('change', (e) => {
             const file = e.target.files[0];
-            const submitBtn = document.getElementById('submit-btn');
-            submitBtn.disabled = !file;
+            
+            // Reset verification state when file changes
+            imageVerified = false;
+            submitBtn.disabled = true;
+            imageStatusDiv.style.display = 'none';
+            imageStatusDiv.innerHTML = '';
+            
+            if (file) {
+                // Show check button when image is uploaded
+                imageCheckBtn.style.display = 'block';
+            } else {
+                imageCheckBtn.style.display = 'none';
+            }
+        });
+
+        imageCheckBtn.addEventListener('click', async () => {
+            const fileInput = document.getElementById('issue-image');
+            const file = fileInput.files[0];
+            
+            if (!file) {
+                toast.error('No Image', 'Please select an image first.');
+                return;
+            }
+
+            try {
+                // UI Loading State
+                imageCheckBtn.innerHTML = '<div class="spinner spinner-sm"></div> Checking...';
+                imageCheckBtn.disabled = true;
+                imageStatusDiv.style.display = 'none';
+
+                // Read file as base64
+                const reader = new FileReader();
+                const base64Promise = new Promise((resolve, reject) => {
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+                
+                const base64Image = await base64Promise;
+
+                // Call backend for EXIF verification
+                const result = await imageAPI.verifyExif({ imageUrl: base64Image });
+
+                imageStatusDiv.style.display = 'flex';
+                
+                if (result.verified) {
+                    imageVerified = true;
+                    submitBtn.disabled = false;
+                    
+                    imageStatusDiv.style.background = '#f0fdf4';
+                    imageStatusDiv.style.border = '1px solid #bbf7d0';
+                    imageStatusDiv.style.color = '#166534';
+                    imageStatusDiv.innerHTML = `
+                        <div style="font-weight: 800; display:flex; align-items:center; gap:6px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            Image Verified Successfully
+                        </div>
+                        <div style="margin-top:4px; font-size:0.8rem; opacity:0.9;">
+                            <b>Date Taken:</b> ${result.dateTaken}<br>
+                            <b>Time Taken:</b> ${result.timeTaken}
+                        </div>
+                    `;
+                    toast.success('Verified!', 'Image metadata is valid.');
+                } else {
+                    imageVerified = false;
+                    submitBtn.disabled = true;
+                    
+                    imageStatusDiv.style.background = '#fef2f2';
+                    imageStatusDiv.style.border = '1px solid #fecaca';
+                    imageStatusDiv.style.color = '#991b1b';
+                    imageStatusDiv.innerHTML = `
+                        <div style="font-weight: 800; display:flex; align-items:center; gap:6px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                            Verification Failed
+                        </div>
+                        <div style="margin-top:4px; font-size:0.8rem; opacity:0.9;">
+                            ${result.message || 'Image does not belong to a valid camera device or required metadata is missing.'}
+                        </div>
+                    `;
+                    toast.error('Verification Failed', 'This image is missing required camera metadata.');
+                }
+            } catch (err) {
+                console.error('Verify error:', err);
+                toast.error('Check Failed', 'Unable to verify image metadata.');
+                imageStatusDiv.style.display = 'flex';
+                imageStatusDiv.style.background = '#fef2f2';
+                imageStatusDiv.style.color = '#991b1b';
+                imageStatusDiv.innerHTML = `<div style="font-weight:700;">✗ Error: ${err.message}</div>`;
+            } finally {
+                imageCheckBtn.innerHTML = '🔍 Image Check';
+                imageCheckBtn.disabled = false;
+            }
         });
 
 
@@ -2165,6 +2277,13 @@
         document.getElementById('report-btn').addEventListener('click', () => {
             switchModalMode('issue');
             modal.classList.add('open');
+            // Reset verification UI
+            imageVerified = false;
+            if (typeof imageCheckBtn !== 'undefined') imageCheckBtn.style.display = 'none';
+            if (typeof imageStatusDiv !== 'undefined') {
+                imageStatusDiv.style.display = 'none';
+                imageStatusDiv.innerHTML = '';
+            }
             setTimeout(() => {
                 initMap();
                 map.invalidateSize();

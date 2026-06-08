@@ -61,6 +61,8 @@ app.use('/api/analytics', require('./routes/analytics'));
 app.use('/api/campaigns', require('./routes/campaigns'));
 app.use('/api/leaderboard', require('./routes/leaderboard'));
 app.use('/api/notifications', require('./routes/notifications').router);
+app.use('/api/image', require('./routes/image'));
+app.use('/api/ezhil-ai', require('./routes/ai'));
 
 /*
 ========================================
