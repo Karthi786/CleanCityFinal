@@ -832,8 +832,8 @@
                             <div class="form-group">
                                 <label class="label" for="issue-location" data-i18n="lbl_location">Location Address *</label>
                                 <div style="display:flex; gap:8px; margin-bottom: 8px;">
-                                    <input id="issue-location" class="input" placeholder="e.g. Mattuthavani Bus Stand..." required style="flex:1;" />
-                                    <button type="button" class="btn btn-outline" id="detect-location-btn" style="white-space:nowrap;">📍 Auto-Detect</button>
+                                    <input id="issue-location" class="input" placeholder="e.g. Mattuthavani Bus Stand..." required style="flex:1; max-width: calc(100% - 110px);" />
+                                    <button type="button" class="btn btn-outline btn-sm" id="detect-location-btn" style="white-space:nowrap; flex-shrink: 0;">📍 Auto-Detect</button>
                                 </div>
                                 <div id="issue-map"></div>
                                 <input type="hidden" id="issue-lat" />
@@ -846,8 +846,8 @@
                             <div class="form-group">
                                 <label class="label">Upload Image *</label>
                                 <div style="display:flex; gap:12px; align-items:center;">
-                                    <input id="issue-image" class="input" type="file" accept="image/*" required style="flex:1;" />
-                                    <button type="button" id="image-check-btn" class="btn btn-outline" style="white-space:nowrap; display:none; font-weight:700;">
+                                    <input id="issue-image" class="input" type="file" accept="image/*" required style="flex:1; max-width: calc(100% - 140px);" />
+                                    <button type="button" id="image-check-btn" class="btn btn-outline btn-sm" style="white-space:nowrap; display:none; font-weight:700; flex-shrink: 0;">
                                         🔍 Image Check
                                     </button>
                                 </div>
@@ -881,8 +881,8 @@
                             <div class="form-group">
                                 <label class="label" for="camp-location">Location *</label>
                                 <div style="display:flex; gap:8px;">
-                                    <input id="camp-location" class="input" placeholder="Campaign location address" required style="flex:1;" />
-                                    <button type="button" class="btn btn-outline" id="camp-detect-location-btn" style="white-space:nowrap;">📍 Auto-Detect</button>
+                                    <input id="camp-location" class="input" placeholder="Campaign location address" required style="flex:1; max-width: calc(100% - 110px);" />
+                                    <button type="button" class="btn btn-outline btn-sm" id="camp-detect-location-btn" style="white-space:nowrap; flex-shrink: 0;">📍 Auto-Detect</button>
                                 </div>
                                 <input type="hidden" id="camp-lat" />
                                 <input type="hidden" id="camp-lng" />

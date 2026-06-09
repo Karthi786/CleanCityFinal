@@ -162,10 +162,12 @@
         }
 
         .notification-dropdown {
-            position: absolute;
-            top: 50px;
-            right: 0;
-            width: 340px;
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100vw - 40px);
+            max-width: 420px;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(20px);
             border-radius: 20px;
@@ -583,7 +585,7 @@
         /* ── Analytics Tab ── */
         .analytics-grid-4 {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: 1fr;
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -708,6 +710,15 @@
 
         .tab-pane.active {
             display: block;
+        }
+
+        @media (max-width: 480px) {
+            .notification-dropdown {
+                width: calc(100vw - 24px) !important;
+                max-width: calc(100vw - 24px) !important;
+                left: 12px !important;
+                transform: none !important;
+            }
         }
     </style>
 </head>

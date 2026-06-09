@@ -230,8 +230,6 @@
                             </svg>
                         </button>
 
-                        <button id="refresh-btn" class="btn btn-outline btn-sm" style="border-radius: 99px; padding: 6px 16px;">🔄 Refresh</button>
-                        
                         <!-- User Info Profile Circle & Action Buttons -->
                         <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
                             <div class="user-avatar-sidebar"
@@ -365,16 +363,6 @@
         document.getElementById('tab-overview-btn').addEventListener('click', () => { switchTab('overview'); loadData(); });
         document.getElementById('tab-verifications-btn').addEventListener('click', () => { switchTab('verifications'); loadPending(); });
         document.getElementById('tab-users-btn').addEventListener('click', () => { switchTab('users'); loadAllUsers(); });
-
-        document.getElementById('refresh-btn').addEventListener('click', () => {
-            let activeTab = 'overview';
-            if (document.getElementById('tab-verifications').style.display === 'block') activeTab = 'verifications';
-            else if (document.getElementById('tab-users').style.display === 'block') activeTab = 'users';
-
-            if (activeTab === 'verifications') loadPending();
-            else if (activeTab === 'users') loadAllUsers();
-            else loadData();
-        });
 
         async function loadData() {
             try {
