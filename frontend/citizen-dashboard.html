@@ -472,6 +472,41 @@
             margin-top: 24px;
         }
 
+        /* ── Profile Avatar in Navbar ── */
+        .nav-profile-photo {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            cursor: pointer;
+            border: 2px solid var(--primary-light);
+            box-shadow: 0 4px 10px rgba(176,0,0,0.2);
+            transition: all 0.25s;
+        }
+        .nav-profile-photo:hover {
+            transform: scale(1.08);
+            border-color: var(--primary);
+        }
+        .nav-profile-fallback {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 10px rgba(176,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.25s;
+        }
+        .nav-profile-fallback:hover {
+            transform: scale(1.08);
+        }
+
         @media (max-width: 640px) {
             .welcome-header {
                 flex-direction: column;
@@ -551,13 +586,12 @@
                             </div>
                         </div>
 
-                        <!-- User Info Profile Circle & Action Buttons -->
+                        <!-- User Profile Photo & Action Buttons -->
                         <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
-                            <div class="user-avatar-sidebar"
-                                style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2);"
-                                id="sidebar-avatar">
-                                N
-                            </div>
+                            <a href="user-details.html" id="nav-profile-link" title="View Profile">
+                                <img id="nav-profile-img" class="nav-profile-photo" src="" alt="Profile" style="display:none;" />
+                                <div id="nav-profile-fallback" class="nav-profile-fallback">N</div>
+                            </a>
                             <span id="header-name" style="font-family: var(--font-display); font-weight: 700; font-size: 0.9rem; color: var(--text); display: none;"></span>
                             <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
                         </div>
@@ -657,12 +691,23 @@
                     <div>
                         <div class="tabs-header">
                             <div class="tabs-nav">
-                                <div class="tab-item active" data-tab="community">
+                                <div class="tab-item active" data-tab="district-feed">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
                                     </svg>
-                                    Community Feed
+                                    District Feed
+                                </div>
+                                <div class="tab-item" data-tab="constituency-feed">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                                        <circle cx="9" cy="7" r="4"></circle>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                                    </svg>
+                                    Constituency Feed
                                 </div>
                                 <div class="tab-item" data-tab="mine">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
@@ -678,8 +723,13 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane active" id="tab-community">
-                            <div id="community-issues" class="issues-grid"></div>
+                        <div class="tab-pane active" id="tab-district-feed">
+                            <div id="district-feed-info" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; padding:8px 16px; background:rgba(15,23,42,0.03); border-radius:12px;">Loading district feed...</div>
+                            <div id="district-feed-issues" class="issues-grid"></div>
+                        </div>
+                        <div class="tab-pane" id="tab-constituency-feed">
+                            <div id="constituency-feed-info" style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px; padding:8px 16px; background:rgba(15,23,42,0.03); border-radius:12px;">Loading constituency feed...</div>
+                            <div id="constituency-feed-issues" class="issues-grid"></div>
                         </div>
                         <div class="tab-pane" id="tab-mine">
                             <div id="my-issues" class="issues-grid"></div>
@@ -1080,8 +1130,48 @@
         document.getElementById('header-name').textContent = firstName;
         document.getElementById('welcome-msg').textContent = `Welcome, ${firstName}!`;
 
-        const avatarStr = firstName.substring(0, 2).toUpperCase();
-        document.getElementById('sidebar-avatar').textContent = avatarStr.charAt(0);
+        // Profile photo setup - fetch from API
+        let userDistrict = user.district || '';
+        let userConstituency = user.constituency || '';
+
+        (async function loadProfilePhoto() {
+            try {
+                const res = await usersAPI.me();
+                const u = res.user;
+                userDistrict = u.district || '';
+                userConstituency = u.constituency || '';
+
+                if (u.profile_photo) {
+                    const img = document.getElementById('nav-profile-img');
+                    img.src = u.profile_photo;
+                    img.style.display = 'block';
+                    document.getElementById('nav-profile-fallback').style.display = 'none';
+                    // Also update drawer avatar
+                    const drawerAv = document.getElementById('drawer-avatar');
+                    if (drawerAv) {
+                        drawerAv.style.backgroundImage = `url(${u.profile_photo})`;
+                        drawerAv.style.backgroundSize = 'cover';
+                        drawerAv.style.backgroundPosition = 'center';
+                        drawerAv.textContent = '';
+                    }
+                } else {
+                    document.getElementById('nav-profile-fallback').textContent = firstName.charAt(0).toUpperCase();
+                }
+
+                // Update drawer info
+                const drawerName = document.getElementById('drawer-name');
+                if (drawerName) drawerName.textContent = u.name || user.name;
+
+                // Reload issues/campaigns/leaderboard to use the newly loaded district/constituency
+                if (sessionStorage.getItem('citizenDashboardView') === 'campaigns') loadCampaigns();
+                if (sessionStorage.getItem('citizenDashboardView') === 'leaderboard') loadLeaderboard();
+                loadIssues();
+            } catch (e) {
+                console.error('Failed to load profile photo:', e);
+                document.getElementById('nav-profile-fallback').textContent = firstName.charAt(0).toUpperCase();
+            }
+        })();
+
         document.getElementById('logout-btn').addEventListener('click', logout);
 
         // ─── Notification System ───
@@ -1391,9 +1481,11 @@
         }
 
         function renderTrending() {
-            const top3 = [...allIssues].sort((a, b) => (b.supports_count || 0) - (a.supports_count || 0)).slice(0, 3);
+            // Filter allIssues to only include those from the citizen's district
+            const districtOnlyIssues = allIssues.filter(i => i.reporter_district === userDistrict);
+            const top3 = [...districtOnlyIssues].sort((a, b) => (b.supports_count || 0) - (a.supports_count || 0)).slice(0, 3);
             const el = document.getElementById('trending-list');
-            if (top3.length === 0) { el.innerHTML = '<div style="color:var(--text-light); font-size: 0.85rem;">No issues yet</div>'; return; }
+            if (top3.length === 0) { el.innerHTML = '<div style="color:var(--text-light); font-size: 0.85rem;">No issues yet in your district</div>'; return; }
 
             el.innerHTML = top3.map((issue, idx) => `
                 <div class="ms-item">
@@ -1466,20 +1558,32 @@
         }
 
         async function loadIssues() {
+            if (!userDistrict && !userConstituency) return; // Wait for profile to load
+            
             try {
-                const [issuesData, supportsData] = await Promise.all([
-                    issuesAPI.getAll(),
-                    issuesAPI.mySupports().catch(() => ({ supportedIds: [] })),
+                document.getElementById('district-feed-info').textContent = `Loading ${userDistrict} district feed...`;
+                document.getElementById('constituency-feed-info').textContent = `Loading ${userConstituency} constituency feed...`;
+
+                const [districtData, constituencyData, myData, supportsData] = await Promise.all([
+                    issuesAPI.getAll({ district: userDistrict }),
+                    issuesAPI.getAll({ constituency: userConstituency }),
+                    issuesAPI.getAll({ myIssues: true }),
+                    issuesAPI.mySupports().catch(() => ({ supportedIds: [] }))
                 ]);
 
-                allIssues = issuesData.issues || [];
+                const districtIssues = districtData.issues || [];
+                const constituencyIssues = constituencyData.issues || [];
+                const myIssues = myData.issues || [];
                 supportedIds = new Set(supportsData.supportedIds || []);
+                
+                // Keep all issues array for modals/trending
+                allIssues = [...new Map([...districtIssues, ...constituencyIssues, ...myIssues].map(item => [item.id, item])).values()];
 
-                // Stats Update
-                const myIssues = allIssues.filter(i => i.reported_by_id === user.id);
-                const communityIssues = allIssues.filter(i => i.reported_by_id !== user.id);
+                // Update info headers
+                document.getElementById('district-feed-info').textContent = `Showing issues reported in ${userDistrict}`;
+                document.getElementById('constituency-feed-info').textContent = `Showing issues reported in ${userConstituency}`;
 
-                // Fetch latest user points from dedicated /users/me endpoint
+                // Fetch latest user points
                 try {
                     const userData = await usersAPI.me();
                     if (userData && userData.user) {
@@ -1489,13 +1593,9 @@
                         document.getElementById('stat-reports-resolved').textContent = u.reports_resolved || 0;
                         document.getElementById('stat-campaigns-participated').textContent = u.campaigns_participated || 0;
                         document.getElementById('stat-campaigns-organized').textContent = u.campaigns_organized || 0;
-
-                        // Update welcome name
                         if (document.getElementById('welcome-name')) {
                             document.getElementById('welcome-name').textContent = u.name || user.name;
                         }
-
-                        // Update global user object with fresh points data
                         Object.assign(user, u);
                     }
                 } catch (e) {
@@ -1504,15 +1604,22 @@
 
                 document.getElementById('my-count').textContent = myIssues.length;
 
-                // Grids
-                const commEl = document.getElementById('community-issues');
-                if (communityIssues.length === 0) renderEmpty(commEl, 'No community issues reported yet.');
-                else commEl.innerHTML = communityIssues.map(i => renderIssueCard(i)).join('');
+                // Render District Feed
+                const distEl = document.getElementById('district-feed-issues');
+                if (districtIssues.length === 0) renderEmpty(distEl, `No issues reported in ${userDistrict} yet.`);
+                else distEl.innerHTML = districtIssues.map(i => renderIssueCard(i)).join('');
 
+                // Render Constituency Feed
+                const constEl = document.getElementById('constituency-feed-issues');
+                if (constituencyIssues.length === 0) renderEmpty(constEl, `No issues reported in ${userConstituency} yet.`);
+                else constEl.innerHTML = constituencyIssues.map(i => renderIssueCard(i)).join('');
+
+                // Render My Submissions
                 const myEl = document.getElementById('my-issues');
                 if (myIssues.length === 0) renderEmpty(myEl, "You haven't reported any issues yet.");
                 else myEl.innerHTML = myIssues.map(i => renderIssueCard(i)).join('');
 
+                // Update trending
                 renderTrending();
 
                 // Attach listeners dynamically
@@ -1921,7 +2028,7 @@
                     <span class="vm-status-badge" style="background:${bgColors[status]};color:${statusColors[status]};">${statusEmojis[status]} ${status}</span>
                     ${isCreator ? `
                     <span class="vm-status-badge" style="top:44px; background:${camp.verification_status === 'approved' ? '#dcfce7' : camp.verification_status === 'rejected' ? '#fee2e2' : '#fef3c7'}; color:${camp.verification_status === 'approved' ? '#16a34a' : camp.verification_status === 'rejected' ? '#991b1b' : '#92400e'};">
-                        ${camp.verification_status === 'approved' ? '✅ Verified' : camp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending Approval'}
+                        ${camp.verification_status === 'approved' ? '✅ Approved' : camp.verification_status === 'rejected' ? '❌ Rejected' : camp.verification_status === 'pending_mla' ? '⏳ Pending MLA Approval' : '⏳ Pending Collector Approval'}
                     </span>` : ''}
                     ${!camp.image_url ? statusEmojis[status] : ''}
                 </div>
@@ -1954,9 +2061,10 @@
         }
 
         async function loadCampaigns() {
+            if (!userConstituency) return;
             try {
                 const [campData, regData] = await Promise.all([
-                    campaignsAPI.getAll(),
+                    campaignsAPI.getAll({ constituency: userConstituency }),
                     campaignsAPI.myRegistrations().catch(() => ({ registeredIds: [] })),
                 ]);
                 allCampaigns = campData.campaigns || [];
@@ -2196,11 +2304,12 @@
 
         // ─── Leaderboard ───
         async function loadLeaderboard() {
+            if (!userDistrict) return;
             const tbody = document.getElementById('leaderboard-tbody');
             tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">Loading leaderboard...</td></tr>';
 
             try {
-                const data = await leaderboardAPI.getTop100();
+                const data = await leaderboardAPI.getTop100({ district: userDistrict });
                 console.log('Leaderboard Data Received:', data);
                 const users = (data.leaderboard || []).slice(0, 10);
 

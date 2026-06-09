@@ -1,0 +1,1362 @@
+export const tnDistricts = [
+  {
+    "district": "Chennai",
+    "constituencies": [
+      {
+        "name": "Ambattur",
+        "mla": "Balamurugan G",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Anna Nagar",
+        "mla": "V.K. Ramkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Chepauk-Thiruvallikeni",
+        "mla": "Udhayanidhi Stalin",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Dr. Radhakrishnan Nagar",
+        "mla": "N. Marie Wilson",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Egmore",
+        "mla": "Rajmohan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Harbour",
+        "mla": "P.K. Sekarbabu",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Kolathur",
+        "mla": "V.S. Babu",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Madhavaram",
+        "mla": "M.L. Vijayprabhu",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Maduravoyal",
+        "mla": "Rhevanth Charan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Mylapore",
+        "mla": "Venkataramanan P",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Perambur",
+        "mla": "C. Joseph Vijay",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Royapuram",
+        "mla": "K.V. Vijay Damu",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Saidapet",
+        "mla": "Arul Prakasam M",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sholinganallur",
+        "mla": "ECR P. Saravanan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiru-Vi-Ka-Nagar",
+        "mla": "M.R. Pallavi",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiruvottiyur",
+        "mla": "Senthil Kumar N",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiyagarayanagar",
+        "mla": "Anand N",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thousand Lights",
+        "mla": "Prabhakar J.C.D",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Velachery",
+        "mla": "Kumar R",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Villivakkam",
+        "mla": "Aadhav Arjuna",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Virugambakkam",
+        "mla": "Sabarinathan R",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Chengalpattu",
+    "constituencies": [
+      {
+        "name": "Alandur",
+        "mla": "M. Harish",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Chengalpattu",
+        "mla": "S. Thiyagarajan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Cheyyur",
+        "mla": "Rajasekar E",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Madurantakam",
+        "mla": "Maragatham Kumaravel K",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Pallavaram",
+        "mla": "J. Kamatchi",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tambaram",
+        "mla": "D. Sarathkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiruporur",
+        "mla": "B. Vijayaraj",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tiruvallur",
+    "constituencies": [
+      {
+        "name": "Avadi",
+        "mla": "R. Ramesh Kumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Gummidipoondi",
+        "mla": "S. Vijayakumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Ponneri",
+        "mla": "Dr. Ravi M.S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Poonamallee",
+        "mla": "Prakasam R",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiruvallur",
+        "mla": "Dr. T. Arunkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruttani",
+        "mla": "G. Hari",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Kanchipuram",
+    "constituencies": [
+      {
+        "name": "Kancheepuram",
+        "mla": "R.V. Ranjithkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sriperumbudur",
+        "mla": "Thennarasu K",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Uthiramerur",
+        "mla": "Munirathinam J",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Ranipet",
+    "constituencies": [
+      {
+        "name": "Arakkonam",
+        "mla": "V. Gandhiraj",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Arcot",
+        "mla": "S.M. Sukumar",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Ranipet",
+        "mla": "Thahira",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sholingur",
+        "mla": "G. Kapil",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Vellore",
+    "constituencies": [
+      {
+        "name": "Anaikattu",
+        "mla": "D. Velazhagan",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Gudiyattam",
+        "mla": "K. Sindu",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Katpadi",
+        "mla": "Dr. M. Sudhakar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Kilvaithinankuppam",
+        "mla": "Thenral Kumar E",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Vellore",
+        "mla": "M.M. Vinoth Kannan",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tirupathur",
+    "constituencies": [
+      {
+        "name": "Ambur",
+        "mla": "Vilwanathan A.C.",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Jolarpet",
+        "mla": "Veeramani K.C.",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Tiruppattur",
+        "mla": "Dr. Thirupathi N",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Vaniyambadi",
+        "mla": "Syed Farooq Basha SSB",
+        "party": "Indian Union Muslim League"
+      }
+    ]
+  },
+  {
+    "district": "Tiruvannamalai",
+    "constituencies": [
+      {
+        "name": "Arani",
+        "mla": "Jayasudha L",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Chengam",
+        "mla": "S. Velu",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Cheyyar",
+        "mla": "Mukkur N. Subramanian",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Kalasapakkam",
+        "mla": "Agri Krishnamurthy S.S.",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Kilpennathur",
+        "mla": "Ramachandran S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Polur",
+        "mla": "Abishek R",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruvannamalai",
+        "mla": "E.V. Velu",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vandavasi",
+        "mla": "Ambethkumar S",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Krishnagiri",
+    "constituencies": [
+      {
+        "name": "Bargur",
+        "mla": "E.C. Govindarasan",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Hosur",
+        "mla": "Balakrishna Reddy P",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Krishnagiri",
+        "mla": "Mukundhan P",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thalli",
+        "mla": "Ramachandran T",
+        "party": "Communist Party of India"
+      },
+      {
+        "name": "Uthangarai",
+        "mla": "N. Elaiyaraja",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Veppanahalli",
+        "mla": "Srinivasan P.S.",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Dharmapuri",
+    "constituencies": [
+      {
+        "name": "Dharmapuri",
+        "mla": "Sowmiya Anbumani",
+        "party": "Pattali Makkal Katchi"
+      },
+      {
+        "name": "Harur",
+        "mla": "Sampathkumar V",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Palacodu",
+        "mla": "Anbalagan K.P.",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Pappireddipatti",
+        "mla": "Maragatham Vetrivel",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Pennagaram",
+        "mla": "Gajendran S",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Viluppuram",
+    "constituencies": [
+      {
+        "name": "Gingee",
+        "mla": "Ganeshkumar A",
+        "party": "Pattali Makkal Katchi"
+      },
+      {
+        "name": "Mailam",
+        "mla": "Shanmugam C. Ve.",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Tindivanam",
+        "mla": "Vanni Arasu",
+        "party": "Viduthalai Chiruthaigal Katchi"
+      },
+      {
+        "name": "Vanur",
+        "mla": "Gowtham D",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vikravandi",
+        "mla": "Sivakumar C",
+        "party": "Pattali Makkal Katchi"
+      },
+      {
+        "name": "Viluppuram",
+        "mla": "Lakshmanan R",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Kallakurichi",
+    "constituencies": [
+      {
+        "name": "Kallakurichi",
+        "mla": "Arul Vignesh C",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Rishivandiyam",
+        "mla": "Karthikeyan K",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Sankarapuram",
+        "mla": "Rakesh R",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Tirukkoyilur",
+        "mla": "Palanisamy S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Ulundurpettai",
+        "mla": "Vasanthavel G.R",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Cuddalore",
+    "constituencies": [
+      {
+        "name": "Bhuvanagiri",
+        "mla": "Arunmozhithevan A",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Chidambaram",
+        "mla": "Thamimun Ansari M",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Cuddalore",
+        "mla": "B. Rajkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Kattumannarkoil",
+        "mla": "L.E. Jothimani",
+        "party": "Viduthalai Chiruthaigal Katchi"
+      },
+      {
+        "name": "Kurinjipadi",
+        "mla": "M.R.K. Panneerselvam",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Neyveli",
+        "mla": "Rajendran R",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Panruti",
+        "mla": "Mohan K",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Tittakudi",
+        "mla": "Ganesan C.V",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vriddhachalam",
+        "mla": "Premalatha Vijayakant",
+        "party": "Desiya Murpokku Dravida Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Mayiladuthurai",
+    "constituencies": [
+      {
+        "name": "Mayiladuthurai",
+        "mla": "Jamal Mohamed Younoos Y.N.",
+        "party": "Indian National Congress"
+      },
+      {
+        "name": "Poompuhar",
+        "mla": "Nivedha M Murugan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Sirkazhi",
+        "mla": "Senthilselvan R",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Nagapattinam",
+    "constituencies": [
+      {
+        "name": "Kilvelur",
+        "mla": "Latha T",
+        "party": "Communist Party of India (Marxist)"
+      },
+      {
+        "name": "Nagapattinam",
+        "mla": "M.H. Jawahirullah",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vedaranyam",
+        "mla": "Manian O.S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tiruvarur",
+    "constituencies": [
+      {
+        "name": "Mannargudi",
+        "mla": "Kamaraj S",
+        "party": "Amma Makkal Munnettra Kazagam"
+      },
+      {
+        "name": "Nannilam",
+        "mla": "Kamaraj R",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Thiruthuraipoondi",
+        "mla": "Marimuthu K",
+        "party": "Communist Party of India"
+      },
+      {
+        "name": "Thiruvarur",
+        "mla": "Kalaivanan Poondi K",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Thanjavur",
+    "constituencies": [
+      {
+        "name": "Kumbakonam",
+        "mla": "Vinoth",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Orathanadu",
+        "mla": "R. Vaithilingam",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Papanasam",
+        "mla": "A.M. Shahjahan",
+        "party": "Indian Union Muslim League"
+      },
+      {
+        "name": "Pattukkottai",
+        "mla": "Annadurai K",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Peravurani",
+        "mla": "Ashokkumar N",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Thanjavur",
+        "mla": "R. Vijaysaravanan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiruvaiyaru",
+        "mla": "Durai Chandrasekaran",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Thiruvidaimarudur",
+        "mla": "Govi Chezhiaan",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Pudukkottai",
+    "constituencies": [
+      {
+        "name": "Alangudi",
+        "mla": "Siva V. Meyyanathan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Aranthangi",
+        "mla": "Mohamed Farvas J",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Gandharvakottai",
+        "mla": "N. Subramanian",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Pudukkottai",
+        "mla": "V. Muthuraja",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Thirumayam",
+        "mla": "Regupathy S",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Viralimalai",
+        "mla": "Vijayabaskar C",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Ariyalur",
+    "constituencies": [
+      {
+        "name": "Ariyalur",
+        "mla": "Rajendran S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Jayankondam",
+        "mla": "Vaithilingam G",
+        "party": "Pattali Makkal Katchi"
+      }
+    ]
+  },
+  {
+    "district": "Perambalur",
+    "constituencies": [
+      {
+        "name": "Kunnam",
+        "mla": "S.S. Sivasankar",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Perambalur",
+        "mla": "Sivakumar K",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tiruchirappalli",
+    "constituencies": [
+      {
+        "name": "Lalgudi",
+        "mla": "Leemarose Martin",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Manachanallur",
+        "mla": "Kathiravan S",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Manapparai",
+        "mla": "R. Kathiravan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Musiri",
+        "mla": "M. Vignesh",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Srirangam",
+        "mla": "Ramesh",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thiruverumbur",
+        "mla": "Vijayakumar (A) Navalpattu S. Viji",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thuraiyur",
+        "mla": "Ravisankar M",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruchirappalli East",
+        "mla": "C. Joseph Vijay",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruchirappalli West",
+        "mla": "K.N. Nehru",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Karur",
+    "constituencies": [
+      {
+        "name": "Aravakurichi",
+        "mla": "Elango R",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Karur",
+        "mla": "M.R. Vijayabhaskar",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Krishnarayapuram",
+        "mla": "Sathya M",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Kulithalai",
+        "mla": "Suriyanur A. Chandran",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Namakkal",
+    "constituencies": [
+      {
+        "name": "Kumarapalayam",
+        "mla": "C. Vijayalakshmi",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Namakkal",
+        "mla": "Dilip C.S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Paramathi-Velur",
+        "mla": "Sekar S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Rasipuram",
+        "mla": "Logesh Tamilselvan D",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Senthamangalam",
+        "mla": "P. Chandrasekar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruchengodu",
+        "mla": "Arunraj K.G",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Salem",
+    "constituencies": [
+      {
+        "name": "Attur",
+        "mla": "Jayasankaran A.P.",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Edappadi",
+        "mla": "Edappadi Palaniswami K",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Gangavalli",
+        "mla": "Nallathambi A",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Mettur",
+        "mla": "Venkatachalam G",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Omalur",
+        "mla": "Mani R",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Salem North",
+        "mla": "Sivakumar K",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Salem South",
+        "mla": "Vijay Tamilan Parthiban A",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Salem West",
+        "mla": "Lakshmanan S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sankari",
+        "mla": "Vetrivel S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Veerapandi",
+        "mla": "Palanivel M.S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Yercaud",
+        "mla": "Usharani P",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Erode",
+    "constituencies": [
+      {
+        "name": "Anthiyur",
+        "mla": "Haribaskar P",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Bhavani",
+        "mla": "Karuppanan K.C",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Bhavanisagar",
+        "mla": "V.P. Tamilselvi",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Erode East",
+        "mla": "M. Vijay Balaji",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Erode West",
+        "mla": "Ananth Moghan K.K.",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Gobichettipalayam",
+        "mla": "K.A. Sengottaiyan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Modakkurichi",
+        "mla": "D. Shanmugan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Perundurai",
+        "mla": "Jayakumar S",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tiruppur",
+    "constituencies": [
+      {
+        "name": "Avanashi",
+        "mla": "Kamali S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Dharapuram",
+        "mla": "Sathyabama P",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Kangayam",
+        "mla": "NSN Nataraj",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Madathukulam",
+        "mla": "R. Jayaramakrishnan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Palladam",
+        "mla": "K. Ramkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruppur North",
+        "mla": "V. Sathyabama",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruppur South",
+        "mla": "Balamurugan S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Udumalaipettai",
+        "mla": "Jayakumar M",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Coimbatore",
+    "constituencies": [
+      {
+        "name": "Coimbatore North",
+        "mla": "V. Sampathkumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Coimbatore South",
+        "mla": "V. Senthilbalaji",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Kavundampalayam",
+        "mla": "Kanimozhi Santhosh",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Kinathukadavu",
+        "mla": "Vignesh K",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Mettupalayam",
+        "mla": "Sunilanand",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Pollachi",
+        "mla": "K. Nithyanandhan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Singanallur",
+        "mla": "K.S. Sri Giri Prasath",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sulur",
+        "mla": "N.M. Sukumar",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thondamuthur",
+        "mla": "S.P. Velumani",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Valparai",
+        "mla": "Kutty (Alias) Sudhakar A",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Dindigul",
+    "constituencies": [
+      {
+        "name": "Athoor",
+        "mla": "I. Periasamy",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Dindigul",
+        "mla": "Senthilkumar I.P",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Natham",
+        "mla": "Natham Viswanathan R",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Nilakkottai",
+        "mla": "Ayyanar R",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Oddanchatram",
+        "mla": "Sakkarapani R",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Palani",
+        "mla": "Ravimanoharan K",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vedasandur",
+        "mla": "Saminathan T",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Madurai",
+    "constituencies": [
+      {
+        "name": "Madurai Central",
+        "mla": "Madhar Badhurudeen",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Madurai East",
+        "mla": "Karthikeyan S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Madurai North",
+        "mla": "A. Kallanai",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Madurai South",
+        "mla": "M.M. Gopison",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Madurai West",
+        "mla": "Thangapandi S.R.",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Melur",
+        "mla": "P. Viswanathan",
+        "party": "Indian National Congress"
+      },
+      {
+        "name": "Sholavandan",
+        "mla": "Karuppaiah M.V",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thirumangalam",
+        "mla": "Manimaran M",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Thiruparankundram",
+        "mla": "Nirmalkumar R",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Usilampatti",
+        "mla": "Vijay M",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Theni",
+    "constituencies": [
+      {
+        "name": "Andipatti",
+        "mla": "Maharajan A",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Bodinayakanur",
+        "mla": "Panneerselvam O",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Cumbum",
+        "mla": "Jeganathmishra Pla",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Periyakulam",
+        "mla": "Sabari Iyngaran G",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Sivaganga",
+    "constituencies": [
+      {
+        "name": "Karaikudi",
+        "mla": "Dr. Prabhu T.K.",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Manamadurai",
+        "mla": "Elangovan D",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sivaganga",
+        "mla": "Kulandhai Rani A",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruppattur",
+        "mla": "Seenivasa Sethupathy R",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Ramanathapuram",
+    "constituencies": [
+      {
+        "name": "Mudhukulathur",
+        "mla": "R.S. Rajakannappan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Paramakudi",
+        "mla": "Advocate Kathiravan K.K.",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Ramanathapuram",
+        "mla": "Katharbatcha Muthuramalingam",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Tiruvadanai",
+        "mla": "Rajeev",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Virudhunagar",
+    "constituencies": [
+      {
+        "name": "Aruppukkottai",
+        "mla": "K.K.S.S.R. Ramachandran",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Rajapalayam",
+        "mla": "Jegadeshwari K",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Sattur",
+        "mla": "Kadarkarairaj A",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Sivakasi",
+        "mla": "Keerthana S",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Srivilliputhur",
+        "mla": "Karthik A",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruchuli",
+        "mla": "Thangam Thenarasu",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Virudhunagar",
+        "mla": "Selvam P",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tenkasi",
+    "constituencies": [
+      {
+        "name": "Alangulam",
+        "mla": "Paul Manoj Pandian",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Kadayanallur",
+        "mla": "Rajendran T.M",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Sankarankovil",
+        "mla": "Dr. Dhilipan Jaishankar",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Tenkasi",
+        "mla": "Dr. Kalai Kathiravan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vasudevanallur",
+        "mla": "E. Raja",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Tirunelveli",
+    "constituencies": [
+      {
+        "name": "Ambasamudram",
+        "mla": "Dr. Esakki Subaya",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Nanguneri",
+        "mla": "Reddiarpatti V. Narayanan",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Palayamkottai",
+        "mla": "M. Abdul Wahab",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Radhapuram",
+        "mla": "Dr. Sathish Christopher",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tirunelveli",
+        "mla": "Murughan R.S.",
+        "party": "Tamilaga Vettri Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Thoothukudi",
+    "constituencies": [
+      {
+        "name": "Kovilpatti",
+        "mla": "Karunanithi K",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Ottapidaram",
+        "mla": "P. Mathanraja",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Srivaikuntam",
+        "mla": "Saravanan G",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Thoothukkudi",
+        "mla": "Srinath",
+        "party": "Tamilaga Vettri Kazhagam"
+      },
+      {
+        "name": "Tiruchendur",
+        "mla": "Anitha R. Radhakrishnan",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Vilathikulam",
+        "mla": "Markandayan G.V",
+        "party": "Dravida Munnetra Kazhagam"
+      }
+    ]
+  },
+  {
+    "district": "Kanniyakumari",
+    "constituencies": [
+      {
+        "name": "Colachal",
+        "mla": "Tharahai Cuthbert",
+        "party": "Indian National Congress"
+      },
+      {
+        "name": "Kanniyakumari",
+        "mla": "Thalavai Sundaram N",
+        "party": "All India Anna Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Killiyoor",
+        "mla": "Rajesh Kumar S",
+        "party": "Indian National Congress"
+      },
+      {
+        "name": "Nagercoil",
+        "mla": "Austin",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Padmanabhapuram",
+        "mla": "Chellaswamy R",
+        "party": "Communist Party of India (Marxist)"
+      },
+      {
+        "name": "Vilavancode",
+        "mla": "Praveen T.T",
+        "party": "Indian National Congress"
+      }
+    ]
+  },
+  {
+    "district": "The Nilgiris",
+    "constituencies": [
+      {
+        "name": "Coonoor",
+        "mla": "M. Raju",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Gudalur",
+        "mla": "Dhravidamani M",
+        "party": "Dravida Munnetra Kazhagam"
+      },
+      {
+        "name": "Udhagamandalam",
+        "mla": "Bhojarajan M",
+        "party": "Bharatiya Janata Party"
+      }
+    ]
+  }
+];

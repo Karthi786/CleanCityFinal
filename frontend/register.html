@@ -182,9 +182,38 @@
                     </div>
 
                     <div class="form-group">
+                        <label class="label" for="phone">Phone Number</label>
+                        <input id="phone" type="tel" class="input" placeholder="e.g. 9876543210" required />
+                    </div>
+
+                    <div class="form-group">
                         <label class="label" for="password" data-i18n="lbl_pwd">Password</label>
                         <input id="password" type="password" class="input" placeholder="At least 6 characters"
                             minlength="6" required autocomplete="new-password" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="profile-photo">Profile Photo Upload</label>
+                        <input id="profile-photo" type="file" class="input" accept="image/*" />
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="district">District</label>
+                        <select id="district" class="select" required>
+                            <option value="">— Select District —</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="constituency-group">
+                        <label class="label" for="constituency">Constituency</label>
+                        <select id="constituency" class="select" required disabled>
+                            <option value="">— Select Constituency —</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="description-group" style="display:none;">
+                        <label class="label" for="description">MLA Description</label>
+                        <textarea id="description" class="input" placeholder="Enter brief profile description" rows="3"></textarea>
                     </div>
 
                     <div class="form-group">
@@ -204,6 +233,14 @@
                                 <div>
                                     <div class="role-label" data-i18n="role_col">District Collector</div>
                                     <div class="role-desc">Oversee all departments and city-wide issue resolution</div>
+                                </div>
+                            </label>
+                            <label class="role-option" data-role="MLA">
+                                <input type="radio" name="role" value="MLA" />
+                                <span class="role-icon">🗣️</span>
+                                <div>
+                                    <div class="role-label">Member of Legislative Assembly</div>
+                                    <div class="role-desc">Manage issues and campaigns for your constituency</div>
                                 </div>
                             </label>
                             <label class="role-option" data-role="DEPT">
@@ -262,12 +299,45 @@
         import { redirectIfLoggedIn } from './js/router.js';
         import { register } from './js/auth.js';
         import { toast } from './js/toast.js';
+        import { tnDistricts } from './js/tndetails.js';
 
         redirectIfLoggedIn();
 
-        // Role selector UI
+        const districtSelect = document.getElementById('district');
+        const constituencySelect = document.getElementById('constituency');
+
+        // Populate districts
+        tnDistricts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district;
+            opt.textContent = d.district;
+            districtSelect.appendChild(opt);
+        });
+
+        // Handle district change
+        districtSelect.addEventListener('change', (e) => {
+            const selected = e.target.value;
+            constituencySelect.innerHTML = '<option value="">— Select Constituency —</option>';
+            if (!selected) {
+                constituencySelect.disabled = true;
+                return;
+            }
+            const distData = tnDistricts.find(d => d.district === selected);
+            if (distData && distData.constituencies) {
+                distData.constituencies.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.name;
+                    opt.textContent = c.name;
+                    constituencySelect.appendChild(opt);
+                });
+                constituencySelect.disabled = false;
+            }
+        });
+
         const roleOptions = document.querySelectorAll('.role-option');
         const deptGroup = document.getElementById('dept-group');
+        const constGroup = document.getElementById('constituency-group');
+        const descGroup = document.getElementById('description-group');
         let selectedRole = 'USER';
 
         roleOptions.forEach(opt => {
@@ -276,7 +346,26 @@
                 opt.classList.add('selected');
                 opt.querySelector('input').checked = true;
                 selectedRole = opt.dataset.role;
+                
                 deptGroup.style.display = selectedRole === 'DEPT' ? 'flex' : 'none';
+                
+                // Collectors do not have a constituency
+                if (selectedRole === 'COLLECTOR') {
+                    constGroup.style.display = 'none';
+                    document.getElementById('constituency').required = false;
+                } else {
+                    constGroup.style.display = 'flex';
+                    document.getElementById('constituency').required = true;
+                }
+
+                // Only MLAs need a description
+                if (selectedRole === 'MLA') {
+                    descGroup.style.display = 'flex';
+                    document.getElementById('description').required = true;
+                } else {
+                    descGroup.style.display = 'none';
+                    document.getElementById('description').required = false;
+                }
             });
         });
 
@@ -296,10 +385,23 @@
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const phone_number = document.getElementById('phone').value.trim();
+            const district = document.getElementById('district').value;
+            const constituency = selectedRole !== 'COLLECTOR' ? document.getElementById('constituency').value : null;
             const dept = document.getElementById('department').value;
+            const description = selectedRole === 'MLA' ? document.getElementById('description').value.trim() : null;
+            const photoInput = document.getElementById('profile-photo');
 
-            if (!name || !email || !password) {
+            if (!name || !email || !password || !phone_number || !district) {
                 toast.error('Missing Fields', 'Please fill in all required fields.');
+                return;
+            }
+            if (selectedRole !== 'COLLECTOR' && !constituency) {
+                toast.error('Missing Fields', 'Please select your constituency.');
+                return;
+            }
+            if (selectedRole === 'MLA' && !description) {
+                toast.error('Missing Fields', 'Please provide an MLA description.');
                 return;
             }
             if (password.length < 6) {
@@ -311,13 +413,27 @@
                 return;
             }
 
+            // Read profile photo as base64
+            let profile_photo = null;
+            if (photoInput.files && photoInput.files[0]) {
+                const file = photoInput.files[0];
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                await new Promise(res => reader.onload = res);
+                profile_photo = reader.result;
+            }
+
             // Map role
             let finalRole = selectedRole;
             if (selectedRole === 'DEPT') finalRole = dept;
 
             setLoading(true);
             try {
-                const data = await register({ name, email, password, role: finalRole, department: dept || null });
+                const payload = { 
+                    name, email, password, role: finalRole, department: dept || null,
+                    phone_number, district, constituency, profile_photo, description
+                };
+                const data = await register(payload);
                 // Strip leading slash — Live Server serves from a subfolder, not root
                 const redirect = (data.redirect || '').replace(/^\//, '');
                 if (redirect === 'pending.html') {

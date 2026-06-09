@@ -22,10 +22,28 @@ const CATEGORY_DEPT_MAP = {
  */
 router.get('/', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin
-            .from('issues')
-            .select('*')
-            .order('created_at', { ascending: false });
+        // Enforce filters for COLLECTOR and MLA
+        if (req.user.role === 'COLLECTOR' && req.user.district) {
+            req.query.district = req.user.district;
+        } else if (req.user.role === 'MLA' && req.user.constituency) {
+            req.query.constituency = req.user.constituency;
+        }
+
+        // If district or constituency filters requested, use a joined query
+        const needsUserJoin = req.query.district || req.query.constituency;
+
+        let query;
+        if (needsUserJoin) {
+            query = supabaseAdmin
+                .from('issues')
+                .select('*, reporter:users!issues_reported_by_id_fkey(district, constituency)')
+                .order('created_at', { ascending: false });
+        } else {
+            query = supabaseAdmin
+                .from('issues')
+                .select('*')
+                .order('created_at', { ascending: false });
+        }
 
         if (req.query.department) {
             query = query.eq('department', req.query.department);
@@ -39,8 +57,24 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
             query = query.neq('reported_by_id', req.userId);
         }
 
-        const { data, error } = await query;
+        let { data, error } = await query;
         if (error) throw error;
+
+        // Post-filter by district/constituency from joined reporter data
+        if (req.query.district && data) {
+            data = data.filter(issue => issue.reporter && issue.reporter.district === req.query.district);
+        }
+        if (req.query.constituency && data) {
+            data = data.filter(issue => issue.reporter && issue.reporter.constituency === req.query.constituency);
+        }
+
+        // Clean up reporter join data before sending
+        if (needsUserJoin && data) {
+            data = data.map(issue => {
+                const { reporter, ...rest } = issue;
+                return { ...rest, reporter_district: reporter?.district, reporter_constituency: reporter?.constituency };
+            });
+        }
 
         return res.json({ issues: data });
     } catch (err) {
@@ -101,25 +135,68 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
             console.log('[Info] users.reports_count column might not exist yet.');
         }
 
-        // Send notification to Department
+        // Send notification to Department in the same district, Collector, and MLA
         try {
-            const { data: deptUser } = await supabaseAdmin
-                .from('users')
-                .select('id')
-                .eq('role', department)
-                .limit(1);
+            const userDistrict = req.user.district;
+            const userConstituency = req.user.constituency;
 
-            if (deptUser && deptUser.length > 0) {
+            // Find users to notify
+            let targetUserIds = [];
+
+            // 1. Department in the same district
+            if (userDistrict) {
+                const { data: deptUsers } = await supabaseAdmin
+                    .from('users')
+                    .select('id')
+                    .eq('role', department)
+                    .eq('district', userDistrict);
+                
+                if (deptUsers) targetUserIds.push(...deptUsers.map(u => u.id));
+
+                // 2. Collector in the same district
+                const { data: collectorUsers } = await supabaseAdmin
+                    .from('users')
+                    .select('id')
+                    .eq('role', 'COLLECTOR')
+                    .eq('district', userDistrict);
+                
+                if (collectorUsers) targetUserIds.push(...collectorUsers.map(u => u.id));
+
+                // 3. MLA in the same constituency
+                if (userConstituency) {
+                    const { data: mlaUsers } = await supabaseAdmin
+                        .from('users')
+                        .select('id')
+                        .eq('role', 'MLA') // assuming MLA role exists or will exist
+                        .eq('district', userDistrict)
+                        .eq('constituency', userConstituency);
+
+                    if (mlaUsers) targetUserIds.push(...mlaUsers.map(u => u.id));
+                }
+            } else {
+                // Fallback to global department if user has no district
+                const { data: deptUsers } = await supabaseAdmin
+                    .from('users')
+                    .select('id')
+                    .eq('role', department)
+                    .limit(1);
+                if (deptUsers && deptUsers.length > 0) targetUserIds.push(deptUsers[0].id);
+            }
+
+            // Remove duplicates and create notifications
+            targetUserIds = [...new Set(targetUserIds)];
+            
+            for (const targetId of targetUserIds) {
                 await createNotification({
-                    userId: deptUser[0].id,
+                    userId: targetId,
                     title: 'New Issue Reported',
-                    message: `A new issue "${title}" has been reported in your department and requires attention.`,
+                    message: `A new issue "${title}" has been reported in your jurisdiction and requires attention.`,
                     type: 'report',
                     relatedId: data.id
                 });
             }
         } catch (nErr) {
-            console.error('Failed to send Dept notification:', nErr);
+            console.error('Failed to send Dept/Collector/MLA notifications:', nErr);
         }
 
         return res.status(201).json({ message: 'Issue reported successfully.', issue: data });
@@ -134,7 +211,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
  * Update issue status (Department / Collector / Admin)
  */
 router.put('/:id/status', verifyToken, requireApproved,
-    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'),
+    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'), // Explicitly excluding MLA
     async (req, res) => {
         const { id } = req.params;
         const { status, completionImageUrl } = req.body;

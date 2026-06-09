@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Details — MakkalSevi</title>
+    <link rel="stylesheet" href="css/styles.css" />
+    <script type="module" src="js/i18n.js"></script>
+    <style>
+        body {
+            background-color: #F8F9FB;
+        }
+        .nav-island-container {
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            pointer-events: none;
+        }
+
+        .nav-island {
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1300px;
+            height: 68px;
+            padding: 0 16px 0 24px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .details-container {
+            max-width: 600px;
+            margin: 120px auto 40px auto;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            padding: 40px;
+            border-radius: 30px;
+            box-shadow: var(--shadow-md);
+        }
+        .profile-photo {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 24px auto;
+            display: block;
+            border: 4px solid var(--primary-light);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        .header h1 {
+            font-family: var(--font-display);
+            font-weight: 800;
+            color: var(--text);
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-island-container">
+        <!-- Add a simple nav back -->
+        <nav class="nav-island">
+            <a href="#" id="back-link" class="logo">
+                <span>← Back to Dashboard</span>
+            </a>
+        </nav>
+    </div>
+
+    <div class="details-container">
+        <div class="header">
+            <h1 data-i18n="lbl_user_details">User Details</h1>
+        </div>
+        <form id="user-details-form" class="form-stack">
+            <div style="text-align: center;">
+                <img id="current-photo" src="" class="profile-photo" alt="Profile" style="display:none;" />
+                <div class="user-avatar-sidebar profile-photo" id="fallback-photo" style="display:flex; align-items:center; justify-content:center; background:var(--primary); color:white; font-size:3rem; font-family:var(--font-display); font-weight:800; line-height: 1;">N</div>
+            </div>
+
+            <div class="form-group">
+                <label class="label">Update Profile Photo</label>
+                <input type="file" id="photo-upload" class="input" accept="image/*" />
+            </div>
+
+            <div class="form-group">
+                <label class="label">Full Name</label>
+                <input type="text" id="name" class="input" required />
+            </div>
+            <div class="form-group">
+                <label class="label">Email Address (Locked)</label>
+                <input type="email" id="email" class="input" disabled />
+            </div>
+            <div class="form-group">
+                <label class="label">Phone Number (Locked)</label>
+                <input type="text" id="phone" class="input" disabled />
+            </div>
+
+            <div class="form-group">
+                <label class="label">District</label>
+                <select id="district" class="select" required>
+                    <option value="">— Select District —</option>
+                </select>
+            </div>
+            <div class="form-group" id="constituency-group">
+                <label class="label">Constituency</label>
+                <select id="constituency" class="select" required disabled>
+                    <option value="">— Select Constituency —</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="description-group" style="display:none;">
+                <label class="label">MLA Description</label>
+                <textarea id="description" class="input" rows="4" placeholder="Enter your public description..."></textarea>
+            </div>
+
+            <button type="submit" id="save-btn" class="btn btn-primary btn-full btn-lg" style="margin-top: 16px;">
+                Save Changes
+            </button>
+        </form>
+    </div>
+
+    <script type="module">
+        import { usersAPI } from './js/api.js';
+        import { toast } from './js/toast.js';
+        import { tnDistricts } from './js/tndetails.js';
+
+        const districtSelect = document.getElementById('district');
+        const constituencySelect = document.getElementById('constituency');
+
+        // Populate districts
+        tnDistricts.forEach(d => {
+            const opt = document.createElement('option');
+            opt.value = d.district;
+            opt.textContent = d.district;
+            districtSelect.appendChild(opt);
+        });
+
+        // Handle district change
+        districtSelect.addEventListener('change', (e) => {
+            const selected = e.target.value;
+            constituencySelect.innerHTML = '<option value="">— Select Constituency —</option>';
+            if (!selected) {
+                constituencySelect.disabled = true;
+                return;
+            }
+            const distData = tnDistricts.find(d => d.district === selected);
+            if (distData && distData.constituencies) {
+                distData.constituencies.forEach(c => {
+                    const opt = document.createElement('option');
+                    opt.value = c.name;
+                    opt.textContent = c.name;
+                    constituencySelect.appendChild(opt);
+                });
+                constituencySelect.disabled = false;
+            }
+        });
+
+        async function loadProfile() {
+            try {
+                const res = await usersAPI.me();
+                const user = res.user;
+
+                // Setup back link
+                const dashboardPaths = {
+                    USER: 'citizen-dashboard.html',
+                    TAMILNADU_CORPORATION: 'department-dashboard.html',
+                    TNEB: 'department-dashboard.html',
+                    POLICE: 'department-dashboard.html',
+                    FIRE_STATION: 'department-dashboard.html',
+                    COLLECTOR: 'collector-dashboard.html',
+                    ADMIN: 'admin-dashboard.html',
+                    MLA: 'mla-dashboard.html'
+                };
+                document.getElementById('back-link').href = dashboardPaths[user.role] || 'citizen-dashboard.html';
+
+                document.getElementById('name').value = user.name || '';
+                document.getElementById('email').value = user.email || '';
+                document.getElementById('phone').value = user.phone_number || '';
+                
+                if (user.role === 'MLA') {
+                    document.getElementById('description-group').style.display = 'block';
+                    document.getElementById('description').value = user.description || '';
+                }
+
+                if (user.role === 'COLLECTOR') {
+                    document.getElementById('constituency-group').style.display = 'none';
+                    document.getElementById('constituency').required = false;
+                }
+                
+                if (user.district) {
+                    districtSelect.value = user.district;
+                    districtSelect.dispatchEvent(new Event('change'));
+                    if (user.role !== 'COLLECTOR') {
+                        constituencySelect.value = user.constituency;
+                    }
+                }
+
+                if (user.profile_photo) {
+                    document.getElementById('current-photo').src = user.profile_photo;
+                    document.getElementById('current-photo').style.display = 'block';
+                    document.getElementById('fallback-photo').style.display = 'none';
+                } else {
+                    document.getElementById('fallback-photo').textContent = user.name ? user.name.charAt(0).toUpperCase() : 'U';
+                }
+            } catch (err) {
+                toast.error('Error', 'Failed to load profile details.');
+            }
+        }
+
+        let currentUserRole = 'USER';
+        loadProfile().then(() => {
+            usersAPI.me().then(r => currentUserRole = r.user.role);
+        });
+
+        document.getElementById('user-details-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const name = document.getElementById('name').value;
+                const district = document.getElementById('district').value;
+                const constituency = currentUserRole !== 'COLLECTOR' ? document.getElementById('constituency').value : null;
+                const description = currentUserRole === 'MLA' ? document.getElementById('description').value : null;
+                const photoInput = document.getElementById('photo-upload');
+
+                let profile_photo;
+                if (photoInput.files && photoInput.files[0]) {
+                    const file = photoInput.files[0];
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    await new Promise(res => reader.onload = res);
+                    profile_photo = reader.result;
+                }
+
+                const payload = { name, district, constituency };
+                if (currentUserRole === 'MLA') payload.description = description;
+                if (profile_photo) payload.profile_photo = profile_photo;
+
+                await usersAPI.updateMe(payload);
+                toast.success('Success', 'Profile updated successfully.');
+                
+                if (profile_photo) {
+                    document.getElementById('current-photo').src = profile_photo;
+                    document.getElementById('current-photo').style.display = 'block';
+                    document.getElementById('fallback-photo').style.display = 'none';
+                }
+            } catch (err) {
+                toast.error('Error', err.message || 'Update failed.');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Save Changes';
+            }
+        });
+    </script>
+</body>
+</html>

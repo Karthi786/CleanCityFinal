@@ -130,6 +130,7 @@ class EzhilAI {
         this.isOpen = !this.isOpen;
         const window = document.getElementById('ezhil-window');
         window.classList.toggle('open', this.isOpen);
+        document.body.classList.toggle('ezhil-active', this.isOpen);
         if (this.isOpen) {
             this.scrollToBottom();
             document.getElementById('ezhil-input').focus();

@@ -95,6 +95,11 @@ export const issuesAPI = {
 export const usersAPI = {
     me: () => apiFetch('/users/me'),
 
+    updateMe: (payload) => apiFetch('/users/me', {
+        method: 'PUT',
+        body: JSON.stringify(payload)
+    }),
+
     getPending: () => apiFetch('/users/pending'),
 
     getAll: (params = {}) => {
@@ -184,7 +189,10 @@ export const campaignsAPI = {
 
 /* ── Leaderboard Endpoints ── */
 export const leaderboardAPI = {
-    getTop100: () => apiFetch('/leaderboard')
+    getTop100: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/leaderboard${q ? '?' + q : ''}`);
+    }
 };
 
 /* ── Notifications Endpoints ── */

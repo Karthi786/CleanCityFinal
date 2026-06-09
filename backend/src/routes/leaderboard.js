@@ -10,12 +10,18 @@ const router = express.Router();
  */
 router.get('/', verifyToken, async (req, res) => {
     try {
-        const { data, error } = await supabaseAdmin
+        let query = supabaseAdmin
             .from('users')
-            .select('id, name, role, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, campaigns_participated, campaigns_organized')
+            .select('id, name, role, district, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, campaigns_participated, campaigns_organized')
             .eq('role', 'USER')
             .order('total_points', { ascending: false })
             .limit(100);
+
+        if (req.query.district) {
+            query = query.eq('district', req.query.district);
+        }
+
+        const { data, error } = await query;
 
         if (error) throw error;
 
