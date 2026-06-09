@@ -6,9 +6,9 @@ const router = express.Router();
 
 const ROLE_LABELS = {
     USER: 'Citizen',
-    MADURAI_CORPORATION: 'Madurai Corporation',
+    TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
     TNEB: 'TNEB (Electrical)',
-    POLICE: 'Madurai Police',
+    POLICE: 'Tamilnadu Police',
     FIRE_STATION: 'Fire Station',
     COLLECTOR: 'District Collector',
     ADMIN: 'System Administrator',
@@ -158,6 +158,32 @@ router.put('/:id/verify', verifyToken, requireApproved, requireRole('ADMIN'), as
     } catch (err) {
         console.error('Verify user error:', err);
         return res.status(500).json({ error: 'Failed to update user status.' });
+    }
+});
+
+/**
+ * DELETE /api/users/:id
+ * Delete a user (ADMIN only)
+ */
+router.delete('/:id', verifyToken, requireApproved, requireRole('ADMIN'), async (req, res) => {
+    const { id } = req.params;
+    try {
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(id);
+        if (authError && authError.status !== 404) {
+            console.error('Failed to delete auth user:', authError);
+        }
+
+        const { error: dbError } = await supabaseAdmin
+            .from('users')
+            .delete()
+            .eq('id', id);
+
+        if (dbError) throw dbError;
+
+        return res.json({ message: 'User deleted successfully.' });
+    } catch (err) {
+        console.error('Delete user error:', err);
+        return res.status(500).json({ error: 'Failed to delete user.' });
     }
 });
 

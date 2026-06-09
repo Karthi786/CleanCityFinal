@@ -17,7 +17,7 @@ const EzhilFAQ = [
     },
     {
         questions: ["choose department", "select category", "துறையை எப்படி தேர்வு செய்வது"],
-        answer: "Simply pick the category that best fits your issue (e.g., 'Waste' for trash, 'Water' for leaks). The system automatically assigns it to the correct department (Madurai Corp, TNEB, etc.)."
+        answer: "Simply pick the category that best fits your issue (e.g., 'Waste' for trash, 'Water' for leaks). The system automatically assigns it to the correct department (Tamilnadu Corp, TNEB, etc.)."
     },
     {
         questions: ["track status", "complaint status", "என்னுடைய புகாரின் நிலை"],

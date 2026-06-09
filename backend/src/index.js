@@ -72,7 +72,7 @@ HEALTH CHECK (Render monitoring)
 app.get('/health', (req, res) => {
     res.json({
         status: 'ok',
-        service: 'CleanMadurai API',
+        service: 'CleanTamilnadu API',
         timestamp: new Date().toISOString()
     });
 });
@@ -120,7 +120,7 @@ app.listen(PORT, () => {
 
     console.log(`
 ╔══════════════════════════════════════════════╗
-║        CleanMadurai API Server               ║
+║        CleanTamilnadu API Server               ║
 ║  Local  → http://localhost:${PORT}           ║
 ║  API    → http://localhost:${PORT}/api       ║
 ║  Health → /health                            ║

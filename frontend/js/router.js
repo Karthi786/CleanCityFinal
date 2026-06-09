@@ -1,5 +1,5 @@
 /**
- * router.js — Client-side route guard for CleanMadurai
+ * router.js — Client-side route guard for CleanTamilnadu
  * Call guardPage() at the top of every protected page.
  */
 import { isLoggedIn, getUser, ROLE_DASHBOARDS } from './auth.js';

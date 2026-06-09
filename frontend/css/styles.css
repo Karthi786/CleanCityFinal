@@ -1861,7 +1861,10 @@ body.drawer-open {
 
   .notification-dropdown {
     width: calc(100vw - 32px) !important;
-    right: -60px !important;
+    max-width: 400px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    right: auto !important;
   }
 
   .premium-table th,

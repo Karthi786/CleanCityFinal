@@ -1,6 +1,6 @@
-# CleanMadurai — Smart & Clean Madurai Platform
+# CleanTamilnadu — Smart and clean Tamilnadu Platform
 
-A civic issue management platform for Madurai built with:
+A civic issue management platform for Tamilnadu built with:
 - **Frontend**: Vanilla HTML + CSS + JavaScript
 - **Backend**: Node.js + Express REST API
 - **Database**: Supabase (PostgreSQL)
@@ -10,7 +10,7 @@ A civic issue management platform for Madurai built with:
 ## Project Structure
 
 ```
-cleanmadurai-app/
+CleanTamilnadu-app/
 ├── backend/               # Node.js Express API
 │   ├── .env               # ← Fill in your Supabase credentials
 │   ├── src/
@@ -87,7 +87,7 @@ npx serve . -p 5500
 |------|-----------|--------|
 | `USER` (Citizen) | `/citizen-dashboard.html` | Report issues, support community |
 | `COLLECTOR` | `/collector-dashboard.html` | View all issues, update status |
-| `MADURAI_CORPORATION` | `/department-dashboard.html` | Waste/Water/Roads issues |
+| `TAMILNADU_CORPORATION` | `/department-dashboard.html` | Waste/Water/Roads issues |
 | `TNEB` | `/department-dashboard.html` | Electricity issues |
 | `POLICE` | `/department-dashboard.html` | Law & Order issues |
 | `FIRE_STATION` | `/department-dashboard.html` | Fire hazard issues |
@@ -123,7 +123,7 @@ GET  /api/users/stats         — System stats (🔒 Admin/Collector)
 
 | Category | Assigned To |
 |----------|-------------|
-| Waste, Water, Roads | Madurai Corporation |
+| Waste, Water, Roads | Tamilnadu Corporation |
 | Electricity | TNEB |
 | Law & Order | Police |
 | Fire | Fire Station |

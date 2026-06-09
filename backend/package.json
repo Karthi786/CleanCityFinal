@@ -1,7 +1,7 @@
 {
-    "name": "cleanmadurai-backend",
+    "name": "CleanTamilnadu-backend",
     "version": "1.0.0",
-    "description": "CleanMadurai Node.js + Supabase Backend API",
+    "description": "CleanTamilnadu Node.js + Supabase Backend API",
     "main": "src/index.js",
     "scripts": {
         "start": "node src/index.js",

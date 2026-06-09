@@ -1,5 +1,5 @@
 /**
- * auth.js — Session management for CleanMadurai frontend
+ * auth.js — Session management for CleanTamilnadu frontend
  */
 import { authAPI } from './api.js';
 
@@ -53,7 +53,7 @@ export async function logout() {
 /* ── Role-based redirect paths ── */
 export const ROLE_DASHBOARDS = {
     USER: 'citizen-dashboard.html',
-    MADURAI_CORPORATION: 'department-dashboard.html',
+    TAMILNADU_CORPORATION: 'department-dashboard.html',
     TNEB: 'department-dashboard.html',
     POLICE: 'department-dashboard.html',
     FIRE_STATION: 'department-dashboard.html',
@@ -63,9 +63,9 @@ export const ROLE_DASHBOARDS = {
 
 export const ROLE_LABELS = {
     USER: 'Citizen',
-    MADURAI_CORPORATION: 'Madurai Corporation',
+    TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
     TNEB: 'TNEB (Electrical)',
-    POLICE: 'Madurai Police',
+    POLICE: 'Tamilnadu Police',
     FIRE_STATION: 'Fire Station',
     COLLECTOR: 'District Collector',
     ADMIN: 'System Administrator',

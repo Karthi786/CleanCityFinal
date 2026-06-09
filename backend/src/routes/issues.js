@@ -7,9 +7,9 @@ const router = express.Router();
 
 // Category → Department mapping
 const CATEGORY_DEPT_MAP = {
-    'Waste': 'MADURAI_CORPORATION',
-    'Water': 'MADURAI_CORPORATION',
-    'Roads': 'MADURAI_CORPORATION',
+    'Waste': 'TAMILNADU_CORPORATION',
+    'Water': 'TAMILNADU_CORPORATION',
+    'Roads': 'TAMILNADU_CORPORATION',
     'Electricity': 'TNEB',
     'Law & Order': 'POLICE',
     'Fire': 'FIRE_STATION',
@@ -134,7 +134,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
  * Update issue status (Department / Collector / Admin)
  */
 router.put('/:id/status', verifyToken, requireApproved,
-    requireRole('MADURAI_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'),
+    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'),
     async (req, res) => {
         const { id } = req.params;
         const { status, completionImageUrl } = req.body;

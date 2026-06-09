@@ -1,5 +1,5 @@
 @echo off
-echo Starting CleanMadurai Server...
+echo Starting CleanTamilnadu Server...
 echo.
 echo Once started, open your browser at:
 echo   http://localhost:5000

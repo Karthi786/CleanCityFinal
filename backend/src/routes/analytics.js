@@ -4,9 +4,9 @@ const { verifyToken, requireApproved } = require('../middleware/auth');
 
 const router = express.Router();
 
-const DEPARTMENTS = ['MADURAI_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
+const DEPARTMENTS = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
 const DEPT_LABELS = {
-    MADURAI_CORPORATION: 'Madurai Corp.',
+    TAMILNADU_CORPORATION: 'Tamilnadu Corp.',
     TNEB: 'TNEB',
     POLICE: 'Police',
     FIRE_STATION: 'Fire Station',

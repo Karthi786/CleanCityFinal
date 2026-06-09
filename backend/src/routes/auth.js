@@ -9,9 +9,9 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Category → Department mapping
 const CATEGORY_DEPT_MAP = {
-    'Waste': 'MADURAI_CORPORATION',
-    'Water': 'MADURAI_CORPORATION',
-    'Roads': 'MADURAI_CORPORATION',
+    'Waste': 'TAMILNADU_CORPORATION',
+    'Water': 'TAMILNADU_CORPORATION',
+    'Roads': 'TAMILNADU_CORPORATION',
     'Electricity': 'TNEB',
     'Law & Order': 'POLICE',
     'Fire': 'FIRE_STATION',
@@ -27,7 +27,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const validRoles = ['USER', 'MADURAI_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'];
+    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'];
     if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role.' });
     }
@@ -150,7 +150,7 @@ router.post('/login', async (req, res) => {
         // Determine redirect
         const dashboardPaths = {
             USER: '/citizen-dashboard.html',
-            MADURAI_CORPORATION: '/department-dashboard.html',
+            TAMILNADU_CORPORATION: '/department-dashboard.html',
             TNEB: '/department-dashboard.html',
             POLICE: '/department-dashboard.html',
             FIRE_STATION: '/department-dashboard.html',

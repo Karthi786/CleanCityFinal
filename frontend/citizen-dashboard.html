@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Citizen Dashboard — MaduraiSevi</title>
+    <title>Citizen Dashboard — MakkalSevi</title>
     <meta name="description"
-        content="MaduraiSevi citizen dashboard — report, track and support civic issues in Madurai." />
+        content="MakkalSevi citizen dashboard — report, track and support civic issues in Tamilnadu." />
     <!-- Global CSS -->
     <link rel="stylesheet" href="css/styles.css" />
     <link rel="stylesheet" href="css/chatbot.css" />
@@ -506,7 +506,7 @@
             <div class="nav-island-container">
                 <nav class="nav-island">
                     <div class="logo">
-                        <span>MaduraiSevi</span>
+                        <span>MakkalSevi</span>
                     </div>
 
                     <!-- Top Doc Navigation Links -->
@@ -569,7 +569,7 @@
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
                             <div class="logo">
-                                <span>MaduraiSevi</span>
+                                <span>MakkalSevi</span>
                             </div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
@@ -604,7 +604,7 @@
                 <div class="welcome-header animate-in stagger-1">
                     <div>
                         <h1 class="welcome-title" id="welcome-msg">Welcome back, <span id="welcome-name">kevin</span>!</h1>
-                        <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Madurai. Report. Support. Impact.</p>
+                        <p class="welcome-sub" data-i18n="hero_subtitle">Your voice transforms Tamilnadu. Report. Support. Impact.</p>
                     </div>
                     <button id="report-btn" class="btn btn-primary btn-lg" style="box-shadow: var(--shadow-primary);">
                         ＋ Report New Issue
@@ -794,7 +794,7 @@
             <div class="modal-header">
                 <div>
                     <div class="modal-title" id="modal-main-title">Report New Issue</div>
-                    <p style="margin-top:4px; font-size: 0.88rem; color: var(--text-muted);">Help Madurai grow cleaner and greener.</p>
+                    <p style="margin-top:4px; font-size: 0.88rem; color: var(--text-muted);">Help Tamilnadu grow cleaner and greener.</p>
                 </div>
                 <button class="modal-close" id="modal-close">✕</button>
             </div>
@@ -1363,7 +1363,7 @@
                 
                 <div class="ic-meta location">
                   <span class="ic-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></span>
-                  ${issue.location_name || 'Madurai'}
+                  ${issue.location_name || 'Tamilnadu'}
                 </div>
                 
                 <div class="ic-meta time">
@@ -1675,7 +1675,7 @@
         // Location & Map logic
         let map, marker;
         const DEFAULT_LAT = 9.9252;
-        const DEFAULT_LNG = 78.1198; // Madurai
+        const DEFAULT_LNG = 78.1198; // Tamilnadu
 
         function initMap() {
             if (map) return;
@@ -1927,7 +1927,7 @@
                 </div>
                 <div class="vm-body">
                     <div class="vm-title">${camp.title}</div>
-                    <div class="vm-meta"><i>📍</i> ${camp.location_name || 'Madurai'}</div>
+                    <div class="vm-meta"><i>📍</i> ${camp.location_name || 'Tamilnadu'}</div>
                     <div class="vm-meta"><i>🗓️</i> ${formatDateTime(camp.start_date, camp.start_time)}</div>
                     
                     <div class="vm-progress-section">

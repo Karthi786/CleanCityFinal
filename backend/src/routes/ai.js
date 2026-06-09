@@ -26,7 +26,7 @@ Do not invent features that do not exist in the application.
 Application Knowledge Base:
 - Citizens can register and login.
 - Citizens can report issues with a title, description, category, and location.
-- Category to Department mapping: Waste/Water/Roads -> Madurai Corporation, Electricity -> TNEB, Law & Order -> Police, Fire -> Fire Station.
+- Category to Department mapping: Waste/Water/Roads -> Tamilnadu Corporation, Electricity -> TNEB, Law & Order -> Police, Fire -> Fire Station.
 - Citizens MUST upload an image when reporting an issue.
 - Images go through EXIF verification (checks for Date and Time taken) and potentially AI detection.
 - Users can track the status of their complaints (PENDING, IN_PROGRESS, COMPLETED).
@@ -52,7 +52,7 @@ router.post('/', verifyToken, async (req, res) => {
                 "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
                 "Content-Type": "application/json",
                 "HTTP-Referer": "https://cleancitymdu.netlify.app", // Optional
-                "X-Title": "CleanMadurai Ezhil AI" // Optional
+                "X-Title": "CleanTamilnadu Ezhil AI" // Optional
             },
             body: JSON.stringify({
                 "model": MODEL,

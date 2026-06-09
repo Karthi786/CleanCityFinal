@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Department Dashboard — MaduraiSevi</title>
+    <title>Department Dashboard — MakkalSevi</title>
     <link rel="stylesheet" href="css/styles.css" />
     <!-- ApexCharts & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -714,10 +714,10 @@
 
         @media (max-width: 480px) {
             .notification-dropdown {
-                width: calc(100vw - 24px) !important;
-                max-width: calc(100vw - 24px) !important;
-                left: 12px !important;
-                transform: none !important;
+                width: calc(100vw - 32px) !important;
+                max-width: 400px !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
             }
         }
     </style>
@@ -748,7 +748,7 @@
             <div class="nav-island-container">
                 <nav class="nav-island">
                     <div class="logo">
-                        <span>MaduraiSevi</span>
+                        <span>MakkalSevi</span>
                     </div>
 
                     <!-- Top Doc Navigation Links -->
@@ -826,7 +826,7 @@
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
                             <div class="logo">
-                                <span>MaduraiSevi</span>
+                                <span>MakkalSevi</span>
                             </div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
@@ -1103,11 +1103,11 @@
         import { t } from './js/i18n.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
-        const DEPT_ROLES = ['MADURAI_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
+        const DEPT_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
         const user = guardPage(DEPT_ROLES);
         if (!user) throw new Error('Unauthorized');
 
-        const ROLE_LABELS = { MADURAI_CORPORATION: 'Madurai Corporation', TNEB: 'TNEB (Electrical)', POLICE: 'Madurai Police', FIRE_STATION: 'Fire Station' };
+        const ROLE_LABELS = { TAMILNADU_CORPORATION: 'Tamilnadu Corporation', TNEB: 'TNEB (Electrical)', POLICE: 'Tamilnadu Police', FIRE_STATION: 'Fire Station' };
         const deptLabel = ROLE_LABELS[user.role] || user.role;
 
         document.getElementById('sidebar-name').textContent = user.name;

@@ -1,5 +1,5 @@
 /**
- * toast.js — Toast notification system for CleanMadurai
+ * toast.js — Toast notification system for CleanTamilnadu
  */
 
 let container = null;

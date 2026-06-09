@@ -1,5 +1,5 @@
 -- =============================================================================
--- CleanMadurai — Points & Contribution System Migration
+-- CleanTamilnadu — Points & Contribution System Migration
 -- Run this entire script in the Supabase SQL Editor.
 -- All statements use IF NOT EXISTS — safe to run multiple times.
 -- =============================================================================

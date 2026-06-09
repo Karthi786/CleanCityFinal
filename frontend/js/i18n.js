@@ -1,5 +1,5 @@
 // js/i18n.js
-// Centralized translation dictionary and logic for CleanMadurai
+// Centralized translation dictionary and logic for CleanTamilnadu
 
 const translations = {
     en: {
@@ -12,11 +12,11 @@ const translations = {
         'nav_notifications': 'Notifications',
         'nav_login': 'Login',
         'nav_logout': 'Sign Out',
-        'app_title': 'CleanMadurai',
+        'app_title': 'CleanTamilnadu',
 
         // Auth & Homepage
         'hero_title_1': 'Smart & Clean',
-        'hero_title_2': 'Madurai',
+        'hero_title_2': 'Tamilnadu',
         'hero_subtitle': 'Report. Support. Transform.',
         'auth_login_title': 'Login to your account',
         'auth_register_title': 'Create an Account',
@@ -83,7 +83,7 @@ const translations = {
         'lbl_city_wide_mgt': 'City-Wide Management',
         'lbl_city_wide_desc': 'Monitor and oversee civic issue resolution across all departments.',
         'lbl_issue_density': 'Issue Density Matrix',
-        'lbl_issue_density_desc': 'Geographical visualization of civic issues across Madurai to identify hotspots.',
+        'lbl_issue_density_desc': 'Geographical visualization of civic issues across Tamilnadu to identify hotspots.',
         'lbl_assigned_issues': 'Assigned Issues',
         'lbl_resolved_cases': 'Resolved Cases',
         'lbl_total_complaints': 'Total Complaints',

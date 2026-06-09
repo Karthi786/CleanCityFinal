@@ -1,6 +1,6 @@
 @echo off
 echo ===================================================
-echo   CLEANMADURAI - SMART CITY PLATFORM
+echo   CleanTamilnadu - SMART CITY PLATFORM
 echo ===================================================
 echo.
 echo [1/2] Starting Backend Server...

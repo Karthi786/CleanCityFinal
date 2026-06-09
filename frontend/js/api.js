@@ -1,5 +1,5 @@
 /**
- * api.js — Centralized API client for CleanMadurai
+ * api.js — Centralized API client for CleanTamilnadu
  * All fetch calls go through this module to handle auth headers + errors.
  */
 
@@ -106,6 +106,8 @@ export const usersAPI = {
         method: 'PUT',
         body: JSON.stringify({ status }),
     }),
+
+    delete: (id) => apiFetch(`/users/${id}`, { method: 'DELETE' }),
 
     getStats: () => apiFetch('/users/stats'),
 };

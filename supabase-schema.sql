@@ -1,5 +1,5 @@
 -- ============================================================
--- CleanMadurai — Supabase Schema Setup
+-- CleanTamilnadu — Supabase Schema Setup
 -- Run this in your Supabase SQL Editor (Dashboard → SQL Editor)
 -- ============================================================
 
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.users (
   name        TEXT NOT NULL,
   email       TEXT NOT NULL UNIQUE,
   role        TEXT NOT NULL DEFAULT 'USER'
-                CHECK (role IN ('USER','MADURAI_CORPORATION','TNEB','POLICE','FIRE_STATION','COLLECTOR','ADMIN')),
+                CHECK (role IN ('USER','TAMILNADU_CORPORATION','TNEB','POLICE','FIRE_STATION','COLLECTOR','ADMIN')),
   department  TEXT,
   verification_status TEXT NOT NULL DEFAULT 'approved'
                 CHECK (verification_status IN ('approved','pending_verification','rejected')),
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS public.issues (
   category             TEXT NOT NULL
                          CHECK (category IN ('Waste','Water','Electricity','Roads','Law & Order','Fire')),
   department           TEXT NOT NULL
-                         CHECK (department IN ('MADURAI_CORPORATION','TNEB','POLICE','FIRE_STATION')),
+                         CHECK (department IN ('TAMILNADU_CORPORATION','TNEB','POLICE','FIRE_STATION')),
   latitude             DOUBLE PRECISION,
   longitude            DOUBLE PRECISION,
   location_name        TEXT,
