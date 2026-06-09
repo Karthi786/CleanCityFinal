@@ -54,6 +54,7 @@ API ROUTES
 ========================================
 */
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/citizen', require('./routes/citizenRegister'));
 app.use('/api/issues', require('./routes/issues'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/reviews', require('./routes/reviews'));

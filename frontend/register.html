@@ -169,79 +169,134 @@
 
             <div class="auth-card-body">
                 <form id="register-form" class="form-stack" novalidate autocomplete="off">
-                    <div class="form-group">
-                        <label class="label" for="name" data-i18n="lbl_fullname">Full Name</label>
-                        <input id="name" type="text" class="input" placeholder="e.g. Arjun Kumar" required
-                            autocomplete="name" />
+                    <div id="registration-fields">
+                        <div class="form-group">
+                            <label class="label" for="name" data-i18n="lbl_fullname">Full Name</label>
+                            <input id="name" type="text" class="input" placeholder="e.g. Arjun Kumar" required
+                                autocomplete="name" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label" for="email" data-i18n="lbl_email">Email Address</label>
+                            <input id="email" type="email" class="input" placeholder="name@example.com" required
+                                autocomplete="email" />
+                            <div id="email-error" style="color: #D32F2F; font-size: 0.8rem; margin-top: 4px; display: none;"></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label" for="password" data-i18n="lbl_pwd">Password</label>
+                            <input id="password" type="password" class="input" placeholder="At least 6 characters"
+                                minlength="6" required autocomplete="new-password" />
+                        </div>
+
+                        <div class="form-group">
+                            <label class="label">Select Your Role</label>
+                            <div class="space-y-4" id="role-options" style="display: flex; flex-direction: column; gap: 12px;">
+                                <label class="role-option selected" data-role="USER">
+                                    <input type="radio" name="role" value="USER" checked />
+                                    <span class="role-icon">🏙️</span>
+                                    <div>
+                                        <div class="role-label" data-i18n="role_cit">Citizen</div>
+                                        <div class="role-desc">Report civic issues and support community causes</div>
+                                    </div>
+                                </label>
+                                <label class="role-option" data-role="COLLECTOR">
+                                    <input type="radio" name="role" value="COLLECTOR" />
+                                    <span class="role-icon">🛡️</span>
+                                    <div>
+                                        <div class="role-label" data-i18n="role_col">District Collector</div>
+                                        <div class="role-desc">Oversee all departments and city-wide issue resolution</div>
+                                    </div>
+                                </label>
+                                <label class="role-option" data-role="DEPT">
+                                    <input type="radio" name="role" value="DEPT" />
+                                    <span class="role-icon">🏛️</span>
+                                    <div>
+                                        <div class="role-label" data-i18n="role_dept">Department Staff</div>
+                                        <div class="role-desc">Manage issues assigned to your municipal department</div>
+                                    </div>
+                                </label>
+                                <label class="role-option" data-role="ADMIN">
+                                    <input type="radio" name="role" value="ADMIN" />
+                                    <span class="role-icon">👑</span>
+                                    <div>
+                                        <div class="role-label">System Administrator</div>
+                                        <div class="role-desc">Manage users, verify accounts, and oversee the platform</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Department sub-selector (shown only for DEPT role) -->
+                        <div class="form-group" id="dept-group" style="display:none;">
+                            <label class="label" for="department" data-i18n="lbl_department">Select Department</label>
+                            <select id="department" class="select">
+                                <option value="">— Choose your department —</option>
+                                <option value="TAMILNADU_CORPORATION" data-i18n="cat_waste">Tamilnadu Corporation (Waste / Water / Roads)</option>
+                                <option value="TNEB" data-i18n="cat_eb">TNEB — Electrical</option>
+                                <option value="POLICE" data-i18n="cat_police">Tamilnadu Police</option>
+                                <option value="FIRE_STATION" data-i18n="cat_fire">Fire Station</option>
+                            </select>
+                        </div>
+
+                        <!-- Citizen-specific fields -->
+                        <div id="citizen-fields" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+                            <div class="form-group">
+                                <label class="label" for="dob">Date of Birth</label>
+                                <input id="dob" type="date" class="input" required />
+                            </div>
+
+                            <div class="form-group">
+                                <label class="label" for="phone_number">Mobile Number</label>
+                                <input id="phone_number" type="tel" class="input" placeholder="e.g. 9876543210" required />
+                                <div id="phone-error" style="color: #D32F2F; font-size: 0.8rem; margin-top: 4px; display: none;"></div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="label" for="district">District</label>
+                                <select id="district" class="select" required>
+                                    <option value="">— Choose your district —</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="label" for="constituency">Constituency</label>
+                                <select id="constituency" class="select" required>
+                                    <option value="">— Choose constituency —</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button id="register-btn" type="submit" class="btn btn-primary btn-full btn-lg"
+                            style="margin-top: 24px;">
+                            <span id="register-btn-text" data-i18n="btn_register">✨ Create Account</span>
+                            <div id="register-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
+                        </button>
                     </div>
 
-                    <div class="form-group">
-                        <label class="label" for="email" data-i18n="lbl_email">Email Address</label>
-                        <input id="email" type="email" class="input" placeholder="name@example.com" required
-                            autocomplete="email" />
-                    </div>
+                    <!-- OTP verification section -->
+                    <div id="otp-section" style="display: none; flex-direction: column; gap: 16px;">
+                        <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
+                            We have sent a verification code to <strong id="otp-email-display" style="color: var(--text)"></strong>. Please enter the 6-digit OTP code below to complete registration.
+                        </p>
 
-                    <div class="form-group">
-                        <label class="label" for="password" data-i18n="lbl_pwd">Password</label>
-                        <input id="password" type="password" class="input" placeholder="At least 6 characters"
-                            minlength="6" required autocomplete="new-password" />
-                    </div>
+                        <div class="form-group">
+                            <label class="label" for="otp">Enter Verification Code</label>
+                            <input id="otp" type="text" class="input" placeholder="e.g. 123456" maxlength="6" pattern="\d{6}" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px; font-weight: bold;" required />
+                        </div>
 
-                    <div class="form-group">
-                        <label class="label">Select Your Role</label>
-                        <div class="space-y-4" id="role-options" style="display: flex; flex-direction: column; gap: 12px;">
-                            <label class="role-option selected" data-role="USER">
-                                <input type="radio" name="role" value="USER" checked />
-                                <span class="role-icon">🏙️</span>
-                                <div>
-                                    <div class="role-label" data-i18n="role_cit">Citizen</div>
-                                    <div class="role-desc">Report civic issues and support community causes</div>
-                                </div>
-                            </label>
-                            <label class="role-option" data-role="COLLECTOR">
-                                <input type="radio" name="role" value="COLLECTOR" />
-                                <span class="role-icon">🛡️</span>
-                                <div>
-                                    <div class="role-label" data-i18n="role_col">District Collector</div>
-                                    <div class="role-desc">Oversee all departments and city-wide issue resolution</div>
-                                </div>
-                            </label>
-                            <label class="role-option" data-role="DEPT">
-                                <input type="radio" name="role" value="DEPT" />
-                                <span class="role-icon">🏛️</span>
-                                <div>
-                                    <div class="role-label" data-i18n="role_dept">Department Staff</div>
-                                    <div class="role-desc">Manage issues assigned to your municipal department</div>
-                                </div>
-                            </label>
-                            <label class="role-option" data-role="ADMIN">
-                                <input type="radio" name="role" value="ADMIN" />
-                                <span class="role-icon">👑</span>
-                                <div>
-                                    <div class="role-label">System Administrator</div>
-                                    <div class="role-desc">Manage users, verify accounts, and oversee the platform</div>
-                                </div>
-                            </label>
+                        <button id="verify-btn" type="button" class="btn btn-primary btn-full btn-lg">
+                            <span id="verify-btn-text">Verify OTP</span>
+                            <div id="verify-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
+                        </button>
+
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
+                            <span id="otp-timer" style="font-size: 0.85rem; color: var(--text-muted);"></span>
+                            <button id="resend-btn" type="button" class="btn" style="background: transparent; color: var(--primary); padding: 4px 8px; font-size: 0.85rem; border: none; cursor: pointer; text-decoration: underline;" disabled>
+                                Resend OTP
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Department sub-selector (shown only for DEPT role) -->
-                    <div class="form-group" id="dept-group" style="display:none;">
-                        <label class="label" for="department" data-i18n="lbl_department">Select Department</label>
-                        <select id="department" class="select">
-                            <option value="">— Choose your department —</option>
-                            <option value="TAMILNADU_CORPORATION" data-i18n="cat_waste">Tamilnadu Corporation (Waste / Water / Roads)</option>
-                            <option value="TNEB" data-i18n="cat_eb">TNEB — Electrical</option>
-                            <option value="POLICE" data-i18n="cat_police">Tamilnadu Police</option>
-                            <option value="FIRE_STATION" data-i18n="cat_fire">Fire Station</option>
-                        </select>
-                    </div>
-
-                    <button id="register-btn" type="submit" class="btn btn-primary btn-full btn-lg"
-                        style="margin-top: 16px;">
-                        <span id="register-btn-text" data-i18n="btn_register">✨ Create Account</span>
-                        <div id="register-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
-                    </button>
                 </form>
             </div>
 
@@ -260,14 +315,60 @@
 
     <script type="module">
         import { redirectIfLoggedIn } from './js/router.js';
-        import { register } from './js/auth.js';
+        import { register, saveSession } from './js/auth.js';
         import { toast } from './js/toast.js';
 
         redirectIfLoggedIn();
 
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5001/api'
+            : 'https://cleancityfinal.onrender.com/api';
+
+        // Load Tamil Nadu districts mapping
+        let districtsData = {};
+        const districtSelect = document.getElementById('district');
+        const constituencySelect = document.getElementById('constituency');
+
+        async function loadDistricts() {
+            try {
+                const response = await fetch(`${API_BASE}/citizen/districts`);
+                if (!response.ok) throw new Error("Failed to load districts mapping");
+                districtsData = await response.json();
+                
+                // Sort and populate
+                Object.keys(districtsData).sort().forEach(dist => {
+                    const option = document.createElement('option');
+                    option.value = dist;
+                    option.textContent = dist;
+                    districtSelect.appendChild(option);
+                });
+            } catch (err) {
+                console.error("Districts mapping load error:", err);
+                toast.error("Network Error", "Could not load district-to-constituency mapping.");
+            }
+        }
+
+        loadDistricts();
+
+        // Populate constituency based on district choice
+        districtSelect.addEventListener('change', () => {
+            const district = districtSelect.value;
+            constituencySelect.innerHTML = '<option value="">— Choose constituency —</option>';
+            
+            if (district && districtsData[district]) {
+                districtsData[district].sort().forEach(con => {
+                    const option = document.createElement('option');
+                    option.value = con;
+                    option.textContent = con;
+                    constituencySelect.appendChild(option);
+                });
+            }
+        });
+
         // Role selector UI
         const roleOptions = document.querySelectorAll('.role-option');
         const deptGroup = document.getElementById('dept-group');
+        const citizenFields = document.getElementById('citizen-fields');
         let selectedRole = 'USER';
 
         roleOptions.forEach(opt => {
@@ -277,7 +378,62 @@
                 opt.querySelector('input').checked = true;
                 selectedRole = opt.dataset.role;
                 deptGroup.style.display = selectedRole === 'DEPT' ? 'flex' : 'none';
+                citizenFields.style.display = selectedRole === 'USER' ? 'flex' : 'none';
             });
+        });
+
+        // Uniqueness validation (blur events)
+        const emailInput = document.getElementById('email');
+        const phoneInput = document.getElementById('phone_number');
+        const emailError = document.getElementById('email-error');
+        const phoneError = document.getElementById('phone-error');
+
+        emailInput.addEventListener('blur', async () => {
+            const email = emailInput.value.trim();
+            if (!email) {
+                emailError.style.display = 'none';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/citizen/check-uniqueness`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    emailError.textContent = data.error || 'Email already registered';
+                    emailError.style.display = 'block';
+                } else {
+                    emailError.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Uniqueness check error:", e);
+            }
+        });
+
+        phoneInput.addEventListener('blur', async () => {
+            const phone = phoneInput.value.trim();
+            if (!phone) {
+                phoneError.style.display = 'none';
+                return;
+            }
+            try {
+                const response = await fetch(`${API_BASE}/citizen/check-uniqueness`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone_number: phone })
+                });
+                if (!response.ok) {
+                    const data = await response.json();
+                    phoneError.textContent = data.error || 'Phone number already registered';
+                    phoneError.style.display = 'block';
+                } else {
+                    phoneError.style.display = 'none';
+                }
+            } catch (e) {
+                console.error("Uniqueness check error:", e);
+            }
         });
 
         const form = document.getElementById('register-form');
@@ -285,10 +441,48 @@
         const btnText = document.getElementById('register-btn-text');
         const spinner = document.getElementById('register-spinner');
 
+        const registrationFields = document.getElementById('registration-fields');
+        const otpSection = document.getElementById('otp-section');
+        const otpEmailDisplay = document.getElementById('otp-email-display');
+        const otpInput = document.getElementById('otp');
+        const verifyBtn = document.getElementById('verify-btn');
+        const verifyBtnText = document.getElementById('verify-btn-text');
+        const verifySpinner = document.getElementById('verify-spinner');
+        const resendBtn = document.getElementById('resend-btn');
+
+        let countdownInterval;
+        let lastRegistrationPayload = {};
+
         function setLoading(on) {
             btn.disabled = on;
             btnText.style.display = on ? 'none' : 'inline-flex';
             spinner.style.display = on ? 'block' : 'none';
+        }
+
+        function setVerifyLoading(on) {
+            verifyBtn.disabled = on;
+            verifyBtnText.style.display = on ? 'none' : 'inline-flex';
+            verifySpinner.style.display = on ? 'block' : 'none';
+        }
+
+        function startResendTimer() {
+            clearInterval(countdownInterval);
+            let timeRemaining = 60;
+            const timerEl = document.getElementById('otp-timer');
+            resendBtn.disabled = true;
+
+            timerEl.textContent = `Resend available in ${timeRemaining}s`;
+
+            countdownInterval = setInterval(() => {
+                timeRemaining--;
+                if (timeRemaining <= 0) {
+                    clearInterval(countdownInterval);
+                    timerEl.textContent = '';
+                    resendBtn.disabled = false;
+                } else {
+                    timerEl.textContent = `Resend available in ${timeRemaining}s`;
+                }
+            }, 1000);
         }
 
         form.addEventListener('submit', async (e) => {
@@ -306,34 +500,162 @@
                 toast.error('Weak Password', 'Password must be at least 6 characters.');
                 return;
             }
-            if (selectedRole === 'DEPT' && !dept) {
-                toast.error('Select Department', 'Please choose your department.');
+
+            // Normal Registration (Non-Citizen role: Collector, Department Staff, Admin)
+            if (selectedRole !== 'USER') {
+                if (selectedRole === 'DEPT' && !dept) {
+                    toast.error('Select Department', 'Please choose your department.');
+                    return;
+                }
+
+                let finalRole = selectedRole;
+                if (selectedRole === 'DEPT') finalRole = dept;
+
+                setLoading(true);
+                try {
+                    const data = await register({ name, email, password, role: finalRole, department: dept || null });
+                    const redirect = (data.redirect || '').replace(/^\//, '');
+                    if (redirect === 'pending.html') {
+                        toast.info('Account Pending', 'Your account is awaiting admin approval.');
+                        setTimeout(() => { window.location.href = 'pending.html'; }, 1000);
+                    } else {
+                        toast.success('Welcome!', 'Account created successfully.');
+                        setTimeout(() => { window.location.href = redirect; }, 800);
+                    }
+                } catch (err) {
+                    toast.error('Registration Failed', err.message);
+                } finally {
+                    setLoading(false);
+                }
                 return;
             }
 
-            // Map role
-            let finalRole = selectedRole;
-            if (selectedRole === 'DEPT') finalRole = dept;
+            // Citizen Registration (OTP Verification flow)
+            const dob = document.getElementById('dob').value;
+            const phone = document.getElementById('phone_number').value.trim();
+            const district = districtSelect.value;
+            const constituency = constituencySelect.value;
+
+            if (!dob || !phone || !district || !constituency) {
+                toast.error('Missing Fields', 'Please fill in all citizen details.');
+                return;
+            }
+
+            // Client side age validation check
+            const birthDate = new Date(dob);
+            const today = new Date();
+            if (birthDate > today) {
+                toast.error('Invalid Date of Birth', 'Date of birth cannot be in the future.');
+                return;
+            }
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            if (age < 18) {
+                toast.error('Age Limit', 'You must be at least 18 years old to register.');
+                return;
+            }
+
+            // Phone format check
+            const phoneRegex = /^[6-9]\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                toast.error('Invalid Phone', 'Must be a valid 10-digit Indian phone number.');
+                return;
+            }
+
+            lastRegistrationPayload = { name, email, password, dob, phone_number: phone, district, constituency };
 
             setLoading(true);
             try {
-                const data = await register({ name, email, password, role: finalRole, department: dept || null });
-                // Strip leading slash — Live Server serves from a subfolder, not root
-                const redirect = (data.redirect || '').replace(/^\//, '');
-                if (redirect === 'pending.html') {
-                    toast.info('Account Pending', 'Your account is awaiting admin approval.');
-                    setTimeout(() => { window.location.href = 'pending.html'; }, 1000);
-                } else {
-                    toast.success('Welcome!', 'Account created successfully.');
-                    setTimeout(() => { window.location.href = redirect; }, 800);
+                const response = await fetch(`${API_BASE}/citizen/register-request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lastRegistrationPayload)
+                });
+                
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Request failed');
                 }
+
+                toast.success('Verification Required', 'OTP sent successfully to your email.');
+                otpEmailDisplay.textContent = email;
+                
+                // Switch forms
+                registrationFields.style.display = 'none';
+                otpSection.style.display = 'flex';
+                
+                startResendTimer();
             } catch (err) {
-                toast.error('Registration Failed', err.message);
+                toast.error('Registration Request Failed', err.message);
             } finally {
                 setLoading(false);
             }
         });
+
+        // Verify OTP code
+        verifyBtn.addEventListener('click', async () => {
+            const otpVal = otpInput.value.trim();
+            if (!otpVal || otpVal.length !== 6) {
+                toast.error('Invalid OTP', 'Please enter a 6-digit verification code.');
+                return;
+            }
+
+            setVerifyLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/citizen/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: lastRegistrationPayload.email,
+                        otp: otpVal
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Verification failed');
+                }
+
+                toast.success('Verification Successful', 'Account created successfully!');
+                saveSession(data.token, data.user);
+                
+                setTimeout(() => {
+                    window.location.href = 'citizen-dashboard.html';
+                }, 800);
+            } catch (err) {
+                toast.error('Verification Failed', err.message);
+            } finally {
+                setVerifyLoading(false);
+            }
+        });
+
+        // Resend OTP code
+        resendBtn.addEventListener('click', async () => {
+            resendBtn.disabled = true;
+            try {
+                const response = await fetch(`${API_BASE}/citizen/register-request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(lastRegistrationPayload)
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Resend failed');
+                }
+
+                toast.success('OTP Resent', 'A new code has been sent to your email.');
+                startResendTimer();
+            } catch (err) {
+                toast.error('Resend Failed', err.message);
+                resendBtn.disabled = false;
+            }
+        });
     </script>
 </body>
+
 
 </html>
