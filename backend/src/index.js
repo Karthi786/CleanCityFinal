@@ -9,18 +9,40 @@ const PORT = process.env.PORT || 5001;
 /*
 ========================================
 CORS CONFIGURATION
-Allow requests from Netlify frontend
+Allow requests from Netlify frontend + local dev
 ========================================
 */
+const allowedOrigins = [
+    "https://cleancitymdu.netlify.app",
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://localhost:5001",
+    "http://localhost:5173",
+    "http://localhost:4173",
+    "http://localhost:5500",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001",
+    "http://127.0.0.1:5001",
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:5173"
+];
+
 app.use(cors({
-    origin: [
-        "https://cleancitymdu.netlify.app",
-        "http://localhost:3001",
-        "http://127.0.0.1:5500",
-        "http://localhost:5500"
-    ],
-    credentials: true
+    origin: function (origin, callback) {
+        // Allow requests with no origin (mobile apps, curl, server-to-server)
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.includes(origin)) {
+            return callback(null, true);
+        }
+        return callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
 }));
+
+// Ensure preflight OPTIONS requests are always handled
+app.options('*', cors());
 
 /*
 ========================================

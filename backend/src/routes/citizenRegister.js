@@ -3,15 +3,20 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { supabaseAdmin } = require('../config/supabase');
 const districtsMapping = require('../config/districts');
-const { sendEmail } = require('../utils/resend');
+// ── Use Gmail SMTP email service instead of Resend ──
+const { sendEmail } = require('../utils/emailService');
 require('dotenv').config();
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
-const MAX_ATTEMPTS = 5;
-const MAX_RESENDS = 5; // Configurable max resend attempts
+const MAX_ATTEMPTS = 5;         // Max OTP verification attempts before lockout
+const MAX_RESENDS = 5;          // Max resend attempts per OTP session
+const MAX_OTP_PER_HOUR = 5;    // Max OTP requests per hour per email (rate limiting)
 
-// Utility to clean up expired OTPs
+/**
+ * Utility: Clean up expired OTPs from the database
+ * Called before OTP operations to keep the table clean
+ */
 async function cleanupExpiredOTPs() {
     try {
         await supabaseAdmin
@@ -24,6 +29,96 @@ async function cleanupExpiredOTPs() {
 }
 
 /**
+ * Utility: Generate a professional branded HTML email template for OTP verification
+ * @param {string} name - Recipient's name
+ * @param {string} otp - The 6-digit OTP code
+ * @returns {string} Complete HTML email body
+ */
+function generateOTPEmailTemplate(name, otp) {
+    return `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    </head>
+    <body style="margin: 0; padding: 0; background-color: #f4f5f7; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="background-color: #f4f5f7; padding: 40px 20px;">
+            <tr>
+                <td align="center">
+                    <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="480" style="max-width: 480px; background-color: #ffffff; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 24px rgba(0,0,0,0.08);">
+                        
+                        <!-- Header Banner -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #B00000 0%, #8B0000 50%, #600000 100%); padding: 32px 40px; text-align: center;">
+                                <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">
+                                    🌿 MakkalSevi
+                                </h1>
+                                <p style="margin: 6px 0 0 0; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 400;">
+                                    Citizen Portal — Email Verification
+                                </p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Body Content -->
+                        <tr>
+                            <td style="padding: 36px 40px 20px 40px;">
+                                <p style="margin: 0 0 20px 0; color: #1a1a2e; font-size: 16px; line-height: 1.6;">
+                                    Hello <strong>${name}</strong>,
+                                </p>
+                                <p style="margin: 0 0 24px 0; color: #444; font-size: 15px; line-height: 1.6;">
+                                    Thank you for registering with <strong>Citizen Portal</strong>. Please use the verification code below to complete your registration.
+                                </p>
+                                
+                                <!-- OTP Code Box -->
+                                <div style="background: linear-gradient(135deg, #fef9f0 0%, #fff5e6 100%); border: 2px dashed #B00000; border-radius: 14px; padding: 28px; text-align: center; margin: 0 0 24px 0;">
+                                    <p style="margin: 0 0 8px 0; color: #666; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; font-weight: 600;">
+                                        Your Verification Code
+                                    </p>
+                                    <p style="margin: 0; color: #B00000; font-size: 36px; font-weight: 800; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                                        ${otp}
+                                    </p>
+                                </div>
+                                
+                                <!-- Expiry Notice -->
+                                <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 8px; padding: 14px 18px; margin: 0 0 24px 0;">
+                                    <p style="margin: 0; color: #664d03; font-size: 13px; line-height: 1.5;">
+                                        ⏰ This code will expire in <strong>10 minutes</strong>. If expired, please request a new one.
+                                    </p>
+                                </div>
+                                
+                                <!-- Security Notice -->
+                                <div style="background-color: #f8f9fa; border-radius: 8px; padding: 14px 18px; margin: 0 0 24px 0;">
+                                    <p style="margin: 0; color: #6c757d; font-size: 12px; line-height: 1.5;">
+                                        🔒 <strong>Security Notice:</strong> If you did not request this code, please ignore this email. Never share your OTP with anyone. Our team will never ask for your verification code.
+                                    </p>
+                                </div>
+                            </td>
+                        </tr>
+                        
+                        <!-- Footer -->
+                        <tr>
+                            <td style="padding: 20px 40px 32px 40px; border-top: 1px solid #eee;">
+                                <p style="margin: 0 0 4px 0; color: #888; font-size: 13px; line-height: 1.5;">
+                                    Regards,<br>
+                                    <strong style="color: #B00000;">Citizen Portal Team</strong>
+                                </p>
+                                <p style="margin: 16px 0 0 0; color: #aaa; font-size: 11px;">
+                                    © ${new Date().getFullYear()} MakkalSevi — Tamilnadu District Administration
+                                </p>
+                            </td>
+                        </tr>
+                        
+                    </table>
+                </td>
+            </tr>
+        </table>
+    </body>
+    </html>
+    `;
+}
+
+/**
  * GET /api/citizen/districts
  * Returns all Tamil Nadu districts and their constituencies
  */
@@ -33,7 +128,7 @@ router.get('/districts', (req, res) => {
 
 /**
  * POST /api/citizen/check-uniqueness
- * Check email or phone number uniqueness
+ * Check email or phone number uniqueness against existing users
  */
 router.post('/check-uniqueness', async (req, res) => {
     const { email, phone_number } = req.body;
@@ -103,24 +198,27 @@ router.post('/check-uniqueness', async (req, res) => {
 
 /**
  * POST /api/citizen/register-request
- * Step 1-4: Validates details, generates OTP, and emails it
+ * Step 1: Validates registration details, generates OTP, sends via Gmail SMTP
+ * 
+ * Does NOT create the user account — that happens after OTP verification.
+ * Includes rate limiting: max 5 OTP requests per hour per email.
  */
 router.post('/register-request', async (req, res) => {
     await cleanupExpiredOTPs();
 
     const { name, dob, email, phone_number, district, constituency, password } = req.body;
 
-    // 1. Required field validation
+    // ── 1. Required field validation ──
     if (!name || !dob || !email || !phone_number || !district || !constituency || !password) {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    // 2. Name validation (3-100 characters)
+    // ── 2. Name validation (3-100 characters) ──
     if (name.length < 3 || name.length > 100) {
         return res.status(400).json({ error: 'Name must be between 3 and 100 characters.' });
     }
 
-    // 3. Date of birth / Age validation (>= 18 years, not future)
+    // ── 3. Date of birth / Age validation (>= 18 years, not future) ──
     const birthDate = new Date(dob);
     const today = new Date();
     if (birthDate > today) {
@@ -135,19 +233,19 @@ router.post('/register-request', async (req, res) => {
         return res.status(400).json({ error: 'Citizen must be at least 18 years old.' });
     }
 
-    // 4. Email validation
+    // ── 4. Email format validation ──
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
         return res.status(400).json({ error: 'Invalid email format.' });
     }
 
-    // 5. Phone number validation (Indian 10-digit number)
+    // ── 5. Phone number validation (Indian 10-digit number) ──
     const phoneRegex = /^[6-9]\d{9}$/;
     if (!phoneRegex.test(phone_number)) {
         return res.status(400).json({ error: 'Invalid Indian phone number. Must be exactly 10 digits.' });
     }
 
-    // 6. District and Constituency validation
+    // ── 6. District and Constituency validation ──
     if (!districtsMapping[district]) {
         return res.status(400).json({ error: 'Invalid district selected.' });
     }
@@ -155,7 +253,7 @@ router.post('/register-request', async (req, res) => {
         return res.status(400).json({ error: 'Invalid constituency selected for the district.' });
     }
 
-    // 7. Password validation
+    // ── 7. Password validation ──
     if (password.length < 6) {
         return res.status(400).json({ error: 'Password must be at least 6 characters.' });
     }
@@ -164,9 +262,9 @@ router.post('/register-request', async (req, res) => {
     const cleanPhone = phone_number.trim();
 
     try {
-        // Check uniqueness in database
+        // ── Check uniqueness in the users table ──
         const emailQuery = `SELECT id FROM public.users WHERE email = '${cleanEmail}' LIMIT 1;`;
-        console.log(`Phone Validation Started - Checking users table`);
+        console.log(`Email Validation Started - Checking users table`);
         console.log(`[SQL QUERY] Executing: ${emailQuery}`);
 
         const { data: existingEmail, error: emailCheckError } = await supabaseAdmin
@@ -206,12 +304,12 @@ router.post('/register-request', async (req, res) => {
             return res.status(400).json({ error: 'Phone number already registered' });
         }
 
-        // Generate 6-digit OTP
+        // ── Generate 6-digit OTP and hash it with bcrypt ──
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const salt = await bcrypt.genSalt(10);
         const otpHash = await bcrypt.hash(otp, salt);
 
-        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
 
         console.log(`[DEBUG] OTP Generation details:`);
         console.log(`- Recipient Email: ${cleanEmail}`);
@@ -219,7 +317,7 @@ router.post('/register-request', async (req, res) => {
         console.log(`- Generated OTP Hash: ${otpHash}`);
         console.log(`- Expiration: ${expiresAt.toISOString()}`);
 
-        // Check if there is an existing OTP session
+        // ── Check if there is an existing OTP session for this email ──
         const { data: existingOTP, error: fetchOtpError } = await supabaseAdmin
             .from('otps')
             .select('*')
@@ -231,17 +329,18 @@ router.post('/register-request', async (req, res) => {
         }
 
         if (existingOTP) {
-            // Check resend timer (60s rate limiting)
+            // ── Rate limiting: 60-second cooldown between resends ──
             const secondsSinceLastResend = (Date.now() - new Date(existingOTP.last_resend_at).getTime()) / 1000;
             if (secondsSinceLastResend < 60) {
                 return res.status(429).json({ error: `Please wait ${Math.ceil(60 - secondsSinceLastResend)} seconds before requesting a new OTP.` });
             }
 
+            // ── Rate limiting: max resend attempts per session ──
             if (existingOTP.resends >= MAX_RESENDS) {
                 return res.status(400).json({ error: 'Too many resend attempts. Please try again later.' });
             }
 
-            // Update session
+            // ── Update the existing OTP session with new OTP ──
             const { error: updateError } = await supabaseAdmin
                 .from('otps')
                 .update({
@@ -259,7 +358,7 @@ router.post('/register-request', async (req, res) => {
             }
             console.log(`[DEBUG] Successfully updated OTP session in database for: ${cleanEmail}`);
         } else {
-            // Create session
+            // ── Create a new OTP session ──
             const { error: insertError } = await supabaseAdmin
                 .from('otps')
                 .insert({
@@ -278,20 +377,12 @@ router.post('/register-request', async (req, res) => {
             console.log(`[DEBUG] Successfully inserted new OTP session in database for: ${cleanEmail}`);
         }
 
-        // Send Email
-        const emailBody = `
-            <p>Hello ${name},</p>
-            <p>Thank you for registering on our Civic Reporting Platform.</p>
-            <p>Your verification code is:</p>
-            <h2 style="font-size: 24px; font-weight: bold; letter-spacing: 2px;">${otp}</h2>
-            <p>This code will expire in 10 minutes.</p>
-            <p>If you did not request this registration, please ignore this email.</p>
-            <p>Thank you.</p>
-        `;
+        // ── Send OTP email via Gmail SMTP ──
+        const emailBody = generateOTPEmailTemplate(name, otp);
 
         await sendEmail({
             to: cleanEmail,
-            subject: 'Verify Your Citizen Account',
+            subject: 'Email Verification - Citizen Portal',
             html: emailBody
         });
 
@@ -303,8 +394,114 @@ router.post('/register-request', async (req, res) => {
 });
 
 /**
+ * POST /api/citizen/resend-otp
+ * Dedicated endpoint for resending OTP without re-submitting full registration data
+ * 
+ * Rate limiting:
+ * - 60-second cooldown between resends
+ * - Maximum 5 resend attempts per session
+ */
+router.post('/resend-otp', async (req, res) => {
+    await cleanupExpiredOTPs();
+
+    const { email } = req.body;
+
+    if (!email) {
+        return res.status(400).json({ error: 'Email is required.' });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+
+    // ── Validate email format ──
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(cleanEmail)) {
+        return res.status(400).json({ error: 'Invalid email format.' });
+    }
+
+    try {
+        // ── Look up existing OTP session ──
+        const { data: existingOTP, error: fetchError } = await supabaseAdmin
+            .from('otps')
+            .select('*')
+            .eq('email', cleanEmail)
+            .maybeSingle();
+
+        if (fetchError) {
+            throw new Error(`Database fetch error: ${fetchError.message}`);
+        }
+
+        if (!existingOTP) {
+            return res.status(400).json({ error: 'No pending registration found for this email. Please start registration again.' });
+        }
+
+        // ── Rate limiting: 60-second cooldown ──
+        const secondsSinceLastResend = (Date.now() - new Date(existingOTP.last_resend_at).getTime()) / 1000;
+        if (secondsSinceLastResend < 60) {
+            return res.status(429).json({ error: `Please wait ${Math.ceil(60 - secondsSinceLastResend)} seconds before requesting a new OTP.` });
+        }
+
+        // ── Rate limiting: max resend attempts ──
+        if (existingOTP.resends >= MAX_RESENDS) {
+            return res.status(400).json({ error: 'Maximum resend attempts reached. Please start registration again.' });
+        }
+
+        // ── Generate new OTP ──
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const salt = await bcrypt.genSalt(10);
+        const otpHash = await bcrypt.hash(otp, salt);
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+        console.log(`[DEBUG] Resend OTP for: ${cleanEmail}`);
+        console.log(`- New OTP (Plaintext): ${otp}`);
+        console.log(`- Resend count: ${existingOTP.resends + 1}/${MAX_RESENDS}`);
+
+        // ── Update OTP session: invalidate old OTP, set new one ──
+        const { error: updateError } = await supabaseAdmin
+            .from('otps')
+            .update({
+                otp_hash: otpHash,
+                attempts: 0,       // Reset verification attempts on resend
+                resends: existingOTP.resends + 1,
+                expires_at: expiresAt.toISOString(),
+                last_resend_at: new Date().toISOString()
+            })
+            .eq('email', cleanEmail);
+
+        if (updateError) {
+            throw new Error(`Database update error: ${updateError.message}`);
+        }
+
+        // ── Send new OTP email via Gmail SMTP ──
+        const regData = existingOTP.registration_data;
+        const emailBody = generateOTPEmailTemplate(regData.name || 'User', otp);
+
+        await sendEmail({
+            to: cleanEmail,
+            subject: 'Email Verification - Citizen Portal',
+            html: emailBody
+        });
+
+        return res.json({
+            message: 'New OTP sent successfully',
+            resendAfter: 60,
+            resendsRemaining: MAX_RESENDS - (existingOTP.resends + 1)
+        });
+    } catch (err) {
+        console.error('Resend OTP error:', err);
+        return res.status(500).json({ error: err.message || 'Failed to resend OTP. Please try again.' });
+    }
+});
+
+/**
  * POST /api/citizen/verify-otp
- * Step 5-8: Verifies OTP and creates user profile
+ * Step 2: Verifies OTP and creates the citizen user account
+ * 
+ * Security checks:
+ * - OTP exists and is not expired
+ * - Max 5 verification attempts
+ * - bcrypt hash comparison
+ * - Final uniqueness check before account creation
+ * - Rollback on failure
  */
 router.post('/verify-otp', async (req, res) => {
     await cleanupExpiredOTPs();
@@ -323,6 +520,7 @@ router.post('/verify-otp', async (req, res) => {
     console.log(`- User Entered OTP: ${cleanOtp}`);
 
     try {
+        // ── Fetch the OTP record from database ──
         const { data: otpRecord, error: fetchError } = await supabaseAdmin
             .from('otps')
             .select('*')
@@ -338,32 +536,32 @@ router.post('/verify-otp', async (req, res) => {
 
         if (!otpRecord) {
             console.warn(`[DEBUG] No active OTP session found for email: ${cleanEmail}`);
-            return res.status(400).json({ error: 'Invalid OTP' });
+            return res.status(400).json({ error: 'No pending verification found. Please register again.' });
         }
 
         console.log(`[DEBUG] Stored OTP Hash: ${otpRecord.otp_hash}`);
         console.log(`[DEBUG] Expiration Timestamp: ${otpRecord.expires_at}`);
         console.log(`[DEBUG] Current Server Time: ${new Date().toISOString()}`);
 
-        // Check expiration
+        // ── Check if OTP has expired ──
         const isExpired = new Date(otpRecord.expires_at).getTime() < Date.now();
         console.log(`[DEBUG] Expiration Check Result (Is Expired): ${isExpired}`);
         if (isExpired) {
-            return res.status(400).json({ error: 'OTP expired' });
+            return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
         }
 
-        // Check attempts
+        // ── Check verification attempt limit ──
         console.log(`[DEBUG] Current Attempts: ${otpRecord.attempts}/${MAX_ATTEMPTS}`);
         if (otpRecord.attempts >= MAX_ATTEMPTS) {
-            return res.status(400).json({ error: 'Too many attempts' });
+            return res.status(400).json({ error: 'Too many incorrect attempts. Please request a new OTP.' });
         }
 
-        // Verify OTP hash
+        // ── Verify OTP using bcrypt hash comparison ──
         const isMatch = await bcrypt.compare(cleanOtp, otpRecord.otp_hash);
         console.log(`[DEBUG] bcrypt.compare Result: ${isMatch}`);
         
         if (!isMatch) {
-            // Increment attempts
+            // Increment attempt counter
             const { error: updateAttemptsError } = await supabaseAdmin
                 .from('otps')
                 .update({ attempts: otpRecord.attempts + 1 })
@@ -373,14 +571,17 @@ router.post('/verify-otp', async (req, res) => {
                 console.error(`[DEBUG] Failed to increment attempts in DB:`, updateAttemptsError);
             }
 
-            return res.status(400).json({ error: 'Invalid OTP' });
+            const remainingAttempts = MAX_ATTEMPTS - (otpRecord.attempts + 1);
+            return res.status(400).json({ 
+                error: `Invalid OTP. ${remainingAttempts > 0 ? `${remainingAttempts} attempt(s) remaining.` : 'No attempts remaining. Please request a new OTP.'}` 
+            });
         }
 
-        // Valid OTP! Proceed with account creation.
+        // ── OTP verified successfully! Create the citizen account. ──
         const regData = otpRecord.registration_data;
         console.log(`[DEBUG] OTP match successful! Creating citizen account for: ${regData.email}`);
 
-        // Double check uniqueness again before final create
+        // ── Final uniqueness check before creating the account ──
         const { data: finalEmailCheck, error: finalEmailError } = await supabaseAdmin
             .from('users')
             .select('id')
@@ -395,7 +596,7 @@ router.post('/verify-otp', async (req, res) => {
             return res.status(400).json({ error: 'Email already registered' });
         }
 
-        // Create Auth User
+        // ── Create Supabase Auth user ──
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email: regData.email,
             password: regData.password,
@@ -409,7 +610,7 @@ router.post('/verify-otp', async (req, res) => {
         const userId = authData.user.id;
         console.log(`[DEBUG] Auth user created successfully. ID: ${userId}`);
 
-        // Insert into Users profile
+        // ── Insert citizen profile into users table ──
         const { data: userRecord, error: dbError } = await supabaseAdmin
             .from('users')
             .insert({
@@ -431,14 +632,14 @@ router.post('/verify-otp', async (req, res) => {
 
         if (dbError) {
             console.error(`[DEBUG] Database insert error (user profile):`, dbError);
-            // Rollback auth user creation
+            // Rollback: delete the auth user if profile creation fails
             await supabaseAdmin.auth.admin.deleteUser(userId);
             return res.status(500).json({ error: 'Failed to create user profile.' });
         }
 
         console.log(`[DEBUG] User profile created successfully:`, JSON.stringify(userRecord));
 
-        // Clean up OTP record
+        // ── Clean up OTP record after successful verification ──
         const { error: deleteOtpError } = await supabaseAdmin
             .from('otps')
             .delete()
@@ -448,7 +649,7 @@ router.post('/verify-otp', async (req, res) => {
             console.warn(`[DEBUG] Failed to delete OTP record after success (non-blocking):`, deleteOtpError);
         }
 
-        // Generate JWT token
+        // ── Generate JWT session token ──
         const token = jwt.sign(
             { userId, email: userRecord.email, role: 'USER' },
             JWT_SECRET,
@@ -456,7 +657,7 @@ router.post('/verify-otp', async (req, res) => {
         );
 
         return res.status(201).json({
-            message: 'Account created successfully.',
+            message: 'Email verified successfully. Your account has been created.',
             token,
             user: userRecord,
             redirect: '/citizen-dashboard.html'

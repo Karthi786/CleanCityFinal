@@ -20,12 +20,19 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
  */
 router.get('/stats', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin.from('issues').select('status, department');
+        let query = supabaseAdmin.from('issues').select('status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)');
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }
-        const { data, error } = await query;
+        let { data, error } = await query;
         if (error) throw error;
+
+        // Auto-filter for COLLECTOR and MLA
+        if (req.user.role === 'COLLECTOR' && req.user.district) {
+            data = data.filter(i => i.reporter && i.reporter.district === req.user.district);
+        } else if (req.user.role === 'MLA' && req.user.constituency) {
+            data = data.filter(i => i.reporter && i.reporter.constituency === req.user.constituency);
+        }
 
         const total = data.length;
         const pending = data.filter(i => i.status === 'PENDING').length;
@@ -46,12 +53,19 @@ router.get('/stats', verifyToken, requireApproved, async (req, res) => {
  */
 router.get('/by-category', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin.from('issues').select('category, department');
+        let query = supabaseAdmin.from('issues').select('category, department, reporter:users!issues_reported_by_id_fkey(district, constituency)');
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }
-        const { data, error } = await query;
+        let { data, error } = await query;
         if (error) throw error;
+
+        // Auto-filter for COLLECTOR and MLA
+        if (req.user.role === 'COLLECTOR' && req.user.district) {
+            data = data.filter(i => i.reporter && i.reporter.district === req.user.district);
+        } else if (req.user.role === 'MLA' && req.user.constituency) {
+            data = data.filter(i => i.reporter && i.reporter.constituency === req.user.constituency);
+        }
 
         const counts = {};
         CATEGORIES.forEach(c => { counts[c] = 0; });
@@ -76,10 +90,17 @@ router.get('/by-category', verifyToken, requireApproved, async (req, res) => {
  */
 router.get('/by-department', verifyToken, requireApproved, async (req, res) => {
     try {
-        const { data, error } = await supabaseAdmin
+        let { data, error } = await supabaseAdmin
             .from('issues')
-            .select('department, status');
+            .select('department, status, reporter:users!issues_reported_by_id_fkey(district, constituency)');
         if (error) throw error;
+
+        // Auto-filter for COLLECTOR and MLA
+        if (req.user.role === 'COLLECTOR' && req.user.district) {
+            data = data.filter(i => i.reporter && i.reporter.district === req.user.district);
+        } else if (req.user.role === 'MLA' && req.user.constituency) {
+            data = data.filter(i => i.reporter && i.reporter.constituency === req.user.constituency);
+        }
 
         const result = DEPARTMENTS.map(dept => {
             const issues = data.filter(i => i.department === dept);
@@ -112,15 +133,22 @@ router.get('/monthly', verifyToken, requireApproved, async (req, res) => {
 
         let query = supabaseAdmin
             .from('issues')
-            .select('created_at, status, department')
+            .select('created_at, status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)')
             .gte('created_at', since.toISOString());
 
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }
 
-        const { data, error } = await query;
+        let { data, error } = await query;
         if (error) throw error;
+
+        // Auto-filter for COLLECTOR and MLA
+        if (req.user.role === 'COLLECTOR' && req.user.district) {
+            data = data.filter(i => i.reporter && i.reporter.district === req.user.district);
+        } else if (req.user.role === 'MLA' && req.user.constituency) {
+            data = data.filter(i => i.reporter && i.reporter.constituency === req.user.constituency);
+        }
 
         // Build month buckets
         const months = [];
@@ -153,12 +181,19 @@ router.get('/monthly', verifyToken, requireApproved, async (req, res) => {
  */
 router.get('/status-distribution', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin.from('issues').select('status, department');
+        let query = supabaseAdmin.from('issues').select('status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)');
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }
-        const { data, error } = await query;
+        let { data, error } = await query;
         if (error) throw error;
+
+        // Auto-filter for COLLECTOR and MLA
+        if (req.user.role === 'COLLECTOR' && req.user.district) {
+            data = data.filter(i => i.reporter && i.reporter.district === req.user.district);
+        } else if (req.user.role === 'MLA' && req.user.constituency) {
+            data = data.filter(i => i.reporter && i.reporter.constituency === req.user.constituency);
+        }
 
         const pending = data.filter(i => i.status === 'PENDING').length;
         const inProgress = data.filter(i => i.status === 'IN_PROGRESS').length;

@@ -28,6 +28,34 @@ export function isLoggedIn() {
     return !!getToken() && !!getUser();
 }
 
+/* ── Role-based redirect paths ── */
+export const ROLE_DASHBOARDS = {
+    USER: 'citizen-dashboard.html',
+    TAMILNADU_CORPORATION: 'department-dashboard.html',
+    TNEB: 'department-dashboard.html',
+    POLICE: 'department-dashboard.html',
+    FIRE_STATION: 'department-dashboard.html',
+    COLLECTOR: 'collector-dashboard.html',
+    ADMIN: 'admin-dashboard.html',
+    MLA: 'mla-dashboard.html',
+};
+
+export const ROLE_LABELS = {
+    USER: 'Citizen',
+    TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
+    TNEB: 'TNEB (Electrical)',
+    POLICE: 'Tamilnadu Police',
+    FIRE_STATION: 'Fire Station',
+    COLLECTOR: 'District Collector',
+    ADMIN: 'System Administrator',
+    MLA: 'Member of Legislative Assembly',
+};
+
+/* ── Get dashboard path for a role ── */
+export function getDashboardForRole(role) {
+    return ROLE_DASHBOARDS[role] || 'citizen-dashboard.html';
+}
+
 /* ── Login ── */
 export async function login(email, password) {
     const data = await authAPI.login(email, password);
@@ -49,24 +77,3 @@ export async function logout() {
     sessionStorage.clear();
     window.location.href = 'login.html';
 }
-
-/* ── Role-based redirect paths ── */
-export const ROLE_DASHBOARDS = {
-    USER: 'citizen-dashboard.html',
-    TAMILNADU_CORPORATION: 'department-dashboard.html',
-    TNEB: 'department-dashboard.html',
-    POLICE: 'department-dashboard.html',
-    FIRE_STATION: 'department-dashboard.html',
-    COLLECTOR: 'collector-dashboard.html',
-    ADMIN: 'admin-dashboard.html',
-};
-
-export const ROLE_LABELS = {
-    USER: 'Citizen',
-    TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
-    TNEB: 'TNEB (Electrical)',
-    POLICE: 'Tamilnadu Police',
-    FIRE_STATION: 'Fire Station',
-    COLLECTOR: 'District Collector',
-    ADMIN: 'System Administrator',
-};

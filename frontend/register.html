@@ -145,6 +145,91 @@
         #dept-group {
             animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
+
+        /* ── OTP Section Styles ── */
+        .otp-email-highlight {
+            color: var(--primary);
+            font-weight: 700;
+        }
+
+        .otp-input-wrapper {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        #otp {
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 6px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            padding: 14px 20px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        #otp:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            outline: none;
+        }
+
+        .otp-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .otp-timer {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .resend-btn {
+            background: transparent;
+            color: var(--primary);
+            padding: 6px 12px;
+            font-size: 0.85rem;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            font-weight: 600;
+            transition: opacity 0.2s ease;
+        }
+
+        .resend-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .resend-btn:not(:disabled):hover {
+            opacity: 0.8;
+        }
+
+        .otp-info-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(176, 0, 0, 0.06);
+            border: 1px solid rgba(176, 0, 0, 0.12);
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 16px;
+        }
+
+        .otp-info-badge .badge-icon {
+            font-size: 1.2rem;
+        }
+
+        .otp-info-badge .badge-text {
+            font-size: 0.88rem;
+            color: var(--text);
+            line-height: 1.4;
+        }
     </style>
 </head>
 
@@ -169,6 +254,9 @@
 
             <div class="auth-card-body">
                 <form id="register-form" class="form-stack" novalidate autocomplete="off">
+                    <!-- ═══════════════════════════════════════════════ -->
+                    <!-- Registration Fields (hidden after OTP is sent) -->
+                    <!-- ═══════════════════════════════════════════════ -->
                     <div id="registration-fields">
                         <div class="form-group">
                             <label class="label" for="name" data-i18n="lbl_fullname">Full Name</label>
@@ -208,6 +296,14 @@
                                         <div class="role-desc">Oversee all departments and city-wide issue resolution</div>
                                     </div>
                                 </label>
+                                <label class="role-option" data-role="MLA">
+                                    <input type="radio" name="role" value="MLA" />
+                                    <span class="role-icon">🗣️</span>
+                                    <div>
+                                        <div class="role-label">Member of Legislative Assembly</div>
+                                        <div class="role-desc">Manage issues and campaigns for your constituency</div>
+                                    </div>
+                                </label>
                                 <label class="role-option" data-role="DEPT">
                                     <input type="radio" name="role" value="DEPT" />
                                     <span class="role-icon">🏛️</span>
@@ -239,31 +335,46 @@
                             </select>
                         </div>
 
-                        <!-- Citizen-specific fields -->
-                        <div id="citizen-fields" style="display: flex; flex-direction: column; gap: 16px; margin-top: 16px;">
+                        <!-- MLA description field (shown only for MLA role) -->
+                        <div class="form-group" id="description-group" style="display:none;">
+                            <label class="label" for="description">MLA Description</label>
+                            <textarea id="description" class="input" placeholder="Enter brief profile description" rows="3"></textarea>
+                        </div>
+
+                        <!-- Phone number (shown for all roles) -->
+                        <div class="form-group">
+                            <label class="label" for="phone_number">Mobile Number</label>
+                            <input id="phone_number" type="tel" class="input" placeholder="e.g. 9876543210" required />
+                            <div id="phone-error" style="color: #D32F2F; font-size: 0.8rem; margin-top: 4px; display: none;"></div>
+                        </div>
+
+                        <!-- Profile Photo Upload (shown for non-citizen roles) -->
+                        <div class="form-group" id="profile-photo-group" style="display:none;">
+                            <label class="label" for="profile-photo">Profile Photo Upload</label>
+                            <input id="profile-photo" type="file" class="input" accept="image/*" />
+                        </div>
+
+                        <!-- District selector (shown for all roles) -->
+                        <div class="form-group">
+                            <label class="label" for="district">District</label>
+                            <select id="district" class="select" required>
+                                <option value="">— Choose your district —</option>
+                            </select>
+                        </div>
+
+                        <!-- Constituency selector -->
+                        <div class="form-group" id="constituency-group">
+                            <label class="label" for="constituency">Constituency</label>
+                            <select id="constituency" class="select" required>
+                                <option value="">— Choose constituency —</option>
+                            </select>
+                        </div>
+
+                        <!-- Citizen-specific fields (DOB) — shown only for USER role -->
+                        <div id="citizen-fields" style="display: flex; flex-direction: column; gap: 16px;">
                             <div class="form-group">
                                 <label class="label" for="dob">Date of Birth</label>
                                 <input id="dob" type="date" class="input" required />
-                            </div>
-
-                            <div class="form-group">
-                                <label class="label" for="phone_number">Mobile Number</label>
-                                <input id="phone_number" type="tel" class="input" placeholder="e.g. 9876543210" required />
-                                <div id="phone-error" style="color: #D32F2F; font-size: 0.8rem; margin-top: 4px; display: none;"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="label" for="district">District</label>
-                                <select id="district" class="select" required>
-                                    <option value="">— Choose your district —</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="label" for="constituency">Constituency</label>
-                                <select id="constituency" class="select" required>
-                                    <option value="">— Choose constituency —</option>
-                                </select>
                             </div>
                         </div>
 
@@ -274,26 +385,33 @@
                         </button>
                     </div>
 
-                    <!-- OTP verification section -->
+                    <!-- ═══════════════════════════════════════════════ -->
+                    <!-- OTP Verification Section (shown after OTP sent) -->
+                    <!-- ═══════════════════════════════════════════════ -->
                     <div id="otp-section" style="display: none; flex-direction: column; gap: 16px;">
-                        <p style="font-size: 0.95rem; color: var(--text-muted); line-height: 1.5;">
-                            We have sent a verification code to <strong id="otp-email-display" style="color: var(--text)"></strong>. Please enter the 6-digit OTP code below to complete registration.
-                        </p>
+                        <div class="otp-info-badge">
+                            <span class="badge-icon">📧</span>
+                            <span class="badge-text">
+                                We sent a 6-digit verification code to
+                                <strong id="otp-email-display" class="otp-email-highlight"></strong>
+                            </span>
+                        </div>
 
                         <div class="form-group">
                             <label class="label" for="otp">Enter Verification Code</label>
-                            <input id="otp" type="text" class="input" placeholder="e.g. 123456" maxlength="6" pattern="\d{6}" style="text-align: center; font-size: 1.5rem; letter-spacing: 4px; font-weight: bold;" required />
+                            <input id="otp" type="text" class="input" placeholder="• • • • • •" maxlength="6"
+                                inputmode="numeric" pattern="\d{6}" autocomplete="one-time-code" required />
                         </div>
 
                         <button id="verify-btn" type="button" class="btn btn-primary btn-full btn-lg">
-                            <span id="verify-btn-text">Verify OTP</span>
+                            <span id="verify-btn-text">✅ Verify & Create Account</span>
                             <div id="verify-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
                         </button>
 
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 8px;">
-                            <span id="otp-timer" style="font-size: 0.85rem; color: var(--text-muted);"></span>
-                            <button id="resend-btn" type="button" class="btn" style="background: transparent; color: var(--primary); padding: 4px 8px; font-size: 0.85rem; border: none; cursor: pointer; text-decoration: underline;" disabled>
-                                Resend OTP
+                        <div class="otp-controls">
+                            <span id="otp-timer" class="otp-timer"></span>
+                            <button id="resend-btn" type="button" class="resend-btn" disabled>
+                                🔄 Resend OTP
                             </button>
                         </div>
                     </div>
@@ -320,11 +438,16 @@
 
         redirectIfLoggedIn();
 
+        // ══════════════════════════════════════════════
+        // API Base URL — auto-detect local vs production
+        // ══════════════════════════════════════════════
         const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
             ? 'http://localhost:5001/api'
             : 'https://cleancityfinal.onrender.com/api';
 
-        // Load Tamil Nadu districts mapping
+        // ══════════════════════════════════════════════
+        // District & Constituency Loading
+        // ══════════════════════════════════════════════
         let districtsData = {};
         const districtSelect = document.getElementById('district');
         const constituencySelect = document.getElementById('constituency');
@@ -335,7 +458,7 @@
                 if (!response.ok) throw new Error("Failed to load districts mapping");
                 districtsData = await response.json();
                 
-                // Sort and populate
+                // Sort and populate district dropdown
                 Object.keys(districtsData).sort().forEach(dist => {
                     const option = document.createElement('option');
                     option.value = dist;
@@ -365,10 +488,15 @@
             }
         });
 
-        // Role selector UI
+        // ══════════════════════════════════════════════
+        // Role Selector — Show/hide role-specific fields
+        // ══════════════════════════════════════════════
         const roleOptions = document.querySelectorAll('.role-option');
         const deptGroup = document.getElementById('dept-group');
         const citizenFields = document.getElementById('citizen-fields');
+        const constGroup = document.getElementById('constituency-group');
+        const descGroup = document.getElementById('description-group');
+        const profilePhotoGroup = document.getElementById('profile-photo-group');
         let selectedRole = 'USER';
 
         roleOptions.forEach(opt => {
@@ -377,12 +505,39 @@
                 opt.classList.add('selected');
                 opt.querySelector('input').checked = true;
                 selectedRole = opt.dataset.role;
+                
+                // Department dropdown — only for DEPT role
                 deptGroup.style.display = selectedRole === 'DEPT' ? 'flex' : 'none';
+                
+                // Citizen-specific fields (DOB) — only for USER role
                 citizenFields.style.display = selectedRole === 'USER' ? 'flex' : 'none';
+
+                // Profile photo — only for non-citizen roles
+                profilePhotoGroup.style.display = selectedRole !== 'USER' ? 'flex' : 'none';
+                
+                // Collectors do not need a constituency
+                if (selectedRole === 'COLLECTOR') {
+                    constGroup.style.display = 'none';
+                    document.getElementById('constituency').required = false;
+                } else {
+                    constGroup.style.display = 'flex';
+                    document.getElementById('constituency').required = true;
+                }
+
+                // Only MLAs need a description
+                if (selectedRole === 'MLA') {
+                    descGroup.style.display = 'flex';
+                    document.getElementById('description').required = true;
+                } else {
+                    descGroup.style.display = 'none';
+                    document.getElementById('description').required = false;
+                }
             });
         });
 
-        // Uniqueness validation (blur events)
+        // ══════════════════════════════════════════════
+        // Uniqueness Validation (blur events)
+        // ══════════════════════════════════════════════
         const emailInput = document.getElementById('email');
         const phoneInput = document.getElementById('phone_number');
         const emailError = document.getElementById('email-error');
@@ -436,6 +591,9 @@
             }
         });
 
+        // ══════════════════════════════════════════════
+        // UI State Elements
+        // ══════════════════════════════════════════════
         const form = document.getElementById('register-form');
         const btn = document.getElementById('register-btn');
         const btnText = document.getElementById('register-btn-text');
@@ -465,6 +623,9 @@
             verifySpinner.style.display = on ? 'block' : 'none';
         }
 
+        // ══════════════════════════════════════════════
+        // Resend OTP Timer (60-second cooldown)
+        // ══════════════════════════════════════════════
         function startResendTimer() {
             clearInterval(countdownInterval);
             let timeRemaining = 60;
@@ -485,15 +646,32 @@
             }, 1000);
         }
 
+        // ══════════════════════════════════════════════
+        // Form Submit Handler
+        // ══════════════════════════════════════════════
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = document.getElementById('name').value.trim();
             const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
+            const phone_number = document.getElementById('phone_number').value.trim();
+            const district = document.getElementById('district').value;
+            const constituency = selectedRole !== 'COLLECTOR' ? document.getElementById('constituency').value : null;
             const dept = document.getElementById('department').value;
+            const description = selectedRole === 'MLA' ? document.getElementById('description').value.trim() : null;
+            const photoInput = document.getElementById('profile-photo');
 
-            if (!name || !email || !password) {
+            // ── Basic validation for all roles ──
+            if (!name || !email || !password || !phone_number || !district) {
                 toast.error('Missing Fields', 'Please fill in all required fields.');
+                return;
+            }
+            if (selectedRole !== 'COLLECTOR' && !constituency) {
+                toast.error('Missing Fields', 'Please select your constituency.');
+                return;
+            }
+            if (selectedRole === 'MLA' && !description) {
+                toast.error('Missing Fields', 'Please provide an MLA description.');
                 return;
             }
             if (password.length < 6) {
@@ -501,7 +679,10 @@
                 return;
             }
 
-            // Normal Registration (Non-Citizen role: Collector, Department Staff, Admin)
+            // ══════════════════════════════════════════
+            // NON-CITIZEN REGISTRATION (Direct via auth API)
+            // Collector, Department Staff, MLA, Admin
+            // ══════════════════════════════════════════
             if (selectedRole !== 'USER') {
                 if (selectedRole === 'DEPT' && !dept) {
                     toast.error('Select Department', 'Please choose your department.');
@@ -511,9 +692,23 @@
                 let finalRole = selectedRole;
                 if (selectedRole === 'DEPT') finalRole = dept;
 
+                // Read profile photo as base64
+                let profile_photo = null;
+                if (photoInput && photoInput.files && photoInput.files[0]) {
+                    const file = photoInput.files[0];
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    await new Promise(res => reader.onload = res);
+                    profile_photo = reader.result;
+                }
+
                 setLoading(true);
                 try {
-                    const data = await register({ name, email, password, role: finalRole, department: dept || null });
+                    const payload = { 
+                        name, email, password, role: finalRole, department: dept || null,
+                        phone_number, district, constituency, profile_photo, description
+                    };
+                    const data = await register(payload);
                     const redirect = (data.redirect || '').replace(/^\//, '');
                     if (redirect === 'pending.html') {
                         toast.info('Account Pending', 'Your account is awaiting admin approval.');
@@ -530,18 +725,18 @@
                 return;
             }
 
-            // Citizen Registration (OTP Verification flow)
+            // ══════════════════════════════════════════
+            // CITIZEN REGISTRATION (OTP Verification Flow)
+            // Step 1: Validate → Send OTP → Show OTP modal
+            // ══════════════════════════════════════════
             const dob = document.getElementById('dob').value;
-            const phone = document.getElementById('phone_number').value.trim();
-            const district = districtSelect.value;
-            const constituency = constituencySelect.value;
 
-            if (!dob || !phone || !district || !constituency) {
-                toast.error('Missing Fields', 'Please fill in all citizen details.');
+            if (!dob) {
+                toast.error('Missing Fields', 'Please enter your date of birth.');
                 return;
             }
 
-            // Client side age validation check
+            // Client-side age validation
             const birthDate = new Date(dob);
             const today = new Date();
             if (birthDate > today) {
@@ -560,12 +755,13 @@
 
             // Phone format check
             const phoneRegex = /^[6-9]\d{9}$/;
-            if (!phoneRegex.test(phone)) {
+            if (!phoneRegex.test(phone_number)) {
                 toast.error('Invalid Phone', 'Must be a valid 10-digit Indian phone number.');
                 return;
             }
 
-            lastRegistrationPayload = { name, email, password, dob, phone_number: phone, district, constituency };
+            // Store payload for resend and verify
+            lastRegistrationPayload = { name, email, password, dob, phone_number, district, constituency };
 
             setLoading(true);
             try {
@@ -583,11 +779,15 @@
                 toast.success('Verification Required', 'OTP sent successfully to your email.');
                 otpEmailDisplay.textContent = email;
                 
-                // Switch forms
+                // Switch from registration form → OTP verification section
                 registrationFields.style.display = 'none';
                 otpSection.style.display = 'flex';
                 
+                // Start 60-second resend cooldown timer
                 startResendTimer();
+
+                // Auto-focus the OTP input
+                setTimeout(() => otpInput.focus(), 300);
             } catch (err) {
                 toast.error('Registration Request Failed', err.message);
             } finally {
@@ -595,11 +795,20 @@
             }
         });
 
-        // Verify OTP code
+        // ══════════════════════════════════════════════
+        // OTP Verification Handler
+        // Step 2: Verify OTP → Create Account → Redirect
+        // ══════════════════════════════════════════════
         verifyBtn.addEventListener('click', async () => {
             const otpVal = otpInput.value.trim();
             if (!otpVal || otpVal.length !== 6) {
                 toast.error('Invalid OTP', 'Please enter a 6-digit verification code.');
+                return;
+            }
+
+            // Validate OTP is numeric only
+            if (!/^\d{6}$/.test(otpVal)) {
+                toast.error('Invalid OTP', 'Verification code must contain only numbers.');
                 return;
             }
 
@@ -619,12 +828,13 @@
                     throw new Error(data.error || 'Verification failed');
                 }
 
-                toast.success('Verification Successful', 'Account created successfully!');
+                // Success! Save session and redirect
+                toast.success('Email Verified!', 'Email verified successfully. Your account has been created.');
                 saveSession(data.token, data.user);
                 
                 setTimeout(() => {
                     window.location.href = 'citizen-dashboard.html';
-                }, 800);
+                }, 1200);
             } catch (err) {
                 toast.error('Verification Failed', err.message);
             } finally {
@@ -632,14 +842,17 @@
             }
         });
 
-        // Resend OTP code
+        // ══════════════════════════════════════════════
+        // Resend OTP Handler (Dedicated Endpoint)
+        // Uses /api/citizen/resend-otp instead of re-submitting full form
+        // ══════════════════════════════════════════════
         resendBtn.addEventListener('click', async () => {
             resendBtn.disabled = true;
             try {
-                const response = await fetch(`${API_BASE}/citizen/register-request`, {
+                const response = await fetch(`${API_BASE}/citizen/resend-otp`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(lastRegistrationPayload)
+                    body: JSON.stringify({ email: lastRegistrationPayload.email })
                 });
 
                 const data = await response.json();
@@ -647,11 +860,28 @@
                     throw new Error(data.error || 'Resend failed');
                 }
 
-                toast.success('OTP Resent', 'A new code has been sent to your email.');
+                toast.success('OTP Resent', 'A new verification code has been sent to your email.');
+                otpInput.value = ''; // Clear old OTP input
+                otpInput.focus();
                 startResendTimer();
             } catch (err) {
                 toast.error('Resend Failed', err.message);
                 resendBtn.disabled = false;
+            }
+        });
+
+        // ══════════════════════════════════════════════
+        // OTP Input — Auto-filter to digits only
+        // ══════════════════════════════════════════════
+        otpInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+        });
+
+        // Allow Enter key to trigger verification
+        otpInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyBtn.click();
             }
         });
     </script>

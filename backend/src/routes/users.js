@@ -12,6 +12,7 @@ const ROLE_LABELS = {
     FIRE_STATION: 'Fire Station',
     COLLECTOR: 'District Collector',
     ADMIN: 'System Administrator',
+    MLA: 'Member of Legislative Assembly',
 };
 
 /**
@@ -23,7 +24,7 @@ router.get('/me', verifyToken, requireApproved, async (req, res) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('users')
-            .select('id, name, email, role, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, reports_count, campaigns_participated, campaigns_organized, verification_status')
+            .select('id, name, email, role, department, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, reports_count, campaigns_participated, campaigns_organized, verification_status, phone_number, district, constituency, description')
             .eq('id', req.userId)
             .single();
 
@@ -31,10 +32,56 @@ router.get('/me', verifyToken, requireApproved, async (req, res) => {
             return res.status(404).json({ error: 'User not found.' });
         }
 
+        // Fetch profile photo from auth metadata
+        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(req.userId);
+        if (authUser && authUser.user && authUser.user.user_metadata) {
+             data.profile_photo = authUser.user.user_metadata.profile_photo || null;
+        }
+
         return res.json({ user: data });
     } catch (err) {
         console.error('GET /users/me error:', err);
         return res.status(500).json({ error: 'Failed to fetch user profile.' });
+    }
+});
+
+/**
+ * PUT /api/users/me
+ * Update the current authenticated user's profile details.
+ */
+router.put('/me', verifyToken, requireApproved, async (req, res) => {
+    try {
+        const { name, district, constituency, profile_photo, description } = req.body;
+        
+        // Update users table
+        const { data, error } = await supabaseAdmin
+            .from('users')
+            .update({ name, district, constituency, description })
+            .eq('id', req.userId)
+            .select()
+            .single();
+
+        if (error) {
+            return res.status(500).json({ error: 'Failed to update user profile.' });
+        }
+
+        // Update auth metadata
+        if (profile_photo !== undefined) {
+            await supabaseAdmin.auth.admin.updateUserById(req.userId, {
+                user_metadata: { profile_photo }
+            });
+            data.profile_photo = profile_photo;
+        } else {
+            const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(req.userId);
+            if (authUser && authUser.user && authUser.user.user_metadata) {
+                 data.profile_photo = authUser.user.user_metadata.profile_photo || null;
+            }
+        }
+
+        return res.json({ message: 'Profile updated successfully', user: data });
+    } catch (err) {
+        console.error('PUT /users/me error:', err);
+        return res.status(500).json({ error: 'Internal server error.' });
     }
 });
 

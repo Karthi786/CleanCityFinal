@@ -21,13 +21,13 @@ const CATEGORY_DEPT_MAP = {
  * POST /api/auth/register
  */
 router.post('/register', async (req, res) => {
-    const { name, email, password, role, department } = req.body;
+    const { name, email, password, role, department, phone_number, district, constituency, profile_photo, description } = req.body;
 
     if (!name || !email || !password || !role) {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'];
+    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN', 'MLA'];
     if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role.' });
     }
@@ -38,6 +38,7 @@ router.post('/register', async (req, res) => {
             email,
             password,
             email_confirm: true,
+            user_metadata: { profile_photo: profile_photo || null }
         });
 
         if (authError) {
@@ -46,7 +47,7 @@ router.post('/register', async (req, res) => {
 
         const userId = authData.user.id;
         const verificationStatus = role === 'USER' ? 'approved' : 'pending_verification';
-        const finalDept = (role !== 'USER' && role !== 'COLLECTOR' && role !== 'ADMIN') ? role : (department || null);
+        const finalDept = (role !== 'USER' && role !== 'COLLECTOR' && role !== 'ADMIN' && role !== 'MLA') ? role : (department || null);
 
         // Insert into users table
         const { data: userRecord, error: dbError } = await supabaseAdmin
@@ -58,6 +59,10 @@ router.post('/register', async (req, res) => {
                 role,
                 department: finalDept,
                 verification_status: verificationStatus,
+                phone_number: phone_number || null,
+                district: district || null,
+                constituency: constituency || null,
+                description: description || null
             })
             .select()
             .single();
@@ -156,6 +161,7 @@ router.post('/login', async (req, res) => {
             FIRE_STATION: '/department-dashboard.html',
             COLLECTOR: '/collector-dashboard.html',
             ADMIN: '/admin-dashboard.html',
+            MLA: '/mla-dashboard.html',
         };
 
         return res.json({

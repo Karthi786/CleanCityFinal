@@ -130,6 +130,7 @@ class EzhilAI {
         this.isOpen = !this.isOpen;
         const window = document.getElementById('ezhil-window');
         window.classList.toggle('open', this.isOpen);
+        document.body.classList.toggle('ezhil-active', this.isOpen);
         if (this.isOpen) {
             this.scrollToBottom();
             document.getElementById('ezhil-input').focus();
@@ -170,7 +171,7 @@ class EzhilAI {
         try {
             const apiBase = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
                 ? 'http://localhost:5001/api'
-                : '/api';
+                : 'https://cleancityfinal.onrender.com/api';
 
             const token = localStorage.getItem('cm_token');
             const messages = this.history.slice(-10).map(m => ({

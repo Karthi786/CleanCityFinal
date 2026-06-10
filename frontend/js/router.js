@@ -44,7 +44,7 @@ export function redirectIfLoggedIn() {
     if (isLoggedIn()) {
         const user = getUser();
         if (user) {
-            window.location.href = ROLE_DASHBOARDS[user.role] || '/citizen-dashboard.html';
+            window.location.href = ROLE_DASHBOARDS[user.role] || 'citizen-dashboard.html';
         }
     }
 }
