@@ -1103,11 +1103,11 @@
         import { t } from './js/i18n.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
-        const DEPT_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
+        const DEPT_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
         const user = guardPage(DEPT_ROLES);
         if (!user) throw new Error('Unauthorized');
 
-        const ROLE_LABELS = { TAMILNADU_CORPORATION: 'Tamilnadu Corporation', TNEB: 'TNEB (Electrical)', POLICE: 'Tamilnadu Police', FIRE_STATION: 'Fire Station' };
+        const ROLE_LABELS = { TAMILNADU_CORPORATION: 'Tamilnadu Corporation', TNEB: 'TNEB (Electrical)', POLICE: 'Tamilnadu Police' };
         const deptLabel = ROLE_LABELS[user.role] || user.role;
 
         document.getElementById('sidebar-name').textContent = user.name;
@@ -1311,7 +1311,7 @@
         let allIssues = [];
 
         function renderIssueRow(issue) {
-            const catIcons = { 'Waste': '🗑️', 'Water': '💧', 'Electricity': '⚡', 'Roads': '🛣️', 'Law & Order': '👮', 'Fire': '🔥' };
+            const catIcons = { 'Waste': '🗑️', 'Water': '💧', 'Electricity': '⚡', 'Roads': '🛣️', 'Law & Order': '👮' };
             const statusLabelKey = issue.status === 'COMPLETED' ? 'status_completed' :
                 (issue.status === 'IN_PROGRESS' ? 'status_in_progress' :
                     (issue.status === 'PENDING' ? 'status_pending' : issue.status));

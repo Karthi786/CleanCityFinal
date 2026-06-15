@@ -14,7 +14,6 @@ const CATEGORY_DEPT_MAP = {
     'Roads': 'TAMILNADU_CORPORATION',
     'Electricity': 'TNEB',
     'Law & Order': 'POLICE',
-    'Fire': 'FIRE_STATION',
 };
 
 /**
@@ -27,7 +26,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN', 'MLA'];
+    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN', 'MLA', 'CM'];
     if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role.' });
     }
@@ -158,10 +157,10 @@ router.post('/login', async (req, res) => {
             TAMILNADU_CORPORATION: '/department-dashboard.html',
             TNEB: '/department-dashboard.html',
             POLICE: '/department-dashboard.html',
-            FIRE_STATION: '/department-dashboard.html',
             COLLECTOR: '/collector-dashboard.html',
             ADMIN: '/admin-dashboard.html',
             MLA: '/mla-dashboard.html',
+            CM: '/cm-dashboard.html',
         };
 
         return res.json({

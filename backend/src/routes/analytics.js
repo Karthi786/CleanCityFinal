@@ -4,14 +4,13 @@ const { verifyToken, requireApproved } = require('../middleware/auth');
 
 const router = express.Router();
 
-const DEPARTMENTS = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION'];
+const DEPARTMENTS = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
 const DEPT_LABELS = {
     TAMILNADU_CORPORATION: 'Tamilnadu Corp.',
     TNEB: 'TNEB',
     POLICE: 'Police',
-    FIRE_STATION: 'Fire Station',
 };
-const CATEGORIES = ['Waste', 'Water', 'Roads', 'Electricity', 'Law & Order', 'Fire'];
+const CATEGORIES = ['Waste', 'Water', 'Roads', 'Electricity', 'Law & Order'];
 const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 /**
@@ -20,7 +19,7 @@ const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Se
  */
 router.get('/stats', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin.from('issues').select('status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)');
+        let query = supabaseAdmin.from('issues').select('status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)').neq('department', 'FIRE_STATION');
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }
@@ -53,7 +52,7 @@ router.get('/stats', verifyToken, requireApproved, async (req, res) => {
  */
 router.get('/by-category', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin.from('issues').select('category, department, reporter:users!issues_reported_by_id_fkey(district, constituency)');
+        let query = supabaseAdmin.from('issues').select('category, department, reporter:users!issues_reported_by_id_fkey(district, constituency)').neq('department', 'FIRE_STATION');
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }
@@ -92,7 +91,8 @@ router.get('/by-department', verifyToken, requireApproved, async (req, res) => {
     try {
         let { data, error } = await supabaseAdmin
             .from('issues')
-            .select('department, status, reporter:users!issues_reported_by_id_fkey(district, constituency)');
+            .select('department, status, reporter:users!issues_reported_by_id_fkey(district, constituency)')
+            .neq('department', 'FIRE_STATION');
         if (error) throw error;
 
         // Auto-filter for COLLECTOR and MLA
@@ -134,7 +134,8 @@ router.get('/monthly', verifyToken, requireApproved, async (req, res) => {
         let query = supabaseAdmin
             .from('issues')
             .select('created_at, status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)')
-            .gte('created_at', since.toISOString());
+            .gte('created_at', since.toISOString())
+            .neq('department', 'FIRE_STATION');
 
         if (req.query.department) {
             query = query.eq('department', req.query.department);
@@ -181,7 +182,7 @@ router.get('/monthly', verifyToken, requireApproved, async (req, res) => {
  */
 router.get('/status-distribution', verifyToken, requireApproved, async (req, res) => {
     try {
-        let query = supabaseAdmin.from('issues').select('status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)');
+        let query = supabaseAdmin.from('issues').select('status, department, reporter:users!issues_reported_by_id_fkey(district, constituency)').neq('department', 'FIRE_STATION');
         if (req.query.department) {
             query = query.eq('department', req.query.department);
         }

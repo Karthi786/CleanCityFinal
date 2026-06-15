@@ -1,0 +1,1621 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chief Minister Dashboard — MakkalSevi</title>
+    <meta name="description" content="Chief Minister's state-level civic analytics dashboard for Tamil Nadu district performance." />
+    <link rel="stylesheet" href="css/styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* ── CM Dashboard Theme ── */
+        :root {
+            --cm-gold: #D4A017;
+            --cm-gold-light: rgba(212, 160, 23, 0.1);
+            --cm-gold-glow: rgba(212, 160, 23, 0.25);
+            --sidebar-width: 0px;
+        }
+
+        body { background: #F8F9FB; }
+
+        .dash-main { margin-left: 0 !important; padding-top: 88px; }
+
+        /* ── Floating Nav Island ── */
+        .nav-island-container {
+            position: fixed; top: 16px; left: 0; right: 0;
+            z-index: 1000; display: flex; justify-content: center; padding: 0 20px;
+            pointer-events: none;
+        }
+        .nav-island {
+            pointer-events: auto; display: flex; align-items: center;
+            justify-content: space-between; width: 100%; max-width: 1340px;
+            height: 64px; padding: 0 16px 0 28px; border-radius: 99px;
+            background: rgba(255,255,255,0.82);
+            backdrop-filter: blur(24px) saturate(200%);
+            -webkit-backdrop-filter: blur(24px) saturate(200%);
+            border: 1px solid rgba(255,255,255,0.5);
+            box-shadow: 0 8px 32px rgba(15,23,42,0.07), 0 1px 2px rgba(0,0,0,0.03);
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .nav-island.scrolled {
+            height: 58px; max-width: 1100px;
+            background: rgba(255,255,255,0.92);
+            box-shadow: 0 12px 40px rgba(15,23,42,0.1);
+        }
+        .nav-logo {
+            display: flex; align-items: center; gap: 10px;
+            font-family: var(--font-display); font-weight: 800;
+            font-size: 1.2rem; color: var(--primary); text-decoration: none;
+        }
+        .nav-logo-badge {
+            background: linear-gradient(135deg, var(--primary), #8B0000);
+            color: white; font-size: 0.7rem; font-weight: 700;
+            padding: 2px 8px; border-radius: 99px; letter-spacing: 0.05em;
+        }
+        .nav-tabs {
+            display: flex; align-items: center; gap: 2px; list-style: none;
+        }
+        .nav-tab {
+            padding: 8px 16px; font-size: 0.88rem; font-weight: 600;
+            color: var(--text-muted); border-radius: 99px; cursor: pointer;
+            transition: all 0.2s; border: none; background: none;
+            font-family: var(--font-display);
+        }
+        .nav-tab:hover { color: var(--primary); background: var(--primary-light); }
+        .nav-tab.active {
+            color: var(--primary); background: var(--primary-light);
+            box-shadow: inset 0 -2px 0 var(--primary);
+        }
+        .nav-actions { display: flex; align-items: center; gap: 10px; }
+        .cm-avatar {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--cm-gold));
+            display: flex; align-items: center; justify-content: center;
+            color: white; font-weight: 800; font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(176,0,0,0.25);
+        }
+
+        /* ── Mobile Burger ── */
+        .mobile-burger {
+            display: none; background: none; border: none; cursor: pointer;
+            padding: 8px; border-radius: 50%; color: var(--text);
+            transition: background 0.2s;
+        }
+        .mobile-burger:hover { background: rgba(15,23,42,0.06); }
+        .mobile-burger svg { width: 20px; height: 20px; display: block; }
+
+        /* ── Page Content ── */
+        .dash-content {
+            padding: 32px 40px; max-width: 1400px; margin: 0 auto;
+        }
+
+        /* ── Page Header ── */
+        .page-hero {
+            background: linear-gradient(135deg, var(--primary) 0%, #8B0000 60%, #6B0000 100%);
+            border-radius: 28px; padding: 36px 40px; margin-bottom: 32px;
+            position: relative; overflow: hidden; color: white;
+        }
+        .page-hero::before {
+            content: ''; position: absolute; top: -40px; right: -40px;
+            width: 220px; height: 220px; border-radius: 50%;
+            background: rgba(255,255,255,0.05);
+        }
+        .page-hero::after {
+            content: ''; position: absolute; bottom: -60px; right: 120px;
+            width: 160px; height: 160px; border-radius: 50%;
+            background: rgba(212,160,23,0.12);
+        }
+        .hero-content { position: relative; z-index: 1; }
+        .hero-eyebrow {
+            font-size: 0.78rem; font-weight: 700; letter-spacing: 0.1em;
+            text-transform: uppercase; color: rgba(255,255,255,0.6);
+            margin-bottom: 8px;
+        }
+        .hero-title {
+            font-family: var(--font-display); font-size: 2rem; font-weight: 800;
+            color: white; margin-bottom: 6px; letter-spacing: -0.02em;
+        }
+        .hero-subtitle { font-size: 0.95rem; color: rgba(255,255,255,0.7); }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(212,160,23,0.2); border: 1px solid rgba(212,160,23,0.4);
+            color: #FFD700; font-size: 0.8rem; font-weight: 700;
+            padding: 4px 14px; border-radius: 99px; margin-top: 12px;
+        }
+
+        /* ── Section Header ── */
+        .section-hdr {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-family: var(--font-display); font-size: 1.3rem; font-weight: 800;
+            color: var(--text);
+        }
+        .section-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 3px; }
+
+        /* ── Stat Cards Grid ── */
+        .stats-grid {
+            display: grid; gap: 20px;
+            grid-template-columns: repeat(6, 1fr);
+            margin-bottom: 32px;
+        }
+        @media(max-width:1200px) { .stats-grid { grid-template-columns: repeat(3,1fr); } }
+        @media(max-width:640px) { .stats-grid { grid-template-columns: repeat(2,1fr); } }
+
+        .stat-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 20px; padding: 20px 18px;
+            box-shadow: 0 4px 16px rgba(15,23,42,0.05);
+            transition: all 0.3s cubic-bezier(0.25,0.8,0.25,1);
+            position: relative; overflow: hidden;
+        }
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(15,23,42,0.1);
+        }
+        .stat-card-icon {
+            width: 44px; height: 44px; border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.3rem; margin-bottom: 12px;
+        }
+        .stat-card-label {
+            font-size: 0.75rem; font-weight: 700; color: var(--text-muted);
+            text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;
+        }
+        .stat-card-value {
+            font-family: var(--font-display); font-size: 2rem; font-weight: 800;
+            color: var(--text); line-height: 1;
+        }
+        .stat-card-sub {
+            font-size: 0.78rem; color: var(--text-light); margin-top: 4px;
+        }
+        .sc-red .stat-card-icon { background: rgba(176,0,0,0.1); }
+        .sc-green .stat-card-icon { background: rgba(22,163,74,0.1); }
+        .sc-amber .stat-card-icon { background: rgba(217,119,6,0.1); }
+        .sc-blue .stat-card-icon { background: rgba(37,99,235,0.1); }
+        .sc-purple .stat-card-icon { background: rgba(124,58,237,0.1); }
+        .sc-gold .stat-card-icon { background: rgba(212,160,23,0.12); }
+
+        /* ── Chart Cards ── */
+        .chart-grid {
+            display: grid; gap: 24px;
+            grid-template-columns: 1fr 1fr;
+            margin-bottom: 32px;
+        }
+        .chart-grid-3 {
+            display: grid; gap: 24px;
+            grid-template-columns: 2fr 1fr;
+            margin-bottom: 32px;
+        }
+        @media(max-width:900px) {
+            .chart-grid, .chart-grid-3 { grid-template-columns: 1fr; }
+        }
+        .chart-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 24px;
+            padding: 28px; box-shadow: 0 4px 20px rgba(15,23,42,0.05);
+        }
+        .chart-card-title {
+            font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+            color: var(--text); margin-bottom: 4px;
+        }
+        .chart-card-sub { font-size: 0.82rem; color: var(--text-muted); margin-bottom: 20px; }
+        .chart-wrap { position: relative; }
+
+        /* ── District Cards Grid ── */
+        .district-grid {
+            display: grid; gap: 18px;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            margin-bottom: 32px;
+        }
+        .district-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 20px;
+            padding: 22px; cursor: pointer; transition: all 0.3s;
+            box-shadow: 0 4px 14px rgba(15,23,42,0.04);
+            position: relative; overflow: hidden;
+        }
+        .district-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; background: linear-gradient(90deg, var(--primary), var(--cm-gold));
+            opacity: 0; transition: opacity 0.3s;
+        }
+        .district-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 16px 40px rgba(15,23,42,0.12);
+            border-color: rgba(176,0,0,0.15);
+        }
+        .district-card:hover::before { opacity: 1; }
+        .district-card-header {
+            display: flex; justify-content: space-between;
+            align-items: flex-start; margin-bottom: 16px;
+        }
+        .district-name {
+            font-family: var(--font-display); font-size: 1.05rem; font-weight: 800;
+            color: var(--text);
+        }
+        .district-sub { font-size: 0.78rem; color: var(--text-muted); margin-top: 2px; }
+        .rate-badge {
+            font-family: var(--font-display); font-size: 0.9rem; font-weight: 800;
+            padding: 4px 12px; border-radius: 99px; flex-shrink: 0;
+        }
+        .rate-high { background: rgba(22,163,74,0.1); color: #16a34a; }
+        .rate-mid { background: rgba(217,119,6,0.1); color: #d97706; }
+        .rate-low { background: rgba(220,38,38,0.1); color: #dc2626; }
+
+        .district-stats {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px;
+        }
+        .district-stat-item { text-align: center; }
+        .district-stat-val {
+            font-family: var(--font-display); font-size: 1.1rem; font-weight: 800;
+            color: var(--text);
+        }
+        .district-stat-lbl {
+            font-size: 0.7rem; color: var(--text-light);
+            text-transform: uppercase; letter-spacing: 0.04em;
+        }
+        .district-progress-bar {
+            height: 5px; background: rgba(15,23,42,0.08); border-radius: 99px;
+            margin-top: 16px; overflow: hidden;
+        }
+        .district-progress-fill {
+            height: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary), var(--cm-gold));
+            transition: width 1s cubic-bezier(0.25,0.8,0.25,1);
+        }
+        .district-arrow {
+            position: absolute; bottom: 22px; right: 22px;
+            font-size: 1.1rem; color: var(--text-light); transition: all 0.2s;
+        }
+        .district-card:hover .district-arrow { color: var(--primary); transform: translateX(3px); }
+
+        /* ── District Detail Panel ── */
+        .detail-panel {
+            display: none; animation: slideUp 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .detail-panel.active { display: block; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            font-family: var(--font-display); font-weight: 600; font-size: 0.9rem;
+            color: var(--primary); background: var(--primary-light); padding: 8px 18px;
+            border-radius: 99px; border: none; cursor: pointer; margin-bottom: 24px;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(176,0,0,0.12); transform: translateX(-2px); }
+
+        .district-detail-hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            border-radius: 24px; padding: 32px; margin-bottom: 24px; color: white;
+        }
+        .district-detail-title {
+            font-family: var(--font-display); font-size: 1.7rem; font-weight: 800;
+            color: white; margin-bottom: 6px;
+        }
+        .district-detail-stats {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-top: 24px;
+        }
+        @media(max-width:640px) { .district-detail-stats { grid-template-columns: repeat(2,1fr); } }
+        .detail-stat-val {
+            font-family: var(--font-display); font-size: 1.8rem; font-weight: 800; color: white;
+        }
+        .detail-stat-lbl { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 4px; }
+
+        /* ── Constituency Table ── */
+        .table-wrap {
+            background: white; border-radius: 20px; overflow: hidden;
+            box-shadow: 0 4px 16px rgba(15,23,42,0.06); margin-bottom: 24px;
+            border: 1px solid rgba(15,23,42,0.06);
+        }
+        .table { width: 100%; border-collapse: collapse; }
+        .table thead th {
+            background: #f8fafc; padding: 14px 20px;
+            font-family: var(--font-display); font-size: 0.78rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted);
+            border-bottom: 1px solid rgba(15,23,42,0.06); text-align: left;
+        }
+        .table tbody td {
+            padding: 14px 20px; font-size: 0.9rem; color: var(--text);
+            border-bottom: 1px solid rgba(15,23,42,0.04); transition: background 0.15s;
+        }
+        .table tbody tr:hover td { background: rgba(176,0,0,0.02); }
+        .table tbody tr:last-child td { border-bottom: none; }
+
+        /* Progress inline bar */
+        .inline-bar {
+            display: flex; align-items: center; gap: 8px;
+        }
+        .bar-track {
+            flex: 1; height: 6px; background: rgba(15,23,42,0.08);
+            border-radius: 99px; overflow: hidden;
+        }
+        .bar-fill {
+            height: 100%; border-radius: 99px;
+            background: linear-gradient(90deg, var(--primary), var(--cm-gold));
+        }
+        .bar-pct { font-size: 0.82rem; font-weight: 700; color: var(--text-muted); min-width: 36px; }
+
+        /* ── Department Cards ── */
+        .dept-grid {
+            display: grid; gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            margin-bottom: 32px;
+        }
+        .dept-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 22px;
+            padding: 24px; box-shadow: 0 4px 14px rgba(15,23,42,0.04);
+            transition: all 0.3s;
+        }
+        .dept-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 14px 36px rgba(15,23,42,0.1);
+        }
+        .dept-card-header {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+        }
+        .dept-icon {
+            width: 50px; height: 50px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center; font-size: 1.4rem;
+        }
+        .dept-name {
+            font-family: var(--font-display); font-size: 1rem; font-weight: 800; color: var(--text);
+        }
+        .dept-stats-row {
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 16px;
+        }
+        .dept-stat { text-align: center; }
+        .dept-stat-val {
+            font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; color: var(--text);
+        }
+        .dept-stat-lbl { font-size: 0.72rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.04em; }
+        .dept-efficiency {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-top: 4px;
+        }
+        .dept-efficiency-label { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+        .dept-efficiency-val {
+            font-family: var(--font-display); font-size: 1rem; font-weight: 800;
+        }
+
+        /* ── Report Tab ── */
+        .report-card {
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.5); border-radius: 24px;
+            padding: 36px; box-shadow: 0 4px 20px rgba(15,23,42,0.05);
+            max-width: 720px;
+        }
+        .report-formats {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px;
+        }
+        .format-btn {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 18px 24px; border-radius: 18px; border: 2px solid;
+            cursor: pointer; transition: all 0.25s; font-family: var(--font-display);
+            font-size: 0.95rem; font-weight: 700; background: transparent;
+        }
+        .format-btn-pdf {
+            border-color: rgba(220,38,38,0.3); color: #dc2626;
+        }
+        .format-btn-pdf:hover {
+            background: rgba(220,38,38,0.06); border-color: #dc2626;
+            transform: translateY(-3px); box-shadow: 0 8px 24px rgba(220,38,38,0.15);
+        }
+        .format-btn-excel {
+            border-color: rgba(22,163,74,0.3); color: #16a34a;
+        }
+        .format-btn-excel:hover {
+            background: rgba(22,163,74,0.06); border-color: #16a34a;
+            transform: translateY(-3px); box-shadow: 0 8px 24px rgba(22,163,74,0.15);
+        }
+
+        /* ── Tab Panes ── */
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* ── Search Box ── */
+        .search-box {
+            display: flex; align-items: center; gap: 10px;
+            background: white; border: 1.5px solid var(--border);
+            border-radius: 99px; padding: 8px 18px;
+            box-shadow: 0 2px 8px rgba(15,23,42,0.04); transition: all 0.2s;
+        }
+        .search-box:focus-within {
+            border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-glow);
+        }
+        .search-box input {
+            border: none; outline: none; background: transparent; font-size: 0.9rem;
+            color: var(--text); font-family: var(--font-body); min-width: 200px;
+        }
+        .search-icon { color: var(--text-light); font-size: 1rem; }
+
+        /* ── Loading States ── */
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite;
+            border-radius: 12px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center; padding: 60px 20px; color: var(--text-muted);
+        }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+        .empty-state-text { font-size: 0.95rem; }
+
+        /* ── Mobile Nav Drawer ── */
+        .mobile-nav-overlay {
+            position: fixed; inset: 0; z-index: 2000;
+            visibility: hidden; opacity: 0; transition: all 0.3s;
+        }
+        .mobile-nav-overlay.open { visibility: visible; opacity: 1; }
+        .mobile-nav-overlay::before {
+            content: ''; position: absolute; inset: 0;
+            background: rgba(15,23,42,0.4); backdrop-filter: blur(6px);
+        }
+        .mobile-nav-drawer {
+            position: absolute; top: 0; right: 0; bottom: 0; width: 280px;
+            background: white; display: flex; flex-direction: column;
+            box-shadow: -8px 0 40px rgba(0,0,0,0.12);
+            transform: translateX(100%); transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+            z-index: 1;
+        }
+        .mobile-nav-overlay.open .mobile-nav-drawer { transform: translateX(0); }
+        .mobile-drawer-header {
+            padding: 20px 20px 16px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 1px solid var(--border);
+        }
+        .mobile-drawer-close {
+            background: none; border: none; font-size: 1.1rem; cursor: pointer;
+            color: var(--text-muted); padding: 4px 8px; border-radius: 8px;
+        }
+        .mobile-drawer-nav { padding: 16px 12px; flex: 1; }
+        .mobile-drawer-link {
+            display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+            border-radius: 14px; color: var(--text-muted); font-weight: 600;
+            font-size: 0.92rem; cursor: pointer; transition: all 0.2s; border: none;
+            background: none; width: 100%; text-align: left; font-family: var(--font-display);
+        }
+        .mobile-drawer-link:hover { background: var(--primary-light); color: var(--primary); }
+        .mobile-drawer-link.active { background: var(--primary-light); color: var(--primary); }
+        .mobile-drawer-footer {
+            padding: 20px; border-top: 1px solid var(--border);
+        }
+
+        @media(max-width:900px) {
+            .nav-tabs { display: none; }
+            .mobile-burger { display: block; }
+            .dash-content { padding: 24px 16px; }
+        }
+        @media(max-width:640px) {
+            .page-hero { padding: 28px 24px; }
+            .hero-title { font-size: 1.5rem; }
+            .report-formats { grid-template-columns: 1fr; }
+        }
+
+        /* ── Print Styles for PDF ── */
+        @media print {
+            .nav-island-container, .back-btn, .report-formats,
+            .mobile-nav-overlay, .mobile-burger { display: none !important; }
+            body { background: white !important; }
+            .dash-main { padding-top: 0 !important; }
+            .chart-card, .stat-card, .district-card, .dept-card {
+                box-shadow: none !important;
+                border: 1px solid #e0e0e0 !important;
+                break-inside: avoid;
+            }
+            .tab-pane { display: block !important; }
+            .page-hero { background: #B00000 !important; -webkit-print-color-adjust: exact; }
+        }
+
+        /* ── Animations ── */
+        .animate-in {
+            animation: fadeSlideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
+        }
+        .stagger-1 { animation-delay: 0.08s; }
+        .stagger-2 { animation-delay: 0.16s; }
+        .stagger-3 { animation-delay: 0.24s; }
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dash-layout">
+        <main class="dash-main">
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- Floating Nav Island                         -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="nav-island-container">
+                <nav class="nav-island" id="nav-island">
+                    <div class="nav-logo">
+                        <span>MakkalSevi</span>
+                        <span class="nav-logo-badge">CM</span>
+                    </div>
+
+                    <ul class="nav-tabs" id="nav-tabs">
+                        <li><button class="nav-tab active" data-tab="overview" id="nav-overview">📊 Overview</button></li>
+                        <li><button class="nav-tab" data-tab="districts" id="nav-districts">🗺️ Districts</button></li>
+                        <li><button class="nav-tab" data-tab="departments" id="nav-departments">🏛️ Departments</button></li>
+                        <li><button class="nav-tab" data-tab="trends" id="nav-trends">📈 Trends</button></li>
+                        <li><button class="nav-tab" data-tab="reports" id="nav-reports">📥 Reports</button></li>
+                    </ul>
+
+                    <div class="nav-actions">
+                        <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="3" y1="12" x2="21" y2="12"/>
+                                <line x1="3" y1="6" x2="21" y2="6"/>
+                                <line x1="3" y1="18" x2="21" y2="18"/>
+                            </svg>
+                        </button>
+                        <div style="display:flex;align-items:center;gap:8px;border-left:1px solid var(--border);padding-left:12px;">
+                            <div class="cm-avatar" id="cm-avatar-el">CM</div>
+                            <div style="display:flex;flex-direction:column;">
+                                <span id="cm-name-el" style="font-family:var(--font-display);font-weight:700;font-size:0.85rem;color:var(--text);">Chief Minister</span>
+                                <span style="font-size:0.72rem;color:var(--text-muted);">State Analytics</span>
+                            </div>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding:6px 12px;font-size:0.82rem;border-radius:99px;margin-left:4px;">Sign Out</button>
+                        </div>
+                    </div>
+                </nav>
+
+                <!-- Mobile Drawer -->
+                <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+                    <div class="mobile-nav-drawer">
+                        <div class="mobile-drawer-header">
+                            <div class="nav-logo" style="font-size:1rem;">MakkalSevi <span class="nav-logo-badge">CM</span></div>
+                            <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
+                        </div>
+                        <div class="mobile-drawer-nav">
+                            <button class="mobile-drawer-link active" data-tab="overview">📊 Overview</button>
+                            <button class="mobile-drawer-link" data-tab="districts">🗺️ Districts</button>
+                            <button class="mobile-drawer-link" data-tab="departments">🏛️ Departments</button>
+                            <button class="mobile-drawer-link" data-tab="trends">📈 Trends</button>
+                            <button class="mobile-drawer-link" data-tab="reports">📥 Reports</button>
+                        </div>
+                        <div class="mobile-drawer-footer">
+                            <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                                <div class="cm-avatar" style="width:40px;height:40px;" id="drawer-avatar-el">CM</div>
+                                <div>
+                                    <div id="drawer-name-el" style="font-weight:700;font-size:0.88rem;">Chief Minister</div>
+                                    <div style="font-size:0.75rem;color:var(--text-muted);">State Analytics</div>
+                                </div>
+                            </div>
+                            <button id="drawer-logout-btn" class="btn btn-outline" style="width:100%;border-radius:99px;">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══════════════════════════════════════════ -->
+            <!-- Dashboard Content                           -->
+            <!-- ═══════════════════════════════════════════ -->
+            <div class="dash-content">
+
+                <!-- Page Hero -->
+                <div class="page-hero animate-in">
+                    <div class="hero-content">
+                        <div class="hero-eyebrow">Government of Tamil Nadu</div>
+                        <h1 class="hero-title">Chief Minister's Analytics Portal</h1>
+                        <p class="hero-subtitle">Real-time civic issue monitoring across all districts and constituencies</p>
+                        <div class="hero-badge">🏛️ MakkalSevi State Dashboard</div>
+                    </div>
+                </div>
+
+                <!-- ════════════════════ TAB: OVERVIEW ════════════════════ -->
+                <div class="tab-pane active" id="tab-overview">
+                    <!-- Stats Grid -->
+                    <div class="section-hdr animate-in stagger-1">
+                        <div>
+                            <div class="section-title">State Overview</div>
+                            <div class="section-subtitle">Live aggregated data across all Tamil Nadu districts</div>
+                        </div>
+                        <span id="last-updated" style="font-size:0.8rem;color:var(--text-light);"></span>
+                    </div>
+
+                    <div class="stats-grid animate-in stagger-2">
+                        <div class="stat-card sc-blue">
+                            <div class="stat-card-icon">🗺️</div>
+                            <div class="stat-card-label">Active Districts</div>
+                            <div class="stat-card-value" id="s-districts">—</div>
+                            <div class="stat-card-sub">With reported issues</div>
+                        </div>
+                        <div class="stat-card sc-purple">
+                            <div class="stat-card-icon">📍</div>
+                            <div class="stat-card-label">Constituencies</div>
+                            <div class="stat-card-value" id="s-const">—</div>
+                            <div class="stat-card-sub">Actively reporting</div>
+                        </div>
+                        <div class="stat-card sc-red">
+                            <div class="stat-card-icon">📋</div>
+                            <div class="stat-card-label">Total Problems</div>
+                            <div class="stat-card-value" id="s-total">—</div>
+                            <div class="stat-card-sub">All time reported</div>
+                        </div>
+                        <div class="stat-card sc-green">
+                            <div class="stat-card-icon">✅</div>
+                            <div class="stat-card-label">Resolved</div>
+                            <div class="stat-card-value" id="s-solved">—</div>
+                            <div class="stat-card-sub" id="s-solved-pct">0% rate</div>
+                        </div>
+                        <div class="stat-card sc-amber">
+                            <div class="stat-card-icon">⏳</div>
+                            <div class="stat-card-label">Pending</div>
+                            <div class="stat-card-value" id="s-pending">—</div>
+                            <div class="stat-card-sub">Awaiting action</div>
+                        </div>
+                        <div class="stat-card sc-gold">
+                            <div class="stat-card-icon">🎯</div>
+                            <div class="stat-card-label">Resolution Rate</div>
+                            <div class="stat-card-value" id="s-rate">—%</div>
+                            <div class="stat-card-sub">State average</div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="chart-grid animate-in stagger-3">
+                        <div class="chart-card">
+                            <div class="chart-card-title">📊 Problem Status Distribution</div>
+                            <div class="chart-card-sub">Current breakdown of all civic issues</div>
+                            <div class="chart-wrap" style="height:260px;">
+                                <canvas id="statusChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <div class="chart-card-title">🏛️ Department Efficiency</div>
+                            <div class="chart-card-sub">Resolution rate per department</div>
+                            <div class="chart-wrap" style="height:260px;">
+                                <canvas id="deptChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top vs Bottom Districts -->
+                    <div class="chart-card animate-in" style="margin-bottom:32px;">
+                        <div class="chart-card-title">🏆 District Performance Comparison</div>
+                        <div class="chart-card-sub">Top & bottom performing districts by resolution rate</div>
+                        <div class="chart-wrap" style="height:300px;">
+                            <canvas id="districtCompChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════════════════════ TAB: DISTRICTS ════════════════════ -->
+                <div class="tab-pane" id="tab-districts">
+
+                    <!-- District List View -->
+                    <div id="district-list-view">
+                        <div class="section-hdr animate-in">
+                            <div>
+                                <div class="section-title">District Performance</div>
+                                <div class="section-subtitle">Click any district to view detailed breakdown</div>
+                            </div>
+                            <div class="search-box">
+                                <span class="search-icon">🔍</span>
+                                <input type="text" id="district-search" placeholder="Search districts..." />
+                            </div>
+                        </div>
+                        <div class="district-grid" id="district-grid">
+                            <div class="stat-card" style="grid-column:1/-1;text-align:center;padding:48px;">
+                                <div style="font-size:0.95rem;color:var(--text-muted);">Loading district data...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- District Detail View -->
+                    <div id="district-detail-view" class="detail-panel">
+                        <button class="back-btn" id="back-to-districts">← Back to Districts</button>
+                        <div class="district-detail-hero" id="detail-hero">
+                            <div class="hero-eyebrow">District Report</div>
+                            <div class="district-detail-title" id="detail-district-name">—</div>
+                            <div class="district-detail-stats" id="detail-stats">
+                                <div>
+                                    <div class="detail-stat-val" id="dd-total">—</div>
+                                    <div class="detail-stat-lbl">Total Issues</div>
+                                </div>
+                                <div>
+                                    <div class="detail-stat-val" id="dd-solved" style="color:#4ade80;">—</div>
+                                    <div class="detail-stat-lbl">Resolved</div>
+                                </div>
+                                <div>
+                                    <div class="detail-stat-val" id="dd-pending" style="color:#fbbf24;">—</div>
+                                    <div class="detail-stat-lbl">Pending</div>
+                                </div>
+                                <div>
+                                    <div class="detail-stat-val" id="dd-rate" style="color:#4ade80;">—%</div>
+                                    <div class="detail-stat-lbl">Resolution Rate</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-grid">
+                            <div class="chart-card">
+                                <div class="chart-card-title">📍 Constituency Performance</div>
+                                <div class="chart-card-sub">Issues and resolution per constituency</div>
+                                <div class="chart-wrap" style="height:280px;">
+                                    <canvas id="constChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-card-title">🏛️ Department Breakdown</div>
+                                <div class="chart-card-sub">Issues handled per department in this district</div>
+                                <div class="chart-wrap" style="height:280px;">
+                                    <canvas id="districtDeptChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-hdr">
+                            <div>
+                                <div class="section-title">Constituency Details</div>
+                                <div class="section-subtitle" id="detail-const-count">—</div>
+                            </div>
+                        </div>
+
+                        <div class="table-wrap">
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Constituency</th>
+                                        <th>Total</th>
+                                        <th>Resolved</th>
+                                        <th>Pending</th>
+                                        <th>Resolution Rate</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="const-tbody"></tbody>
+                            </table>
+                        </div>
+
+                        <div class="section-hdr">
+                            <div>
+                                <div class="section-title">Department Performance</div>
+                                <div class="section-subtitle">In this district</div>
+                            </div>
+                        </div>
+                        <div class="dept-grid" id="detail-dept-grid"></div>
+                    </div>
+                </div>
+
+                <!-- ════════════════════ TAB: DEPARTMENTS ════════════════════ -->
+                <div class="tab-pane" id="tab-departments">
+                    <div class="section-hdr animate-in">
+                        <div>
+                            <div class="section-title">Department Performance Analysis</div>
+                            <div class="section-subtitle">State-wide efficiency metrics per department</div>
+                        </div>
+                    </div>
+
+                    <div class="dept-grid" id="dept-grid">
+                        <div class="dept-card" style="grid-column:1/-1;text-align:center;padding:48px;">
+                            <div style="color:var(--text-muted);">Loading department data...</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card animate-in" style="margin-bottom:32px;">
+                        <div class="chart-card-title">📊 Department Comparison</div>
+                        <div class="chart-card-sub">Total vs Resolved complaints per department</div>
+                        <div class="chart-wrap" style="height:320px;">
+                            <canvas id="deptBarChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════════════════════ TAB: TRENDS ════════════════════ -->
+                <div class="tab-pane" id="tab-trends">
+                    <div class="section-hdr animate-in">
+                        <div>
+                            <div class="section-title">Monthly Progress Trends</div>
+                            <div class="section-subtitle">12-month view of civic issue reporting and resolution</div>
+                        </div>
+                    </div>
+
+                    <div class="chart-card animate-in" style="margin-bottom:24px;">
+                        <div class="chart-card-title">📈 Reports Received vs Resolved (Monthly)</div>
+                        <div class="chart-card-sub">Tracking civic issue volume and resolution pace over the past 12 months</div>
+                        <div class="chart-wrap" style="height:360px;">
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card animate-in stagger-1">
+                        <div class="chart-card-title">📉 Monthly Pending Issues</div>
+                        <div class="chart-card-sub">Unresolved issues reported per month</div>
+                        <div class="chart-wrap" style="height:260px;">
+                            <canvas id="pendingTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ════════════════════ TAB: REPORTS ════════════════════ -->
+                <div class="tab-pane" id="tab-reports">
+                    <div class="section-hdr animate-in">
+                        <div>
+                            <div class="section-title">Generate Reports</div>
+                            <div class="section-subtitle">Download state analytics as PDF or Excel</div>
+                        </div>
+                    </div>
+
+                    <div class="report-card animate-in">
+                        <div>
+                            <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:800;margin-bottom:8px;">📋 State Analytics Report</h3>
+                            <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:16px;">
+                                Download a comprehensive report containing district summaries, constituency details, department performance, and problem statistics.
+                            </p>
+
+                            <div style="margin-bottom:20px;">
+                                <label style="font-family:var(--font-display);font-size:0.85rem;font-weight:700;color:var(--text-muted);display:block;margin-bottom:8px;">Select District (optional)</label>
+                                <select id="report-district-select" class="select" style="max-width:320px;">
+                                    <option value="all">All Districts</option>
+                                </select>
+                            </div>
+
+                            <div class="report-formats">
+                                <button class="format-btn format-btn-pdf" id="download-pdf">
+                                    <span>📄</span>
+                                    <div>
+                                        <div>Download PDF</div>
+                                        <div style="font-size:0.78rem;font-weight:500;opacity:0.7;">Print-formatted report</div>
+                                    </div>
+                                </button>
+                                <button class="format-btn format-btn-excel" id="download-excel">
+                                    <span>📊</span>
+                                    <div>
+                                        <div>Download Excel</div>
+                                        <div style="font-size:0.78rem;font-weight:500;opacity:0.7;">Spreadsheet with all data</div>
+                                    </div>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-card animate-in stagger-2" style="margin-top:24px;">
+                        <h3 style="font-family:var(--font-display);font-size:1.2rem;font-weight:800;margin-bottom:8px;">📌 Report Contents</h3>
+                        <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:12px;">
+                            <li style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);">
+                                <span style="color:#16a34a;font-size:1rem;">✓</span> State-wide overview statistics
+                            </li>
+                            <li style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);">
+                                <span style="color:#16a34a;font-size:1rem;">✓</span> Per-district performance summary
+                            </li>
+                            <li style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);">
+                                <span style="color:#16a34a;font-size:1rem;">✓</span> Constituency-level breakdown
+                            </li>
+                            <li style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);">
+                                <span style="color:#16a34a;font-size:1rem;">✓</span> Department efficiency metrics
+                            </li>
+                            <li style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);">
+                                <span style="color:#16a34a;font-size:1rem;">✓</span> Monthly trend data (12 months)
+                            </li>
+                            <li style="display:flex;align-items:center;gap:10px;font-size:0.9rem;color:var(--text-muted);">
+                                <span style="color:#16a34a;font-size:1rem;">✓</span> Resolution percentages and rankings
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div> <!-- /dash-content -->
+        </main>
+    </div>
+
+    <script type="module">
+        import { guardPage } from './js/router.js';
+        import { logout } from './js/auth.js';
+        import { toast } from './js/toast.js';
+
+        // ── Guard: Only CM role ──
+        const user = guardPage(['CM']);
+        if (!user) throw new Error('Access denied');
+
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5001/api'
+            : 'https://cleancityfinal.onrender.com/api';
+
+        // ── Set user info ──
+        const initials = (user.name || 'CM').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+        document.getElementById('cm-avatar-el').textContent = initials;
+        document.getElementById('cm-name-el').textContent = user.name || 'Chief Minister';
+        document.getElementById('drawer-avatar-el').textContent = initials;
+        document.getElementById('drawer-name-el').textContent = user.name || 'Chief Minister';
+        document.getElementById('last-updated').textContent = 'Updated: ' + new Date().toLocaleString('en-IN');
+
+        // ── Auth API helper ──
+        async function cmFetch(path) {
+            const token = localStorage.getItem('cm_token');
+            const res = await fetch(`${API_BASE}${path}`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+            if (res.status === 401) { await logout(); return null; }
+            if (!res.ok) throw new Error((await res.json()).error || 'Request failed');
+            return res.json();
+        }
+
+        // ── Logout ──
+        const logoutHandler = () => logout();
+        document.getElementById('logout-btn').addEventListener('click', logoutHandler);
+        document.getElementById('drawer-logout-btn').addEventListener('click', logoutHandler);
+
+        // ── Nav Island Scroll ──
+        window.addEventListener('scroll', () => {
+            document.getElementById('nav-island').classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // ═══════════════════════════════════
+        // TAB SWITCHING
+        // ═══════════════════════════════════
+        let activeTab = 'overview';
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.mobile-drawer-link').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + tab)?.classList.add('active');
+            document.getElementById('nav-' + tab)?.classList.add('active');
+            document.querySelectorAll(`.mobile-drawer-link[data-tab="${tab}"]`).forEach(b => b.classList.add('active'));
+            activeTab = tab;
+        }
+
+        document.querySelectorAll('.nav-tab').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.dataset.tab);
+                closeMobileDrawer();
+            });
+        });
+        document.querySelectorAll('.mobile-drawer-link').forEach(btn => {
+            btn.addEventListener('click', () => {
+                switchTab(btn.dataset.tab);
+                closeMobileDrawer();
+            });
+        });
+
+        // ── Mobile Drawer ──
+        function closeMobileDrawer() {
+            document.getElementById('mobile-nav-overlay').classList.remove('open');
+        }
+        document.getElementById('mobile-menu-btn').addEventListener('click', () => {
+            document.getElementById('mobile-nav-overlay').classList.add('open');
+        });
+        document.getElementById('mobile-nav-close').addEventListener('click', closeMobileDrawer);
+        document.getElementById('mobile-nav-overlay').addEventListener('click', e => {
+            if (e.target === document.getElementById('mobile-nav-overlay')) closeMobileDrawer();
+        });
+
+        // ═══════════════════════════════════════════
+        // CHART.JS GLOBAL DEFAULTS
+        // ═══════════════════════════════════════════
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.plugins.legend.labels.usePointStyle = true;
+        Chart.defaults.plugins.legend.labels.padding = 16;
+
+        const PALETTE = {
+            red: '#B00000', redLight: 'rgba(176,0,0,0.12)',
+            gold: '#D4A017', goldLight: 'rgba(212,160,23,0.12)',
+            green: '#16a34a', greenLight: 'rgba(22,163,74,0.12)',
+            amber: '#d97706', amberLight: 'rgba(217,119,6,0.12)',
+            blue: '#2563eb', blueLight: 'rgba(37,99,235,0.12)',
+            purple: '#7c3aed', purpleLight: 'rgba(124,58,237,0.12)',
+        };
+
+        let chartInstances = {};
+        function destroyChart(id) {
+            if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; }
+        }
+        function createChart(id, config) {
+            destroyChart(id);
+            const ctx = document.getElementById(id);
+            if (!ctx) return;
+            chartInstances[id] = new Chart(ctx, config);
+        }
+
+        // ═══════════════════════════════════════════
+        // GLOBAL DATA STORE
+        // ═══════════════════════════════════════════
+        let globalOverview = null;
+        let globalDistricts = [];
+        let globalDepts = [];
+        let globalMonthly = null;
+
+        // ═══════════════════════════════════════════
+        // LOAD OVERVIEW
+        // ═══════════════════════════════════════════
+        async function loadOverview() {
+            try {
+                const data = await cmFetch('/cm/overview');
+                if (!data) return;
+                globalOverview = data;
+
+                document.getElementById('s-districts').textContent = data.totalDistricts;
+                document.getElementById('s-const').textContent = data.totalConstituencies;
+                document.getElementById('s-total').textContent = data.totalIssues.toLocaleString();
+                document.getElementById('s-solved').textContent = data.solved.toLocaleString();
+                document.getElementById('s-pending').textContent = data.pending.toLocaleString();
+                document.getElementById('s-rate').textContent = data.resolutionRate + '%';
+                document.getElementById('s-solved-pct').textContent = data.resolutionRate + '% rate';
+
+                // Status Donut Chart
+                createChart('statusChart', {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Resolved', 'In Progress', 'Pending'],
+                        datasets: [{
+                            data: [data.solved, data.inProgress, data.pending],
+                            backgroundColor: [PALETTE.green, PALETTE.blue, PALETTE.amber],
+                            borderWidth: 0, hoverOffset: 8
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '68%',
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${Math.round(ctx.parsed / data.totalIssues * 100)}%)`
+                                }
+                            }
+                        }
+                    }
+                });
+            } catch (err) {
+                console.error('Overview load error:', err);
+                toast.error('Error', 'Failed to load overview data.');
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        // LOAD DEPARTMENTS (overview + deptChart)
+        // ═══════════════════════════════════════════
+        async function loadDepartments() {
+            try {
+                const data = await cmFetch('/cm/departments');
+                if (!data) return;
+                globalDepts = data.departments;
+
+                // Dept Efficiency Chart (overview tab)
+                createChart('deptChart', {
+                    type: 'bar',
+                    data: {
+                        labels: data.departments.map(d => d.label),
+                        datasets: [{
+                            label: 'Efficiency %',
+                            data: data.departments.map(d => d.efficiencyRate),
+                            backgroundColor: data.departments.map((_, i) =>
+                                [PALETTE.red, PALETTE.blue, PALETTE.purple][i % 3]),
+                            borderRadius: 8, borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                        scales: {
+                            x: { max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
+                            y: { grid: { display: false } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+                // Render dept cards on dept tab
+                renderDeptCards(data.departments, 'dept-grid');
+
+                // Dept Comparison Bar Chart
+                createChart('deptBarChart', {
+                    type: 'bar',
+                    data: {
+                        labels: data.departments.map(d => d.label),
+                        datasets: [
+                            {
+                                label: 'Total', data: data.departments.map(d => d.total),
+                                backgroundColor: PALETTE.blueLight, borderColor: PALETTE.blue,
+                                borderWidth: 2, borderRadius: 6,
+                            },
+                            {
+                                label: 'Resolved', data: data.departments.map(d => d.solved),
+                                backgroundColor: PALETTE.greenLight, borderColor: PALETTE.green,
+                                borderWidth: 2, borderRadius: 6,
+                            },
+                            {
+                                label: 'Pending', data: data.departments.map(d => d.pending),
+                                backgroundColor: PALETTE.amberLight, borderColor: PALETTE.amber,
+                                borderWidth: 2, borderRadius: 6,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { grid: { color: 'rgba(0,0,0,0.04)' } }
+                        },
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+
+            } catch (err) {
+                console.error('Dept load error:', err);
+                toast.error('Error', 'Failed to load department data.');
+            }
+        }
+
+        function renderDeptCards(departments, containerId) {
+            const DEPT_ICONS = {
+                'TAMILNADU_CORPORATION': { icon: '🏙️', color: PALETTE.blueLight, border: PALETTE.blue },
+                'TNEB': { icon: '⚡', color: PALETTE.goldLight, border: PALETTE.gold },
+                'POLICE': { icon: '👮', color: PALETTE.purpleLight, border: PALETTE.purple },
+            };
+            const container = document.getElementById(containerId);
+            if (!departments.length) {
+                container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">No department data available yet.</div></div>';
+                return;
+            }
+            container.innerHTML = departments.map(dept => {
+                const meta = DEPT_ICONS[dept.key] || { icon: '🏛️', color: PALETTE.blueLight, border: PALETTE.blue };
+                const effColor = dept.efficiencyRate >= 70 ? PALETTE.green : dept.efficiencyRate >= 40 ? PALETTE.amber : '#dc2626';
+                return `
+                <div class="dept-card">
+                    <div class="dept-card-header">
+                        <div class="dept-icon" style="background:${meta.color};border:1px solid ${meta.border}22;">${meta.icon}</div>
+                        <div>
+                            <div class="dept-name">${dept.label}</div>
+                            <div style="font-size:0.78rem;color:var(--text-muted);">${dept.total} total complaints</div>
+                        </div>
+                    </div>
+                    <div class="dept-stats-row">
+                        <div class="dept-stat">
+                            <div class="dept-stat-val">${dept.total}</div>
+                            <div class="dept-stat-lbl">Total</div>
+                        </div>
+                        <div class="dept-stat">
+                            <div class="dept-stat-val" style="color:${PALETTE.green}">${dept.solved}</div>
+                            <div class="dept-stat-lbl">Resolved</div>
+                        </div>
+                        <div class="dept-stat">
+                            <div class="dept-stat-val" style="color:${PALETTE.amber}">${dept.pending}</div>
+                            <div class="dept-stat-lbl">Pending</div>
+                        </div>
+                    </div>
+                    <div style="height:6px;background:rgba(15,23,42,0.07);border-radius:99px;margin-bottom:12px;">
+                        <div style="height:100%;border-radius:99px;background:linear-gradient(90deg,${meta.border},${PALETTE.gold});width:${dept.efficiencyRate}%;transition:width 1.2s cubic-bezier(0.25,0.8,0.25,1);"></div>
+                    </div>
+                    <div class="dept-efficiency">
+                        <span class="dept-efficiency-label">Efficiency Rate</span>
+                        <span class="dept-efficiency-val" style="color:${effColor};">${dept.efficiencyRate}%</span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ═══════════════════════════════════════════
+        // LOAD DISTRICTS
+        // ═══════════════════════════════════════════
+        async function loadDistricts() {
+            try {
+                const data = await cmFetch('/cm/districts');
+                if (!data) return;
+                globalDistricts = data.districts;
+
+                // Populate report district select
+                const sel = document.getElementById('report-district-select');
+                data.districts.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.name; opt.textContent = d.name;
+                    sel.appendChild(opt);
+                });
+
+                renderDistrictCards(data.districts);
+
+                // District Comparison Chart (overview tab) — top 8 + bottom 3
+                const sorted = [...data.districts].sort((a, b) => b.resolutionRate - a.resolutionRate);
+                const shown = sorted.length > 10
+                    ? [...sorted.slice(0, 7), ...sorted.slice(-3)]
+                    : sorted;
+
+                createChart('districtCompChart', {
+                    type: 'bar',
+                    data: {
+                        labels: shown.map(d => d.name),
+                        datasets: [{
+                            label: 'Resolution Rate (%)',
+                            data: shown.map(d => d.resolutionRate),
+                            backgroundColor: shown.map(d =>
+                                d.resolutionRate >= 70 ? 'rgba(22,163,74,0.75)'
+                                    : d.resolutionRate >= 40 ? 'rgba(217,119,6,0.75)'
+                                        : 'rgba(220,38,38,0.75)'),
+                            borderRadius: 6, borderSkipped: false,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            y: { max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
+                            x: { grid: { display: false }, ticks: { maxRotation: 45 } }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+            } catch (err) {
+                console.error('Districts load error:', err);
+                toast.error('Error', 'Failed to load district data.');
+            }
+        }
+
+        function renderDistrictCards(districts) {
+            const container = document.getElementById('district-grid');
+            if (!districts.length) {
+                container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="empty-state-icon">🗺️</div><div class="empty-state-text">No district data available yet. Citizens need to register and report issues.</div></div>';
+                return;
+            }
+            container.innerHTML = districts.map(d => {
+                const rateClass = d.resolutionRate >= 70 ? 'rate-high' : d.resolutionRate >= 40 ? 'rate-mid' : 'rate-low';
+                return `
+                <div class="district-card" data-district="${encodeURIComponent(d.name)}">
+                    <div class="district-card-header">
+                        <div>
+                            <div class="district-name">${d.name}</div>
+                            <div class="district-sub">${d.constituencyCount} constituencies · ${d.activeDepartments} depts active</div>
+                        </div>
+                        <span class="rate-badge ${rateClass}">${d.resolutionRate}%</span>
+                    </div>
+                    <div class="district-stats">
+                        <div class="district-stat-item">
+                            <div class="district-stat-val">${d.total}</div>
+                            <div class="district-stat-lbl">Total</div>
+                        </div>
+                        <div class="district-stat-item">
+                            <div class="district-stat-val" style="color:var(--success)">${d.solved}</div>
+                            <div class="district-stat-lbl">Solved</div>
+                        </div>
+                        <div class="district-stat-item">
+                            <div class="district-stat-val" style="color:var(--warning)">${d.pending}</div>
+                            <div class="district-stat-lbl">Pending</div>
+                        </div>
+                    </div>
+                    <div class="district-progress-bar">
+                        <div class="district-progress-fill" style="width:${d.resolutionRate}%"></div>
+                    </div>
+                    <div class="district-arrow">→</div>
+                </div>`;
+            }).join('');
+
+            // Attach click handlers
+            container.querySelectorAll('.district-card').forEach(card => {
+                card.addEventListener('click', () => {
+                    openDistrictDetail(decodeURIComponent(card.dataset.district));
+                });
+            });
+        }
+
+        // ── District Search ──
+        document.getElementById('district-search').addEventListener('input', e => {
+            const q = e.target.value.toLowerCase();
+            const filtered = globalDistricts.filter(d => d.name.toLowerCase().includes(q));
+            renderDistrictCards(filtered);
+        });
+
+        // ═══════════════════════════════════════════
+        // DISTRICT DETAIL
+        // ═══════════════════════════════════════════
+        async function openDistrictDetail(districtName) {
+            document.getElementById('district-list-view').style.display = 'none';
+            document.getElementById('district-detail-view').classList.add('active');
+            document.getElementById('detail-district-name').textContent = districtName;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            try {
+                const data = await cmFetch('/cm/districts/' + encodeURIComponent(districtName));
+                if (!data) return;
+
+                document.getElementById('dd-total').textContent = data.total;
+                document.getElementById('dd-solved').textContent = data.solved;
+                document.getElementById('dd-pending').textContent = data.pending;
+                document.getElementById('dd-rate').textContent = data.resolutionRate + '%';
+                document.getElementById('detail-const-count').textContent = `${data.constituencyCount} constituencies in ${districtName}`;
+
+                // Constituency Bar Chart
+                const constTop = data.constituencies.slice(0, 10);
+                createChart('constChart', {
+                    type: 'bar',
+                    data: {
+                        labels: constTop.map(c => c.name.length > 14 ? c.name.slice(0, 12) + '…' : c.name),
+                        datasets: [
+                            {
+                                label: 'Total', data: constTop.map(c => c.total),
+                                backgroundColor: PALETTE.blueLight, borderColor: PALETTE.blue,
+                                borderWidth: 2, borderRadius: 4,
+                            },
+                            {
+                                label: 'Resolved', data: constTop.map(c => c.solved),
+                                backgroundColor: PALETTE.greenLight, borderColor: PALETTE.green,
+                                borderWidth: 2, borderRadius: 4,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false }, ticks: { maxRotation: 45, font: { size: 10 } } },
+                            y: { grid: { color: 'rgba(0,0,0,0.04)' } }
+                        },
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+
+                // Dept Pie for this district
+                createChart('districtDeptChart', {
+                    type: 'doughnut',
+                    data: {
+                        labels: data.departments.map(d => d.label),
+                        datasets: [{
+                            data: data.departments.map(d => d.total),
+                            backgroundColor: [PALETTE.red, PALETTE.gold, PALETTE.blue, PALETTE.purple],
+                            borderWidth: 0, hoverOffset: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '60%',
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+
+                // Constituency Table
+                const tbody = document.getElementById('const-tbody');
+                if (!data.constituencies.length) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted);">No constituency data available.</td></tr>';
+                } else {
+                    tbody.innerHTML = data.constituencies.map((c, i) => {
+                        const rateColor = c.resolutionRate >= 70 ? '#16a34a' : c.resolutionRate >= 40 ? '#d97706' : '#dc2626';
+                        return `<tr>
+                            <td style="font-weight:600;color:var(--text-muted);">${i + 1}</td>
+                            <td style="font-weight:700;">${c.name}</td>
+                            <td>${c.total}</td>
+                            <td style="color:var(--success);font-weight:600;">${c.solved}</td>
+                            <td style="color:var(--warning);font-weight:600;">${c.pending}</td>
+                            <td>
+                                <div class="inline-bar">
+                                    <div class="bar-track"><div class="bar-fill" style="width:${c.resolutionRate}%"></div></div>
+                                    <span class="bar-pct" style="color:${rateColor}">${c.resolutionRate}%</span>
+                                </div>
+                            </td>
+                        </tr>`;
+                    }).join('');
+                }
+
+                // Department cards for this district
+                renderDeptCards(data.departments, 'detail-dept-grid');
+
+            } catch (err) {
+                console.error('District detail error:', err);
+                toast.error('Error', 'Failed to load district details.');
+            }
+        }
+
+        document.getElementById('back-to-districts').addEventListener('click', () => {
+            document.getElementById('district-list-view').style.display = '';
+            document.getElementById('district-detail-view').classList.remove('active');
+        });
+
+        // ═══════════════════════════════════════════
+        // LOAD MONTHLY TRENDS
+        // ═══════════════════════════════════════════
+        async function loadMonthly() {
+            try {
+                const data = await cmFetch('/cm/monthly?months=12');
+                if (!data) return;
+                globalMonthly = data;
+
+                createChart('monthlyChart', {
+                    type: 'line',
+                    data: {
+                        labels: data.months,
+                        datasets: [
+                            {
+                                label: 'Reports Received',
+                                data: data.totalCounts,
+                                borderColor: PALETTE.red, backgroundColor: PALETTE.redLight,
+                                borderWidth: 2.5, fill: true, tension: 0.4,
+                                pointBackgroundColor: PALETTE.red, pointRadius: 4,
+                            },
+                            {
+                                label: 'Resolved',
+                                data: data.resolvedCounts,
+                                borderColor: PALETTE.green, backgroundColor: PALETTE.greenLight,
+                                borderWidth: 2.5, fill: true, tension: 0.4,
+                                pointBackgroundColor: PALETTE.green, pointRadius: 4,
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true }
+                        },
+                        plugins: { legend: { position: 'top' } }
+                    }
+                });
+
+                createChart('pendingTrendChart', {
+                    type: 'bar',
+                    data: {
+                        labels: data.months,
+                        datasets: [{
+                            label: 'Pending Issues',
+                            data: data.pendingCounts,
+                            backgroundColor: 'rgba(217,119,6,0.25)',
+                            borderColor: PALETTE.amber,
+                            borderWidth: 2, borderRadius: 6,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        scales: {
+                            x: { grid: { display: false } },
+                            y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+
+            } catch (err) {
+                console.error('Monthly trend error:', err);
+                toast.error('Error', 'Failed to load trend data.');
+            }
+        }
+
+        // ═══════════════════════════════════════════
+        // REPORTS
+        // ═══════════════════════════════════════════
+        document.getElementById('download-pdf').addEventListener('click', () => {
+            const selected = document.getElementById('report-district-select').value;
+            const title = selected === 'all' ? 'All Districts' : selected;
+            // Open print dialog with visible report
+            const printWin = window.open('', '_blank');
+            const now = new Date().toLocaleString('en-IN');
+            const ov = globalOverview;
+            const dists = selected === 'all' ? globalDistricts : globalDistricts.filter(d => d.name === selected);
+
+            printWin.document.write(`<!DOCTYPE html><html><head>
+                <title>MakkalSevi CM Report — ${title}</title>
+                <style>
+                    body{font-family:Arial,sans-serif;margin:32px;color:#0f172a;}
+                    h1{color:#B00000;font-size:1.8rem;border-bottom:3px solid #B00000;padding-bottom:12px;}
+                    h2{color:#1e293b;font-size:1.2rem;margin-top:28px;margin-bottom:8px;}
+                    table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.9rem;}
+                    th{background:#f8fafc;padding:10px 14px;text-align:left;border:1px solid #e2e8f0;font-weight:700;}
+                    td{padding:10px 14px;border:1px solid #e2e8f0;}
+                    tr:nth-child(even) td{background:#f9fafb;}
+                    .hero{background:#B00000;color:white;padding:20px 24px;border-radius:12px;margin-bottom:24px;}
+                    .stat-row{display:flex;gap:20px;margin-bottom:20px;flex-wrap:wrap;}
+                    .stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;min-width:120px;}
+                    .stat-val{font-size:1.6rem;font-weight:800;color:#B00000;}
+                    .stat-lbl{font-size:0.78rem;color:#475569;text-transform:uppercase;letter-spacing:0.06em;}
+                    .footer{margin-top:40px;padding-top:14px;border-top:1px solid #e2e8f0;font-size:0.78rem;color:#94a3b8;}
+                </style>
+            </head><body>
+                <div class="hero">
+                    <h1 style="color:white;border-bottom:none;padding-bottom:0;margin-bottom:4px;">🏛️ MakkalSevi — Chief Minister Report</h1>
+                    <div style="font-size:0.9rem;opacity:0.8;">Generated: ${now} | Scope: ${title}</div>
+                </div>
+                ${ov ? `<h2>State Overview</h2>
+                <div class="stat-row">
+                    <div class="stat-box"><div class="stat-val">${ov.totalDistricts}</div><div class="stat-lbl">Active Districts</div></div>
+                    <div class="stat-box"><div class="stat-val">${ov.totalConstituencies}</div><div class="stat-lbl">Constituencies</div></div>
+                    <div class="stat-box"><div class="stat-val">${ov.totalIssues}</div><div class="stat-lbl">Total Issues</div></div>
+                    <div class="stat-box"><div class="stat-val">${ov.solved}</div><div class="stat-lbl">Resolved</div></div>
+                    <div class="stat-box"><div class="stat-val">${ov.pending}</div><div class="stat-lbl">Pending</div></div>
+                    <div class="stat-box"><div class="stat-val">${ov.resolutionRate}%</div><div class="stat-lbl">Resolution Rate</div></div>
+                </div>` : ''}
+                <h2>District Performance Summary</h2>
+                <table><thead><tr>
+                    <th>#</th><th>District</th><th>Total</th><th>Resolved</th><th>Pending</th><th>Rate</th><th>Constituencies</th>
+                </tr></thead><tbody>
+                ${dists.map((d, i) => `<tr>
+                    <td>${i + 1}</td><td><b>${d.name}</b></td><td>${d.total}</td>
+                    <td style="color:#16a34a;font-weight:600;">${d.solved}</td>
+                    <td style="color:#d97706;font-weight:600;">${d.pending}</td>
+                    <td><b>${d.resolutionRate}%</b></td><td>${d.constituencyCount}</td>
+                </tr>`).join('')}
+                </tbody></table>
+                ${globalDepts.length ? `<h2>Department Performance</h2>
+                <table><thead><tr>
+                    <th>Department</th><th>Total</th><th>Resolved</th><th>In Progress</th><th>Pending</th><th>Efficiency</th>
+                </tr></thead><tbody>
+                ${globalDepts.map(d => `<tr>
+                    <td><b>${d.label}</b></td><td>${d.total}</td>
+                    <td style="color:#16a34a;">${d.solved}</td>
+                    <td style="color:#2563eb;">${d.inProgress}</td>
+                    <td style="color:#d97706;">${d.pending}</td>
+                    <td><b>${d.efficiencyRate}%</b></td>
+                </tr>`).join('')}
+                </tbody></table>` : ''}
+                <div class="footer">© ${new Date().getFullYear()} Tamil Nadu District Administration · MakkalSevi Civic Platform · Confidential Government Report</div>
+            </body></html>`);
+            printWin.document.close();
+            setTimeout(() => printWin.print(), 400);
+        });
+
+        document.getElementById('download-excel').addEventListener('click', () => {
+            if (!globalDistricts.length) {
+                toast.error('No Data', 'Load district data first.');
+                return;
+            }
+            const selected = document.getElementById('report-district-select').value;
+            const dists = selected === 'all' ? globalDistricts : globalDistricts.filter(d => d.name === selected);
+            const wb = XLSX.utils.book_new();
+
+            // Sheet 1: Overview
+            if (globalOverview) {
+                const ov = globalOverview;
+                const ovData = [
+                    ['MakkalSevi — CM State Report', '', '', '', '', ''],
+                    ['Generated', new Date().toLocaleString('en-IN'), '', '', '', ''],
+                    [''],
+                    ['Metric', 'Value'],
+                    ['Active Districts', ov.totalDistricts],
+                    ['Active Constituencies', ov.totalConstituencies],
+                    ['Total Issues', ov.totalIssues],
+                    ['Resolved', ov.solved],
+                    ['In Progress', ov.inProgress],
+                    ['Pending', ov.pending],
+                    ['Resolution Rate (%)', ov.resolutionRate],
+                ];
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ovData), 'Overview');
+            }
+
+            // Sheet 2: Districts
+            const distHeaders = ['#', 'District', 'Total Issues', 'Resolved', 'In Progress', 'Pending', 'Resolution Rate (%)', 'Constituencies', 'Active Departments'];
+            const distRows = dists.map((d, i) => [i + 1, d.name, d.total, d.solved, d.inProgress || 0, d.pending, d.resolutionRate, d.constituencyCount, d.activeDepartments]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([distHeaders, ...distRows]), 'Districts');
+
+            // Sheet 3: Departments
+            if (globalDepts.length) {
+                const dHeaders = ['Department', 'Label', 'Total', 'Resolved', 'In Progress', 'Pending', 'Efficiency (%)'];
+                const dRows = globalDepts.map(d => [d.key, d.label, d.total, d.solved, d.inProgress, d.pending, d.efficiencyRate]);
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([dHeaders, ...dRows]), 'Departments');
+            }
+
+            // Sheet 4: Monthly Trend
+            if (globalMonthly) {
+                const mHeaders = ['Month', 'Total Reports', 'Resolved', 'Pending'];
+                const mRows = globalMonthly.months.map((m, i) => [m, globalMonthly.totalCounts[i], globalMonthly.resolvedCounts[i], globalMonthly.pendingCounts[i]]);
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([mHeaders, ...mRows]), 'Monthly Trends');
+            }
+
+            const filename = `MakkalSevi_CM_Report_${selected === 'all' ? 'AllDistricts' : selected}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            XLSX.writeFile(wb, filename);
+            toast.success('Downloaded', `Report saved as ${filename}`);
+        });
+
+        // ═══════════════════════════════════════════
+        // INITIALISE ALL DATA
+        // ═══════════════════════════════════════════
+        async function init() {
+            await Promise.all([
+                loadOverview(),
+                loadDistricts(),
+                loadDepartments(),
+                loadMonthly(),
+            ]);
+        }
+
+        init();
+    </script>
+</body>
+</html>

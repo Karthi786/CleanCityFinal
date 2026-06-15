@@ -115,6 +115,10 @@ export const usersAPI = {
     delete: (id) => apiFetch(`/users/${id}`, { method: 'DELETE' }),
 
     getStats: () => apiFetch('/users/stats'),
+
+    citizenStats: () => apiFetch('/users/citizen-stats'),
+
+    districtAuthorities: () => apiFetch('/users/district-authorities'),
 };
 
 /* ── Reviews Endpoints ── */
@@ -192,7 +196,9 @@ export const leaderboardAPI = {
     getTop100: (params = {}) => {
         const q = new URLSearchParams(params).toString();
         return apiFetch(`/leaderboard${q ? '?' + q : ''}`);
-    }
+    },
+
+    weekly: () => apiFetch('/leaderboard/weekly'),
 };
 
 /* ── Notifications Endpoints ── */

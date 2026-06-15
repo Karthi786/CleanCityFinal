@@ -53,7 +53,6 @@ const translations = {
         'cat_eb': 'Electricity Board',
         'cat_pw': 'Public Works',
         'cat_police': 'Police',
-        'cat_fire': 'Fire Station',
 
         // Dashboards
         'col_panel': 'Collector Panel',
@@ -172,7 +171,6 @@ const translations = {
         'cat_eb': 'மின்சார வாரியம்',
         'cat_pw': 'பொது பணித் துறை',
         'cat_police': 'காவல் துறை',
-        'cat_fire': 'தீயணைப்பு நிலையம்',
 
         // Dashboards
         'col_panel': 'ஆட்சியர் தளம்',

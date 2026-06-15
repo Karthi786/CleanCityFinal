@@ -326,7 +326,7 @@
         import { toast } from './js/toast.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
-        const ROLE_LABELS = { USER: 'Citizen', TAMILNADU_CORPORATION: 'Tamilnadu Corp.', TNEB: 'TNEB', POLICE: 'Police', FIRE_STATION: 'Fire Station', COLLECTOR: 'Collector', ADMIN: 'Admin' };
+        const ROLE_LABELS = { USER: 'Citizen', TAMILNADU_CORPORATION: 'Tamilnadu Corp.', TNEB: 'TNEB', POLICE: 'Police', COLLECTOR: 'Collector', ADMIN: 'Admin' };
 
         const user = guardPage(['ADMIN']);
         if (!user) throw new Error('Unauthorized');

@@ -388,10 +388,16 @@ router.post('/:id/volunteers/:volunteerId/confirm', verifyToken, requireApproved
             .eq('user_id', volunteerId);
         if (regUpdateErr) throw regUpdateErr;
 
+        // Compute current ISO week
+        const now = new Date();
+        const jan1 = new Date(now.getFullYear(), 0, 1);
+        const weekNumber = Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+        const currentWeek = `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
+
         // ── Volunteer: +3 points ──────────────────────────────────────────────────
         const { data: volunteerRow } = await supabaseAdmin
             .from('users')
-            .select('total_points, campaigns_participated, campaign_participated_points')
+            .select('total_points, campaigns_participated, campaign_participated_points, weekly_points, weekly_points_week')
             .eq('id', volunteerId)
             .single();
 
@@ -400,10 +406,16 @@ router.post('/:id/volunteers/:volunteerId/confirm', verifyToken, requireApproved
             const newParticipatedPts = (volunteerRow.campaign_participated_points || 0) + 3;
             const newTotal = (volunteerRow.total_points || 0) + 3;
 
+            // Weekly points
+            const volExistingWeek = volunteerRow.weekly_points_week;
+            const volCurrentWeeklyPoints = volExistingWeek === currentWeek ? (volunteerRow.weekly_points || 0) : 0;
+
             await supabaseAdmin.from('users').update({
                 campaigns_participated: newParticipated,
                 campaign_participated_points: newParticipatedPts,
                 total_points: newTotal,
+                weekly_points: volCurrentWeeklyPoints + 3,
+                weekly_points_week: currentWeek,
             }).eq('id', volunteerId);
 
             console.log(JSON.stringify({
@@ -412,6 +424,8 @@ router.post('/:id/volunteers/:volunteerId/confirm', verifyToken, requireApproved
                 campaign_id: id,
                 points_awarded: 3,
                 new_total_points: newTotal,
+                weekly_points: volCurrentWeeklyPoints + 3,
+                week: currentWeek,
                 timestamp: new Date().toISOString(),
             }));
         }
@@ -435,7 +449,7 @@ router.post('/:id/volunteers/:volunteerId/confirm', verifyToken, requireApproved
                 // Only award points if our optimistic lock succeeded
                 const { data: creatorRow } = await supabaseAdmin
                     .from('users')
-                    .select('total_points, campaigns_organized, campaign_created_points')
+                    .select('total_points, campaigns_organized, campaign_created_points, weekly_points, weekly_points_week')
                     .eq('id', campRow.created_by_id)
                     .single();
 
@@ -444,10 +458,16 @@ router.post('/:id/volunteers/:volunteerId/confirm', verifyToken, requireApproved
                     const newCreatedPts = (creatorRow.campaign_created_points || 0) + 5;
                     const newCreatorTotal = (creatorRow.total_points || 0) + 5;
 
+                    // Weekly points for creator
+                    const creatorExistingWeek = creatorRow.weekly_points_week;
+                    const creatorCurrentWeeklyPoints = creatorExistingWeek === currentWeek ? (creatorRow.weekly_points || 0) : 0;
+
                     await supabaseAdmin.from('users').update({
                         campaigns_organized: newOrganized,
                         campaign_created_points: newCreatedPts,
                         total_points: newCreatorTotal,
+                        weekly_points: creatorCurrentWeeklyPoints + 5,
+                        weekly_points_week: currentWeek,
                     }).eq('id', campRow.created_by_id);
 
                     console.log(JSON.stringify({
@@ -456,11 +476,14 @@ router.post('/:id/volunteers/:volunteerId/confirm', verifyToken, requireApproved
                         campaign_id: id,
                         points_awarded: 5,
                         new_total_points: newCreatorTotal,
+                        weekly_points: creatorCurrentWeeklyPoints + 5,
+                        week: currentWeek,
                         timestamp: new Date().toISOString(),
                     }));
                 }
             }
         }
+
 
         return res.json({ message: 'Volunteer confirmed and points awarded.' });
     } catch (err) {

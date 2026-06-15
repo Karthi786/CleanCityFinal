@@ -12,7 +12,6 @@ const CATEGORY_DEPT_MAP = {
     'Roads': 'TAMILNADU_CORPORATION',
     'Electricity': 'TNEB',
     'Law & Order': 'POLICE',
-    'Fire': 'FIRE_STATION',
 };
 
 /**
@@ -37,11 +36,13 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
             query = supabaseAdmin
                 .from('issues')
                 .select('*, reporter:users!issues_reported_by_id_fkey(district, constituency)')
+                .neq('department', 'FIRE_STATION')
                 .order('created_at', { ascending: false });
         } else {
             query = supabaseAdmin
                 .from('issues')
                 .select('*')
+                .neq('department', 'FIRE_STATION')
                 .order('created_at', { ascending: false });
         }
 
@@ -211,7 +212,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
  * Update issue status (Department / Collector / Admin)
  */
 router.put('/:id/status', verifyToken, requireApproved,
-    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'FIRE_STATION', 'COLLECTOR', 'ADMIN'), // Explicitly excluding MLA
+    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN'), // Explicitly excluding MLA
     async (req, res) => {
         const { id } = req.params;
         const { status, completionImageUrl } = req.body;
@@ -246,8 +247,14 @@ router.put('/:id/status', verifyToken, requireApproved,
             if (status === 'COMPLETED' && issueToUpdate && !issueToUpdate.points_awarded && issueToUpdate.reported_by_id) {
                 console.log(`[Points] Awarding 1pt to reporter ${issueToUpdate.reported_by_id}`);
                 updateData.points_awarded = true;
+
+                // Compute current ISO week string e.g. "2026-W24"
+                const now = new Date();
+                const jan1 = new Date(now.getFullYear(), 0, 1);
+                const weekNumber = Math.ceil(((now - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+                const currentWeek = `${now.getFullYear()}-W${String(weekNumber).padStart(2, '0')}`;
                 
-                const { data: userRow, error: uErr } = await supabaseAdmin.from('users').select('total_points, reports_resolved, reports_points').eq('id', issueToUpdate.reported_by_id).single();
+                const { data: userRow, error: uErr } = await supabaseAdmin.from('users').select('total_points, reports_resolved, reports_points, weekly_points, weekly_points_week').eq('id', issueToUpdate.reported_by_id).single();
                 
                 if (uErr) {
                     console.error('[Points] Failed to fetch user row:', uErr);
@@ -262,6 +269,16 @@ router.put('/:id/status', verifyToken, requireApproved,
                     
                     // Force total_points to be the sum of latest known + 1
                     userUpdatePayload.total_points = (userRow.total_points || 0) + 1;
+
+                    // Update weekly points — reset if it's a new week
+                    try {
+                        const existingWeek = userRow.weekly_points_week;
+                        const currentWeeklyPoints = existingWeek === currentWeek ? (userRow.weekly_points || 0) : 0;
+                        userUpdatePayload.weekly_points = currentWeeklyPoints + 1;
+                        userUpdatePayload.weekly_points_week = currentWeek;
+                    } catch (_) {
+                        // weekly_points columns may not exist yet — ignore gracefully
+                    }
                     
                     const { error: updErr } = await supabaseAdmin.from('users').update(userUpdatePayload).eq('id', issueToUpdate.reported_by_id);
                     if (updErr) console.error('[Points] User update error:', updErr);
@@ -272,11 +289,14 @@ router.put('/:id/status', verifyToken, requireApproved,
                             issue_id: id,
                             points_awarded: 1,
                             new_total_points: userUpdatePayload.total_points,
+                            weekly_points: userUpdatePayload.weekly_points,
+                            week: currentWeek,
                             timestamp: new Date().toISOString(),
                         }));
                     }
                 }
             }
+
 
             const { data, error } = await supabaseAdmin
                 .from('issues')

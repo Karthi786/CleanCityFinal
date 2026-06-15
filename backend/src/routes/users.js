@@ -9,7 +9,6 @@ const ROLE_LABELS = {
     TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
     TNEB: 'TNEB (Electrical)',
     POLICE: 'Tamilnadu Police',
-    FIRE_STATION: 'Fire Station',
     COLLECTOR: 'District Collector',
     ADMIN: 'System Administrator',
     MLA: 'Member of Legislative Assembly',
@@ -234,4 +233,155 @@ router.delete('/:id', verifyToken, requireApproved, requireRole('ADMIN'), async 
     }
 });
 
+/**
+ * GET /api/users/citizen-stats
+ * Returns district/constituency problem counts for the logged-in citizen.
+ * Used by the new citizen dashboard stat cards.
+ */
+router.get('/citizen-stats', verifyToken, requireApproved, requireRole('USER'), async (req, res) => {
+    try {
+        const { district, constituency } = req.user;
+
+        if (!district && !constituency) {
+            return res.json({
+                districtTotal: 0,
+                constituencyTotal: 0,
+                districtSolved: 0,
+                constituencySolved: 0,
+            });
+        }
+
+        // Fetch all issues joined with reporter district/constituency
+        const { data: allIssues, error } = await supabaseAdmin
+            .from('issues')
+            .select('status, reporter:users!issues_reported_by_id_fkey(district, constituency)');
+
+        if (error) throw error;
+
+        const issues = allIssues || [];
+
+        // Filter by district
+        const districtIssues = district
+            ? issues.filter(i => i.reporter && i.reporter.district === district)
+            : [];
+
+        // Filter by constituency
+        const constituencyIssues = constituency
+            ? issues.filter(i => i.reporter && i.reporter.constituency === constituency)
+            : [];
+
+        return res.json({
+            districtTotal: districtIssues.length,
+            constituencyTotal: constituencyIssues.length,
+            districtSolved: districtIssues.filter(i => i.status === 'COMPLETED').length,
+            constituencySolved: constituencyIssues.filter(i => i.status === 'COMPLETED').length,
+        });
+    } catch (err) {
+        console.error('citizen-stats error:', err);
+        return res.status(500).json({ error: 'Failed to fetch citizen stats.' });
+    }
+});
+
+/**
+ * GET /api/users/district-authorities
+ * Returns authority users (non-USER, non-ADMIN roles) in the citizen's district,
+ * along with their activity stats from the issues table.
+ */
+router.get('/district-authorities', verifyToken, requireApproved, requireRole('USER'), async (req, res) => {
+    try {
+        const { district, constituency } = req.user;
+
+        if (!district) {
+            return res.json({ authorities: [] });
+        }
+
+        const AUTHORITY_ROLES = ['COLLECTOR', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'MLA'];
+        const ROLE_LABELS_LOCAL = {
+            COLLECTOR: 'District Collector',
+            TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
+            TNEB: 'TNEB (Electrical)',
+            POLICE: 'Tamilnadu Police',
+            MLA: 'Member of Legislative Assembly',
+        };
+        const DEPT_LABELS_LOCAL = {
+            COLLECTOR: 'District Administration',
+            TAMILNADU_CORPORATION: 'Municipal Corporation',
+            TNEB: 'Tamil Nadu Electricity Board',
+            POLICE: 'Law Enforcement',
+            MLA: 'Legislative Assembly',
+        };
+
+        // Fetch all authority users in this district
+        let query = supabaseAdmin
+            .from('users')
+            .select('id, name, role, department, district, constituency, phone_number, email, created_at, verification_status')
+            .eq('district', district)
+            .eq('verification_status', 'approved')
+            .in('role', AUTHORITY_ROLES);
+
+        const { data: authUsers, error: authErr } = await query;
+        if (authErr) throw authErr;
+
+        if (!authUsers || authUsers.length === 0) {
+            return res.json({ authorities: [] });
+        }
+
+        // Fetch all issues in district to compute per-authority stats
+        const { data: allIssues, error: issueErr } = await supabaseAdmin
+            .from('issues')
+            .select('status, department, updated_at, reporter:users!issues_reported_by_id_fkey(district)')
+            .order('updated_at', { ascending: false });
+
+        if (issueErr) throw issueErr;
+
+        const districtIssues = (allIssues || []).filter(i => i.reporter && i.reporter.district === district);
+
+        // Build authority stats by department (role maps to department key)
+        const authorities = authUsers.map(auth => {
+            // Issues assigned to this authority's department
+            const deptIssues = auth.role !== 'COLLECTOR' && auth.role !== 'MLA'
+                ? districtIssues.filter(i => i.department === auth.role)
+                : districtIssues; // COLLECTOR and MLA oversee all
+
+            const totalAssigned = deptIssues.length;
+            const solved = deptIssues.filter(i => i.status === 'COMPLETED').length;
+            const pending = deptIssues.filter(i => i.status === 'PENDING').length;
+            const inProgress = deptIssues.filter(i => i.status === 'IN_PROGRESS').length;
+
+            // Last activity: most recently updated issue
+            const lastIssue = deptIssues.find(i => i.status === 'COMPLETED' || i.status === 'IN_PROGRESS');
+            const lastActivity = lastIssue ? lastIssue.updated_at : null;
+
+            // Performance: resolution rate as percentage
+            const responseRate = totalAssigned > 0 ? Math.round((solved / totalAssigned) * 100) : 0;
+
+            return {
+                id: auth.id,
+                name: auth.name,
+                role: auth.role,
+                designation: ROLE_LABELS_LOCAL[auth.role] || auth.role,
+                department: DEPT_LABELS_LOCAL[auth.role] || auth.department || '',
+                district: auth.district,
+                constituency: auth.constituency || null,
+                phone_number: auth.phone_number || null,
+                email: auth.email || null,
+                stats: {
+                    totalAssigned,
+                    solved,
+                    pending,
+                    inProgress,
+                    lastActivity,
+                    responseRate,
+                },
+            };
+        });
+
+        return res.json({ authorities });
+    } catch (err) {
+        console.error('district-authorities error:', err);
+        return res.status(500).json({ error: 'Failed to fetch district authorities.' });
+    }
+});
+
 module.exports = router;
+

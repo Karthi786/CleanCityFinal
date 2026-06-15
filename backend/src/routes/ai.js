@@ -26,7 +26,7 @@ Do not invent features that do not exist in the application.
 Application Knowledge Base:
 - Citizens can register and login.
 - Citizens can report issues with a title, description, category, and location.
-- Category to Department mapping: Waste/Water/Roads -> Tamilnadu Corporation, Electricity -> TNEB, Law & Order -> Police, Fire -> Fire Station.
+- Category to Department mapping: Waste/Water/Roads -> Tamilnadu Corporation, Electricity -> TNEB, Law & Order -> Police.
 - Citizens MUST upload an image when reporting an issue.
 - Images go through EXIF verification (checks for Date and Time taken) and potentially AI detection.
 - Users can track the status of their complaints (PENDING, IN_PROGRESS, COMPLETED).

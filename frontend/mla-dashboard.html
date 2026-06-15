@@ -916,7 +916,6 @@
                             <option value="TAMILNADU_CORPORATION">Tamilnadu Corporation</option>
                             <option value="TNEB">TNEB</option>
                             <option value="POLICE">Police</option>
-                            <option value="FIRE_STATION">Fire Station</option>
                         </select>
                         <button id="download-excel-btn" class="btn btn-primary btn-sm"
                             style="display:flex;align-items:center;gap:6px; border-radius:99px;" data-i18n="btn_download">
@@ -1443,7 +1442,7 @@
         let map = null;
         let heatLayer = null;
 
-        const DEPT_LABELS = { TAMILNADU_CORPORATION: 'Tamilnadu Corp.', TNEB: 'TNEB', POLICE: 'Police', FIRE_STATION: 'Fire Station' };
+        const DEPT_LABELS = { TAMILNADU_CORPORATION: 'Tamilnadu Corp.', TNEB: 'TNEB', POLICE: 'Police' };
 
         function renderIssueRow(issue) {
             const statusLabelKey = issue.status === 'COMPLETED' ? 'status_completed' :
@@ -1452,7 +1451,7 @@
             return `
         <div class="issue-row animate-in">
           <div style="width:48px;height:48px;border-radius:14px;background:rgba(15,23,42,0.04);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;">
-            ${issue.category === 'Waste' ? '🗑️' : issue.category === 'Water' ? '💧' : issue.category === 'Electricity' ? '⚡' : issue.category === 'Roads' ? '🛣️' : issue.category === 'Fire' ? '🔥' : '👮'}
+            ${issue.category === 'Waste' ? '🗑️' : issue.category === 'Water' ? '💧' : issue.category === 'Electricity' ? '⚡' : issue.category === 'Roads' ? '🛣️' : '👮'}
           </div>
           <div class="issue-row-info">
             <div class="issue-row-title">${issue.title}</div>

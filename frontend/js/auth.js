@@ -34,10 +34,10 @@ export const ROLE_DASHBOARDS = {
     TAMILNADU_CORPORATION: 'department-dashboard.html',
     TNEB: 'department-dashboard.html',
     POLICE: 'department-dashboard.html',
-    FIRE_STATION: 'department-dashboard.html',
     COLLECTOR: 'collector-dashboard.html',
     ADMIN: 'admin-dashboard.html',
     MLA: 'mla-dashboard.html',
+    CM: 'cm-dashboard.html',
 };
 
 export const ROLE_LABELS = {
@@ -45,10 +45,10 @@ export const ROLE_LABELS = {
     TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
     TNEB: 'TNEB (Electrical)',
     POLICE: 'Tamilnadu Police',
-    FIRE_STATION: 'Fire Station',
     COLLECTOR: 'District Collector',
     ADMIN: 'System Administrator',
     MLA: 'Member of Legislative Assembly',
+    CM: 'Chief Minister',
 };
 
 /* ── Get dashboard path for a role ── */

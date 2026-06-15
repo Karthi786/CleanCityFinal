@@ -548,7 +548,7 @@
                     <ul class="nav-links">
                         <li><a class="nav-link-item active" href="#" id="nav-dashboard-link">Dashboard</a></li>
                         <li><a class="nav-link-item" href="#" id="nav-campaigns-link">Campaigns</a></li>
-                        <li><a class="nav-link-item" href="#" id="nav-leaderboard-link">Leaderboard</a></li>
+                        <li><a class="nav-link-item" href="#" id="nav-leaderboard-link">Authorities</a></li>
                     </ul>
 
                     <div class="nav-actions">
@@ -615,7 +615,7 @@
                                 <span class="drawer-icon">📣</span> Campaigns
                             </a>
                             <a href="#" class="mobile-drawer-link" id="drawer-leaderboard-link">
-                                <span class="drawer-icon">🏆</span> Leaderboard
+                                <span class="drawer-icon">🏛️</span> Authorities
                             </a>
                         </div>
                         <div class="mobile-drawer-footer">
@@ -645,34 +645,46 @@
                     </button>
                 </div>
 
-                <!-- Stats Grid -->
-                <div class="grid grid-4 animate-in stagger-2" style="margin-bottom: 32px;">
+                <!-- Stats Grid (5 cards: district total, constituency total, district solved, constituency solved, points) -->
+                <div class="grid animate-in stagger-2" id="citizen-stats-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:20px; margin-bottom: 32px;">
                     <div class="stat-card">
                         <div>
-                            <div class="stat-label">Reports Submitted</div>
-                            <div class="stat-value" id="stat-reports-submitted">0</div>
-                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Resolved: <strong id="stat-reports-resolved" style="color:var(--success);">0</strong></div>
+                            <div class="stat-label">Problems in District</div>
+                            <div class="stat-value" id="stat-district-total">—</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;" id="stat-district-name">Loading...</div>
                         </div>
                         <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div>
-                            <div class="stat-label">Campaigns Participated</div>
-                            <div class="stat-value" id="stat-campaigns-participated">0</div>
+                            <div class="stat-label">Problems in Constituency</div>
+                            <div class="stat-value" id="stat-constituency-total">—</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;" id="stat-constituency-name">Loading...</div>
                         </div>
                         <div class="stat-icon purple" style="background: rgba(124, 58, 237, 0.08); color: #7c3aed;">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                         </div>
                     </div>
-                    <div class="stat-card">
+                    <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.2);">
                         <div>
-                            <div class="stat-label">Campaigns Created</div>
-                            <div class="stat-value" id="stat-campaigns-organized">0</div>
+                            <div class="stat-label" style="color:var(--success);">Solved in District</div>
+                            <div class="stat-value" id="stat-district-solved" style="color:var(--success);">—</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Completed issues</div>
                         </div>
-                        <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.2);">
+                        <div>
+                            <div class="stat-label" style="color:var(--success);">Solved in Constituency</div>
+                            <div class="stat-value" id="stat-constituency-solved" style="color:var(--success);">—</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-top:6px;">Completed issues</div>
+                        </div>
+                        <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
                         </div>
                     </div>
                     <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.25);">
@@ -680,8 +692,8 @@
                             <div class="stat-label" style="color:var(--success);">Total Points</div>
                             <div class="stat-value" id="stat-total-points" style="color:var(--success);">0</div>
                         </div>
-                        <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        <div class="stat-icon" style="background: var(--warning-light); color: var(--warning);">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         </div>
                     </div>
                 </div>
@@ -736,7 +748,7 @@
                         </div>
                     </div>
 
-                    <!-- Right: Trending Panel -->
+                    <!-- Right: Trending Panel + Weekly Leaderboard -->
                     <div>
                         <div class="ms-panel">
                             <div class="ms-header">
@@ -750,6 +762,20 @@
                             <div class="ms-sub" data-i18n="lbl_city_wide_desc">Issues receiving the most attention right now.</div>
                             <div id="trending-list">
                                 <!-- Dynamically populated -->
+                            </div>
+                        </div>
+
+                        <!-- Weekly Leaderboard Panel -->
+                        <div class="ms-panel" style="margin-top: 24px;">
+                            <div class="ms-header">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="8" r="6"></circle><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"></path>
+                                </svg>
+                                <span>Top Citizens This Week</span>
+                            </div>
+                            <div class="ms-sub" id="weekly-week-label">Loading this week's rankings...</div>
+                            <div id="weekly-leaderboard-list">
+                                <div style="color:var(--text-light); font-size: 0.85rem;">Loading...</div>
                             </div>
                         </div>
                     </div>
@@ -808,31 +834,21 @@
                 <div id="campaigns-grid" class="vm-campaign-grid"></div>
             </div>
 
-            <!-- ── Leaderboard View ── -->
+            <!-- ── District Authorities View (replaces old Leaderboard page) ── -->
             <div class="dash-content animate-in" id="leaderboard-section" style="display:none;">
                 <div class="welcome-header animate-in stagger-1">
                     <div>
-                        <h1 class="welcome-title">🏆 Top Contributors</h1>
-                        <p class="welcome-sub">The heroes making our city a better place.</p>
+                        <h1 class="welcome-title">🏛️ District Authorities</h1>
+                        <p class="welcome-sub" id="authorities-sub">Loading authorities for your district...</p>
                     </div>
                 </div>
 
-                <div class="table-wrap">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Citizen Name</th>
-                                <th>Total Points</th>
-                                <th>Issues Resolved</th>
-                                <th>Campaigns Joined</th>
-                                <th>Campaigns Run</th>
-                            </tr>
-                        </thead>
-                        <tbody id="leaderboard-tbody">
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
+                <div id="authorities-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap:24px;">
+                    <!-- Dynamically populated -->
+                    <div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--text-light);">
+                        <div class="spinner" style="margin:0 auto 16px;"></div>
+                        Loading authorities...
+                    </div>
                 </div>
             </div>
         </main>
@@ -876,7 +892,6 @@
                                     <option value="Electricity" data-i18n="cat_eb">⚡ Electricity</option>
                                     <option value="Roads" data-i18n="cat_pw">🛣️ Roads</option>
                                     <option value="Law &amp; Order" data-i18n="cat_police">👮 Law &amp; Order</option>
-                                    <option value="Fire" data-i18n="cat_fire">🔥 Fire</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1166,10 +1181,12 @@
                 if (sessionStorage.getItem('citizenDashboardView') === 'campaigns') loadCampaigns();
                 if (sessionStorage.getItem('citizenDashboardView') === 'leaderboard') loadLeaderboard();
                 loadIssues();
+                loadWeeklyLeaderboard(); // refresh with user context
             } catch (e) {
                 console.error('Failed to load profile photo:', e);
                 document.getElementById('nav-profile-fallback').textContent = firstName.charAt(0).toUpperCase();
             }
+
         })();
 
         document.getElementById('logout-btn').addEventListener('click', logout);
@@ -1583,23 +1600,37 @@
                 document.getElementById('district-feed-info').textContent = `Showing issues reported in ${userDistrict}`;
                 document.getElementById('constituency-feed-info').textContent = `Showing issues reported in ${userConstituency}`;
 
-                // Fetch latest user points
+                // Fetch latest user points + district/constituency stats
                 try {
-                    const userData = await usersAPI.me();
+                    const [userData, citizenStats] = await Promise.all([
+                        usersAPI.me(),
+                        usersAPI.citizenStats().catch(() => null),
+                    ]);
+
                     if (userData && userData.user) {
                         const u = userData.user;
                         document.getElementById('stat-total-points').textContent = u.total_points || 0;
-                        document.getElementById('stat-reports-submitted').textContent = Math.max(u.reports_count || 0, myIssues.length || 0);
-                        document.getElementById('stat-reports-resolved').textContent = u.reports_resolved || 0;
-                        document.getElementById('stat-campaigns-participated').textContent = u.campaigns_participated || 0;
-                        document.getElementById('stat-campaigns-organized').textContent = u.campaigns_organized || 0;
                         if (document.getElementById('welcome-name')) {
                             document.getElementById('welcome-name').textContent = u.name || user.name;
                         }
                         Object.assign(user, u);
                     }
+
+                    if (citizenStats) {
+                        document.getElementById('stat-district-total').textContent = citizenStats.districtTotal ?? '—';
+                        document.getElementById('stat-constituency-total').textContent = citizenStats.constituencyTotal ?? '—';
+                        document.getElementById('stat-district-solved').textContent = citizenStats.districtSolved ?? '—';
+                        document.getElementById('stat-constituency-solved').textContent = citizenStats.constituencySolved ?? '—';
+                    }
+
+                    // Update district/constituency labels
+                    const dName = document.getElementById('stat-district-name');
+                    const cName = document.getElementById('stat-constituency-name');
+                    if (dName) dName.textContent = userDistrict || 'Not set';
+                    if (cName) cName.textContent = userConstituency || 'Not set';
+
                 } catch (e) {
-                    console.error('Failed to refresh user points', e);
+                    console.error('Failed to refresh user stats', e);
                 }
 
                 document.getElementById('my-count').textContent = myIssues.length;
@@ -2302,54 +2333,183 @@
             document.body.removeChild(link);
         }
 
-        // ─── Leaderboard ───
+        // ─── District Authorities (replaces old Leaderboard page) ───
         async function loadLeaderboard() {
-            if (!userDistrict) return;
-            const tbody = document.getElementById('leaderboard-tbody');
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;">Loading leaderboard...</td></tr>';
+            // Alias: now loads district authorities page
+            await loadDistrictAuthorities();
+        }
+
+        async function loadDistrictAuthorities() {
+            const grid = document.getElementById('authorities-grid');
+            const subEl = document.getElementById('authorities-sub');
+
+            if (!userDistrict) {
+                if (subEl) subEl.textContent = 'Please update your district in your profile to see local authorities.';
+                if (grid) grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--text-light);">No district set in your profile.</div>`;
+                return;
+            }
+
+            if (subEl) subEl.textContent = `Authorities responsible for ${userDistrict} district`;
+
+            if (grid) grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:var(--text-light);"><div class="spinner" style="margin:0 auto 16px;"></div>Loading authorities...</div>`;
 
             try {
-                const data = await leaderboardAPI.getTop100({ district: userDistrict });
-                console.log('Leaderboard Data Received:', data);
-                const users = (data.leaderboard || []).slice(0, 10);
+                const data = await usersAPI.districtAuthorities();
+                const authorities = data.authorities || [];
 
-                if (users.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text-light);">No ranking data available yet.</td></tr>';
+                if (authorities.length === 0) {
+                    grid.innerHTML = `<div style="grid-column:1/-1; padding:60px; text-align:center; color:var(--text-light); background:var(--bg-card); border-radius:24px; border:1.5px dashed var(--border);">
+                        <div style="font-size:2rem; margin-bottom:12px;">🏛️</div>
+                        <div style="font-family:var(--font-display); font-weight:700; margin-bottom:8px;">No Authorities Found</div>
+                        <div style="font-size:0.88rem;">No registered authority users found for ${userDistrict} district yet.</div>
+                    </div>`;
                     return;
                 }
 
-                tbody.innerHTML = users.map((u, idx) => {
-                    let rankDisplay = idx + 1;
-                    if (idx === 0) rankDisplay = '🥇 1st';
-                    if (idx === 1) rankDisplay = '🥈 2nd';
-                    if (idx === 2) rankDisplay = '🥉 3rd';
+                const ROLE_ICONS = {
+                    COLLECTOR: '🏛️',
+                    TAMILNADU_CORPORATION: '🏙️',
+                    TNEB: '⚡',
+                    POLICE: '👮',
+                    MLA: '🗳️',
+                };
 
-                    const isMe = u.id === user.id;
-                    const rowBg = isMe ? 'background:#fefce8;' : '';
+                grid.innerHTML = authorities.map(auth => {
+                    const icon = ROLE_ICONS[auth.role] || '👤';
+                    const s = auth.stats;
+                    const resolveRate = s.responseRate;
+                    const rateColor = resolveRate >= 70 ? 'var(--success)' : resolveRate >= 40 ? 'var(--warning)' : 'var(--danger)';
+                    const lastAct = s.lastActivity
+                        ? new Date(s.lastActivity).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+                        : 'No activity yet';
+
+                    const contactHtml = [
+                        auth.phone_number ? `<div style="display:flex;align-items:center;gap:6px;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13.19 19.79 19.79 0 0 1 1.6 4.6 2 2 0 0 1 3.59 2.43h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.77a16 16 0 0 0 6.29 6.29l.94-.94a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"></path></svg> ${auth.phone_number}</div>` : '',
+                        auth.email ? `<div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;word-break:break-all;"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg> ${auth.email}</div>` : '',
+                    ].filter(Boolean).join('');
 
                     return `
-                    <tr style="border-bottom:1px solid #f1f5f9;${rowBg}">
-                        <td style="padding:16px 12px;font-weight:700;">${rankDisplay}</td>
-                        <td style="padding:16px 12px;font-weight:600;">
-                            ${isMe ? `<span style="color:var(--primary);">${u.name} (You)</span>` : u.name}
-                        </td>
-                        <td style="padding:16px 12px;font-weight:800;color:var(--primary);font-size:1.1rem;">${u.total_points || 0}</td>
-                        <td style="padding:16px 12px;">
-                            <span title="${u.reports_resolved || 0} resolved × 1pt">${u.reports_resolved || 0} <small style="color:var(--text-light);">(${u.reports_points || 0}pt)</small></span>
-                        </td>
-                        <td style="padding:16px 12px;">
-                            <span title="${u.campaigns_participated || 0} joined × 3pt">${u.campaigns_participated || 0} <small style="color:var(--text-light);">(${u.campaign_participated_points || 0}pt)</small></span>
-                        </td>
-                        <td style="padding:16px 12px;">
-                            <span title="${u.campaigns_organized || 0} run × 5pt">${u.campaigns_organized || 0} <small style="color:var(--text-light);">(${u.campaign_created_points || 0}pt)</small></span>
-                        </td>
-                    </tr>
-                `}).join('');
+                    <div style="background:var(--bg-card);border:1px solid rgba(255,255,255,0.45);border-radius:var(--radius-lg);padding:24px;box-shadow:var(--shadow-md);display:flex;flex-direction:column;gap:16px;transition:transform 0.25s,box-shadow 0.25s;" onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'" onmouseout="this.style.transform='';this.style.boxShadow='var(--shadow-md)'">
+
+                        <!-- Header -->
+                        <div style="display:flex;align-items:flex-start;gap:14px;">
+                            <div style="width:52px;height:52px;border-radius:16px;background:var(--primary-light);color:var(--primary);display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;">${icon}</div>
+                            <div style="flex:1;">
+                                <div style="font-family:var(--font-display);font-weight:800;font-size:1.05rem;color:var(--text);margin-bottom:2px;">${auth.name}</div>
+                                <div style="font-size:0.82rem;color:var(--primary);font-weight:600;">${auth.designation}</div>
+                                <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">${auth.department}</div>
+                            </div>
+                        </div>
+
+                        <!-- Location -->
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+                            <span style="display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--text-muted);background:rgba(15,23,42,0.04);padding:4px 10px;border-radius:99px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                ${auth.district}
+                            </span>
+                            ${auth.constituency ? `<span style="display:flex;align-items:center;gap:4px;font-size:0.8rem;color:var(--text-muted);background:rgba(15,23,42,0.04);padding:4px 10px;border-radius:99px;">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                                ${auth.constituency}
+                            </span>` : ''}
+                        </div>
+
+                        <!-- Activity Stats -->
+                        <div style="background:rgba(15,23,42,0.03);border-radius:16px;padding:16px;display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <div style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Assigned</div>
+                                <div style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--text);">${s.totalAssigned}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Solved</div>
+                                <div style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--success);">${s.solved}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem;font-weight:700;color:var(--warning);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">Pending</div>
+                                <div style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--warning);">${s.pending}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.72rem;font-weight:700;color:#2563eb;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:4px;">In Progress</div>
+                                <div style="font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:#2563eb;">${s.inProgress}</div>
+                            </div>
+                        </div>
+
+                        <!-- Performance bar -->
+                        <div>
+                            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                                <span style="font-size:0.78rem;color:var(--text-muted);font-weight:600;">Response Performance</span>
+                                <span style="font-size:0.78rem;font-weight:800;color:${rateColor};">${resolveRate}%</span>
+                            </div>
+                            <div style="height:6px;background:rgba(15,23,42,0.08);border-radius:99px;overflow:hidden;">
+                                <div style="height:100%;width:${resolveRate}%;background:${rateColor};border-radius:99px;transition:width 0.8s ease;"></div>
+                            </div>
+                        </div>
+
+                        <!-- Last Activity -->
+                        <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;color:var(--text-muted);">
+                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            Last Activity: <strong>${lastAct}</strong>
+                        </div>
+
+                        <!-- Contact Details -->
+                        ${contactHtml ? `<div style="padding-top:12px;border-top:1px solid var(--border);font-size:0.82rem;color:var(--text-muted);display:flex;flex-direction:column;gap:6px;">${contactHtml}</div>` : ''}
+                    </div>`;
+                }).join('');
+
             } catch (err) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:24px;color:#ef4444;">Failed to load leaderboard.</td></tr>';
-                toast.error('Leaderboard Fetch Failed', err.message);
+                console.error('District authorities error:', err);
+                if (grid) grid.innerHTML = `<div style="grid-column:1/-1; padding:40px; text-align:center; color:#ef4444;">Failed to load district authorities.</div>`;
             }
         }
+
+        // ─── Weekly Leaderboard ───
+        async function loadWeeklyLeaderboard() {
+            const el = document.getElementById('weekly-leaderboard-list');
+            const weekLabel = document.getElementById('weekly-week-label');
+            if (!el) return;
+
+            el.innerHTML = '<div style="color:var(--text-light); font-size: 0.85rem;">Loading...</div>';
+
+            try {
+                const data = await leaderboardAPI.weekly();
+                const top5 = data.weekly || [];
+                const week = data.week || '';
+
+                if (weekLabel) {
+                    // Format week label nicely e.g. "2026-W24" → "Week 24 of 2026"
+                    const parts = week.split('-W');
+                    weekLabel.textContent = parts.length === 2
+                        ? `Week ${parts[1]} of ${parts[0]}`
+                        : 'Current Week Rankings';
+                }
+
+                if (top5.length === 0) {
+                    el.innerHTML = '<div style="color:var(--text-light); font-size: 0.85rem; padding: 8px 0;">No activity this week yet. Be the first!</div>';
+                    return;
+                }
+
+                const rankEmojis = ['🥇', '🥈', '🥉', '4.', '5.'];
+
+                el.innerHTML = top5.map((entry, idx) => {
+                    const isMe = entry.id === user.id;
+                    const pts = entry.weekly_points || 0;
+                    return `
+                    <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:14px;margin-bottom:6px;background:${isMe ? 'rgba(176,0,0,0.05)' : 'rgba(15,23,42,0.03)'};border:1px solid ${isMe ? 'rgba(176,0,0,0.12)' : 'transparent'};">
+                        <div style="font-size:1rem;width:24px;text-align:center;flex-shrink:0;">${rankEmojis[idx] || (idx + 1) + '.'}</div>
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-family:var(--font-display);font-weight:700;font-size:0.88rem;color:${isMe ? 'var(--primary)' : 'var(--text)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                ${entry.name}${isMe ? ' (You)' : ''}
+                            </div>
+                        </div>
+                        <div style="font-family:var(--font-display);font-weight:800;font-size:0.9rem;color:var(--primary);flex-shrink:0;">${pts} pts</div>
+                    </div>`;
+                }).join('');
+
+            } catch (err) {
+                console.error('Weekly leaderboard error:', err);
+                el.innerHTML = '<div style="color:var(--text-light); font-size: 0.85rem;">Could not load weekly rankings.</div>';
+            }
+        }
+
 
         window.openIssueDetails = async (id) => {
             const issue = allIssues.find(i => i.id === id);
@@ -2490,6 +2650,12 @@
         if (initialCitizenView === 'campaigns') loadCampaigns();
         if (initialCitizenView === 'leaderboard') loadLeaderboard();
         loadIssues();
+
+        // Load weekly leaderboard on dashboard view (sidebar panel)
+        loadWeeklyLeaderboard();
+        // Refresh weekly leaderboard every 5 minutes
+        setInterval(loadWeeklyLeaderboard, 300000);
+
 
         // Ensure toast styles support the new format if needed
         const style = document.createElement('style');
