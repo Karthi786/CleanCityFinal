@@ -29,15 +29,15 @@
     <style>
         /* ══════════════════════════════════════════
            COMMISSIONER DASHBOARD THEME
-           Indigo/Purple accent — distinct from red (Collector)
+           Crimson Red — distinct from indigo (Comm.)
            and gold (CM)
         ══════════════════════════════════════════ */
         :root {
-            --comm-primary: #4F46E5;
-            --comm-primary-light: rgba(79, 70, 229, 0.08);
-            --comm-primary-glow: rgba(79, 70, 229, 0.2);
-            --comm-secondary: #7C3AED;
-            --comm-accent: #06B6D4;
+            --comm-primary: #B00000;
+            --comm-primary-light: rgba(176, 0, 0, 0.08);
+            --comm-primary-glow: rgba(176, 0, 0, 0.2);
+            --comm-secondary: #EF4444;
+            --comm-accent: #F59E0B;
             --sidebar-width: 0px;
         }
 
@@ -194,7 +194,7 @@
 
         /* ── Page Hero ── */
         .page-hero {
-            background: linear-gradient(135deg, var(--comm-primary) 0%, var(--comm-secondary) 60%, #5B21B6 100%);
+            background: linear-gradient(135deg, var(--comm-primary) 0%, var(--comm-secondary) 60%, #991b1b 100%);
             border-radius: 28px;
             padding: 36px 40px;
             margin-bottom: 32px;
@@ -222,7 +222,7 @@
             width: 160px;
             height: 160px;
             border-radius: 50%;
-            background: rgba(6, 182, 212, 0.12);
+            background: rgba(245, 158, 11, 0.12);
         }
 
         .hero-content { position: relative; z-index: 1; }
@@ -309,10 +309,10 @@
             border-radius: 20px 20px 0 0;
         }
 
-        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg, #4F46E5, #7C3AED); }
+        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg, #B00000, #EF4444); }
         .kpi-card.kpi-green::before  { background: linear-gradient(90deg, #10B981, #06B6D4); }
         .kpi-card.kpi-amber::before  { background: linear-gradient(90deg, #F59E0B, #EF4444); }
-        .kpi-card.kpi-blue::before   { background: linear-gradient(90deg, #2563EB, #4F46E5); }
+        .kpi-card.kpi-blue::before   { background: linear-gradient(90deg, #2563EB, #EF4444); }
         .kpi-card.kpi-purple::before { background: linear-gradient(90deg, #7C3AED, #06B6D4); }
         .kpi-card.kpi-cyan::before   { background: linear-gradient(90deg, #06B6D4, #3B82F6); }
 
@@ -441,7 +441,7 @@
             transition: background 0.15s;
         }
 
-        .issues-table tbody tr:hover td { background: rgba(79, 70, 229, 0.02); }
+        .issues-table tbody tr:hover td { background: rgba(176, 0, 0, 0.02); }
         .issues-table tbody tr:last-child td { border-bottom: none; }
 
         /* ── Status Badges ── */
@@ -670,7 +670,7 @@
             border-bottom: 1px solid rgba(15, 23, 42, 0.04);
         }
 
-        .constituency-table tbody tr:hover td { background: rgba(79, 70, 229, 0.02); }
+        .constituency-table tbody tr:hover td { background: rgba(176, 0, 0, 0.02); }
 
         .inline-bar {
             display: flex;
@@ -714,7 +714,7 @@
         .report-option-card:hover {
             border-color: var(--comm-primary);
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
+            box-shadow: 0 8px 24px rgba(176, 0, 0, 0.12);
         }
 
         .report-option-card.selected {
@@ -798,106 +798,6 @@
             border-radius: 50%;
         }
 
-        /* ── Mobile Drawer ── */
-        .mobile-nav-overlay {
-            position: fixed;
-            inset: 0;
-            z-index: 2000;
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.3s;
-        }
-
-        .mobile-nav-overlay.open { visibility: visible; opacity: 1; }
-
-        .mobile-nav-overlay::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: rgba(15, 23, 42, 0.4);
-            backdrop-filter: blur(6px);
-        }
-
-        .mobile-nav-drawer {
-            position: absolute;
-            top: 0;
-            right: 0;
-            bottom: 0;
-            width: 280px;
-            background: white;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
-            transform: translateX(100%);
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-            z-index: 1;
-        }
-
-        .mobile-nav-overlay.open .mobile-nav-drawer { transform: translateX(0); }
-
-        .mobile-drawer-header {
-            padding: 20px 20px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(15, 23, 42, 0.07);
-        }
-
-        .mobile-drawer-close {
-            background: none;
-            border: none;
-            font-size: 1.1rem;
-            cursor: pointer;
-            color: var(--text-muted, #64748b);
-            padding: 4px 8px;
-            border-radius: 8px;
-        }
-
-        .mobile-drawer-nav { padding: 16px 12px; flex: 1; }
-
-        .mobile-drawer-link {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 16px;
-            border-radius: 14px;
-            color: var(--text-muted, #64748b);
-            font-weight: 600;
-            font-size: 0.92rem;
-            cursor: pointer;
-            transition: all 0.2s;
-            border: none;
-            background: none;
-            width: 100%;
-            text-align: left;
-            font-family: var(--font-display, 'Outfit', sans-serif);
-        }
-
-        .mobile-drawer-link:hover,
-        .mobile-drawer-link.active {
-            background: var(--comm-primary-light);
-            color: var(--comm-primary);
-        }
-
-        .mobile-drawer-footer {
-            padding: 20px;
-            border-top: 1px solid rgba(15, 23, 42, 0.07);
-        }
-
-        /* ── Animations ── */
-        .animate-in {
-            animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        .stagger-1 { animation-delay: 0.06s; }
-        .stagger-2 { animation-delay: 0.12s; }
-        .stagger-3 { animation-delay: 0.18s; }
-
-        @keyframes fadeSlideUp {
-            from { opacity: 0; transform: translateY(18px); }
-            to   { opacity: 1; transform: translateY(0); }
-        }
-
         /* ── Responsive ── */
         @media(max-width: 900px) {
             .nav-links { display: none; }
@@ -918,7 +818,7 @@
             body { background: white !important; }
             .dash-main { padding-top: 0 !important; }
             .tab-pane { display: block !important; }
-            .page-hero { background: #4F46E5 !important; -webkit-print-color-adjust: exact; }
+            .page-hero { background: #B00000 !important; -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -1324,9 +1224,10 @@
                             📍 <span id="hm-points-count">0</span> locations plotted
                         </div>
                         <div class="heatmap-legend">
-                            <div class="legend-item"><div class="legend-dot" style="background:#ff4444;"></div> High Density</div>
-                            <div class="legend-item"><div class="legend-dot" style="background:#ff9900;"></div> Medium</div>
-                            <div class="legend-item"><div class="legend-dot" style="background:#22c55e;"></div> Low Density</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:red;"></div> High Density</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:orange;"></div> Medium</div>
+                            <div class="legend-item"><div class="legend-dot" style="background:yellow;border:1px solid #e2e8f0;"></div> Low Density</div>
+                            <div class="legend-item" style="border-left:1px solid #e2e8f0;padding-left:12px;">⬤ Pending = Full intensity &nbsp; ⬤ Resolved = Dim</div>
                         </div>
                     </div>
 
@@ -1336,7 +1237,7 @@
                     </div>
 
                     <!-- Heatmap info note -->
-                    <div style="margin-top:14px;padding:14px 18px;background:var(--comm-primary-light);border-radius:14px;border:1px solid rgba(79,70,229,0.15);font-size:0.84rem;color:var(--comm-primary);">
+                    <div style="margin-top:14px;padding:14px 18px;background:var(--comm-primary-light);border-radius:14px;border:1px solid rgba(176,0,0,0.15);font-size:0.84rem;color:var(--comm-primary);">
                         💡 <strong>Tip:</strong> Only issues with GPS coordinates will appear on the map. Issues without location data are excluded from the heatmap visualization.
                     </div>
                 </div>
@@ -1567,7 +1468,7 @@
         Chart.defaults.plugins.legend.labels.padding = 16;
 
         const P = {
-            indigo: '#4F46E5', indigoL: 'rgba(79,70,229,0.12)',
+            indigo: '#B00000', indigoL: 'rgba(176,0,0,0.12)',
             green:  '#10B981', greenL:  'rgba(16,185,129,0.12)',
             amber:  '#F59E0B', amberL:  'rgba(245,158,11,0.12)',
             blue:   '#2563EB', blueL:   'rgba(37,99,235,0.12)',
@@ -1783,7 +1684,7 @@
                         <div style="font-weight:700;font-size:0.88rem;margin-bottom:2px;">${issue.title || '—'}</div>
                         <div style="font-size:0.75rem;color:var(--text-muted,#64748b);">#${(issue.id || '').slice(0, 8)}…</div>
                     </td>
-                    <td><span style="background:rgba(79,70,229,0.08);color:#4F46E5;padding:2px 8px;border-radius:99px;font-size:0.75rem;font-weight:700;">${issue.category || '—'}</span></td>
+                    <td><span style="background:rgba(176,0,0,0.08);color:#B00000;padding:2px 8px;border-radius:99px;font-size:0.75rem;font-weight:700;">${issue.category || '—'}</span></td>
                     <td style="font-size:0.84rem;">${DEPT_LABELS[issue.department] || issue.department || '—'}</td>
                     <td style="font-size:0.82rem;color:var(--text-muted,#64748b);">${issue.location_name || `${issue.reporter_constituency || '—'}`}</td>
                     <td style="font-size:0.82rem;">${issue.reporter_name || issue.reported_by_name || '—'}</td>
@@ -2075,8 +1976,9 @@
         function renderHeatmap(points) {
             if (!commMap) {
                 commMap = L.map('commissioner-map').setView([10.8505, 76.2711], 8);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
+                L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                    attribution: '&copy; OpenStreetMap &copy; CARTO',
+                    maxZoom: 19
                 }).addTo(commMap);
             }
 
@@ -2085,10 +1987,18 @@
 
             if (points.length === 0) return;
 
-            const latlngs = points.map(p => [p.lat, p.lng, 1.0]);
+            const latlngs = points.map(p => [
+                p.lat,
+                p.lng,
+                p.status === 'COMPLETED' ? 0.3 : 1.0
+            ]);
             heatLayer = L.heatLayer(latlngs, {
-                radius: 22, blur: 18, maxZoom: 17,
-                gradient: { 0.2: '#22c55e', 0.5: '#f59e0b', 0.8: '#ef4444', 1.0: '#7c0000' }
+                radius: 25, blur: 15, maxZoom: 13,
+                gradient: {
+                    0.4: 'yellow',
+                    0.6: 'orange',
+                    1.0: 'red'
+                }
             }).addTo(commMap);
 
             // Fit map to points
@@ -2163,16 +2073,16 @@
                 <title>Commissioner Report — ${dists} District</title>
                 <style>
                     body{font-family:Arial,sans-serif;margin:32px;color:#0f172a;}
-                    h1{color:#4F46E5;font-size:1.7rem;border-bottom:3px solid #4F46E5;padding-bottom:10px;}
+                    h1{color:#B00000;font-size:1.7rem;border-bottom:3px solid #B00000;padding-bottom:10px;}
                     h2{color:#1e293b;font-size:1.1rem;margin-top:24px;margin-bottom:8px;}
                     table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.85rem;}
                     th{background:#f8fafc;padding:10px 12px;text-align:left;border:1px solid #e2e8f0;font-weight:700;}
                     td{padding:9px 12px;border:1px solid #e2e8f0;}
                     tr:nth-child(even) td{background:#f9fafb;}
-                    .hero{background:#4F46E5;color:white;padding:20px 24px;border-radius:10px;margin-bottom:24px;}
+                    .hero{background:#B00000;color:white;padding:20px 24px;border-radius:10px;margin-bottom:24px;}
                     .stat-row{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
                     .stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:110px;}
-                    .stat-val{font-size:1.5rem;font-weight:800;color:#4F46E5;}
+                    .stat-val{font-size:1.5rem;font-weight:800;color:#B00000;}
                     .stat-lbl{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;}
                     .footer{margin-top:36px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:0.76rem;color:#94a3b8;}
                 </style>
