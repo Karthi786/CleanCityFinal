@@ -5,7 +5,7 @@
  * Uses Nodemailer with App Password authentication.
  * 
  * Environment Variables Required:
- *   EMAIL_USER - Gmail address (e.g. makkalsevi1@gmail.com)
+ *   EMAIL_USER - Gmail address (e.g. makkalkural1@gmail.com)
  *   EMAIL_PASS - 16-character Gmail App Password
  */
 require('dotenv').config();
@@ -82,7 +82,7 @@ async function sendEmail({ to, subject, html }) {
 
     try {
         const mailOptions = {
-            from: `"MakkalSevi - Citizen Portal" <${EMAIL_USER}>`,
+            from: `"MakkalKural - Citizen Portal" <${EMAIL_USER}>`,
             to: to,
             subject: subject,
             html: html

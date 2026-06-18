@@ -1,5 +1,5 @@
 -- ============================================================
--- MakkalSevi — Weekly Leaderboard & Citizen Dashboard Migration
+-- MakkalKural — Weekly Leaderboard & Citizen Dashboard Migration
 -- Run this in your Supabase SQL Editor
 -- ============================================================
 

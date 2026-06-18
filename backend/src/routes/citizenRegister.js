@@ -52,7 +52,7 @@ function generateOTPEmailTemplate(name, otp) {
                         <tr>
                             <td style="background: linear-gradient(135deg, #B00000 0%, #8B0000 50%, #600000 100%); padding: 32px 40px; text-align: center;">
                                 <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 800; letter-spacing: 0.5px;">
-                                    🌿 MakkalSevi
+                                    🌿 MakkalKural
                                 </h1>
                                 <p style="margin: 6px 0 0 0; color: rgba(255,255,255,0.85); font-size: 13px; font-weight: 400;">
                                     Citizen Portal — Email Verification
@@ -104,7 +104,7 @@ function generateOTPEmailTemplate(name, otp) {
                                     <strong style="color: #B00000;">Citizen Portal Team</strong>
                                 </p>
                                 <p style="margin: 16px 0 0 0; color: #aaa; font-size: 11px;">
-                                    © ${new Date().getFullYear()} MakkalSevi — Tamilnadu District Administration
+                                    © ${new Date().getFullYear()} MakkalKural — Tamilnadu District Administration
                                 </p>
                             </td>
                         </tr>

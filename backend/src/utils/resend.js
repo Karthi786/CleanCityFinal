@@ -40,7 +40,7 @@ async function sendEmail({ to, subject, html }) {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: 'MakkalSevi <onboarding@resend.dev>',
+                from: 'MakkalKural <onboarding@resend.dev>',
                 to: [to],
                 subject: subject,
                 html: html

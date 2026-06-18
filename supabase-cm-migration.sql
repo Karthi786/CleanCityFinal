@@ -1,5 +1,5 @@
 -- ============================================================
--- CM Role Migration — MakkalSevi
+-- CM Role Migration — MakkalKural
 -- Run this ONCE in your Supabase SQL Editor before using CM accounts.
 -- Dashboard → SQL Editor → New Query → Paste → Run
 -- ============================================================

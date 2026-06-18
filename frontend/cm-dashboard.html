@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Chief Minister Dashboard — MakkalSevi</title>
+    <title>Chief Minister Dashboard — MakkalKural</title>
     <meta name="description" content="Chief Minister's state-level civic analytics dashboard for Tamil Nadu district performance." />
     <link rel="stylesheet" href="css/styles.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
@@ -546,7 +546,7 @@
             <div class="nav-island-container">
                 <nav class="nav-island" id="nav-island">
                     <div class="nav-logo">
-                        <span>MakkalSevi</span>
+                        <span>MakkalKural</span>
                         <span class="nav-logo-badge">CM</span>
                     </div>
 
@@ -581,7 +581,7 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="nav-logo" style="font-size:1rem;">MakkalSevi <span class="nav-logo-badge">CM</span></div>
+                            <div class="nav-logo" style="font-size:1rem;">MakkalKural <span class="nav-logo-badge">CM</span></div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">
@@ -616,7 +616,7 @@
                         <div class="hero-eyebrow">Government of Tamil Nadu</div>
                         <h1 class="hero-title">Chief Minister's Analytics Portal</h1>
                         <p class="hero-subtitle">Real-time civic issue monitoring across all districts and constituencies</p>
-                        <div class="hero-badge">🏛️ MakkalSevi State Dashboard</div>
+                        <div class="hero-badge">🏛️ MakkalKural State Dashboard</div>
                     </div>
                 </div>
 
@@ -1492,7 +1492,7 @@
             const dists = selected === 'all' ? globalDistricts : globalDistricts.filter(d => d.name === selected);
 
             printWin.document.write(`<!DOCTYPE html><html><head>
-                <title>MakkalSevi CM Report — ${title}</title>
+                <title>MakkalKural CM Report — ${title}</title>
                 <style>
                     body{font-family:Arial,sans-serif;margin:32px;color:#0f172a;}
                     h1{color:#B00000;font-size:1.8rem;border-bottom:3px solid #B00000;padding-bottom:12px;}
@@ -1510,7 +1510,7 @@
                 </style>
             </head><body>
                 <div class="hero">
-                    <h1 style="color:white;border-bottom:none;padding-bottom:0;margin-bottom:4px;">🏛️ MakkalSevi — Chief Minister Report</h1>
+                    <h1 style="color:white;border-bottom:none;padding-bottom:0;margin-bottom:4px;">🏛️ MakkalKural — Chief Minister Report</h1>
                     <div style="font-size:0.9rem;opacity:0.8;">Generated: ${now} | Scope: ${title}</div>
                 </div>
                 ${ov ? `<h2>State Overview</h2>
@@ -1545,7 +1545,7 @@
                     <td><b>${d.efficiencyRate}%</b></td>
                 </tr>`).join('')}
                 </tbody></table>` : ''}
-                <div class="footer">© ${new Date().getFullYear()} Tamil Nadu District Administration · MakkalSevi Civic Platform · Confidential Government Report</div>
+                <div class="footer">© ${new Date().getFullYear()} Tamil Nadu District Administration · MakkalKural Civic Platform · Confidential Government Report</div>
             </body></html>`);
             printWin.document.close();
             setTimeout(() => printWin.print(), 400);
@@ -1564,7 +1564,7 @@
             if (globalOverview) {
                 const ov = globalOverview;
                 const ovData = [
-                    ['MakkalSevi — CM State Report', '', '', '', '', ''],
+                    ['MakkalKural — CM State Report', '', '', '', '', ''],
                     ['Generated', new Date().toLocaleString('en-IN'), '', '', '', ''],
                     [''],
                     ['Metric', 'Value'],
@@ -1598,7 +1598,7 @@
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([mHeaders, ...mRows]), 'Monthly Trends');
             }
 
-            const filename = `MakkalSevi_CM_Report_${selected === 'all' ? 'AllDistricts' : selected}_${new Date().toISOString().slice(0, 10)}.xlsx`;
+            const filename = `MakkalKural_CM_Report_${selected === 'all' ? 'AllDistricts' : selected}_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(wb, filename);
             toast.success('Downloaded', `Report saved as ${filename}`);
         });

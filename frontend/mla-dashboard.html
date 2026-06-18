@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>MLA Dashboard — MakkalSevi</title>
+    <title>MLA Dashboard — MakkalKural</title>
     <link rel="stylesheet" href="css/styles.css" />
 
     <!-- Leaflet & Heatmap dependencies -->
@@ -105,7 +105,8 @@
             transition: all var(--transition);
         }
 
-        .nav-link-item:hover, .nav-link-item.active {
+        .nav-link-item:hover,
+        .nav-link-item.active {
             color: var(--primary);
         }
 
@@ -607,6 +608,7 @@
         }
 
         @media (max-width: 900px) {
+
             html,
             body {
                 overflow-x: hidden;
@@ -642,7 +644,7 @@
                 overflow: hidden;
             }
 
-            .chart-card > div[id^="col-"],
+            .chart-card>div[id^="col-"],
             .apexcharts-canvas,
             .apexcharts-svg {
                 max-width: 100% !important;
@@ -654,7 +656,7 @@
                 padding: 16px 12px !important;
             }
 
-            #tab-issues > .grid.grid-3,
+            #tab-issues>.grid.grid-3,
             .analytics-grid-4,
             .analytics-grid-2 {
                 grid-template-columns: 1fr !important;
@@ -673,7 +675,7 @@
                 align-items: center;
             }
 
-            #tab-issues .stat-card > div:first-child,
+            #tab-issues .stat-card>div:first-child,
             .kpi-card {
                 text-align: left;
             }
@@ -735,12 +737,18 @@
             <div id="sidebar-avatar"></div>
             <button id="logout-btn-hidden"></button>
             <nav class="sidebar-nav">
-                <a class="sidebar-link active" data-tab="issues" href="#" id="nav-issues" onclick="event.preventDefault();switchTab('issues')">All Issues</a>
-                <a class="sidebar-link" data-tab="analytics" href="#" id="nav-analytics" onclick="event.preventDefault();switchTab('analytics')">Analytics</a>
-                <a class="sidebar-link" data-tab="map" href="#" id="nav-map" onclick="event.preventDefault();switchTab('map')">Heatmap</a>
-                <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews" onclick="event.preventDefault();switchTab('reviews')">All Reviews</a>
-                <a class="sidebar-link" data-tab="campaigns" href="#" id="nav-campaigns" onclick="event.preventDefault();switchTab('campaigns')">Campaigns</a>
-                <a class="sidebar-link" data-tab="leaderboard" href="#" id="nav-leaderboard" onclick="event.preventDefault();switchTab('leaderboard')">Leaderboard</a>
+                <a class="sidebar-link active" data-tab="issues" href="#" id="nav-issues"
+                    onclick="event.preventDefault();switchTab('issues')">All Issues</a>
+                <a class="sidebar-link" data-tab="analytics" href="#" id="nav-analytics"
+                    onclick="event.preventDefault();switchTab('analytics')">Analytics</a>
+                <a class="sidebar-link" data-tab="map" href="#" id="nav-map"
+                    onclick="event.preventDefault();switchTab('map')">Heatmap</a>
+                <a class="sidebar-link" data-tab="reviews" href="#" id="nav-reviews"
+                    onclick="event.preventDefault();switchTab('reviews')">All Reviews</a>
+                <a class="sidebar-link" data-tab="campaigns" href="#" id="nav-campaigns"
+                    onclick="event.preventDefault();switchTab('campaigns')">Campaigns</a>
+                <a class="sidebar-link" data-tab="leaderboard" href="#" id="nav-leaderboard"
+                    onclick="event.preventDefault();switchTab('leaderboard')">Leaderboard</a>
             </nav>
         </aside>
         <button id="hamburger"></button>
@@ -761,38 +769,44 @@
             <div class="nav-island-container">
                 <nav class="nav-island">
                     <div class="logo">
-                        <span>MakkalSevi</span>
+                        <span>MakkalKural</span>
                     </div>
 
                     <!-- Top Doc Navigation Links -->
                     <ul class="nav-links">
                         <li>
-                            <a class="nav-link-item active" href="#" id="nav-issues-visible" onclick="event.preventDefault(); switchTab('issues');">
+                            <a class="nav-link-item active" href="#" id="nav-issues-visible"
+                                onclick="event.preventDefault(); switchTab('issues');">
                                 Issues
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-analytics-visible" onclick="event.preventDefault(); switchTab('analytics');">
+                            <a class="nav-link-item" href="#" id="nav-analytics-visible"
+                                onclick="event.preventDefault(); switchTab('analytics');">
                                 Analytics
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-map-visible" onclick="event.preventDefault(); switchTab('map');">
+                            <a class="nav-link-item" href="#" id="nav-map-visible"
+                                onclick="event.preventDefault(); switchTab('map');">
                                 Heatmap
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-reviews-visible" onclick="event.preventDefault(); switchTab('reviews');">
+                            <a class="nav-link-item" href="#" id="nav-reviews-visible"
+                                onclick="event.preventDefault(); switchTab('reviews');">
                                 Reviews
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-campaigns-visible" onclick="event.preventDefault(); switchTab('campaigns');">
+                            <a class="nav-link-item" href="#" id="nav-campaigns-visible"
+                                onclick="event.preventDefault(); switchTab('campaigns');">
                                 Campaigns
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-leaderboard-visible" onclick="event.preventDefault(); switchTab('leaderboard');">
+                            <a class="nav-link-item" href="#" id="nav-leaderboard-visible"
+                                onclick="event.preventDefault(); switchTab('leaderboard');">
                                 Leaderboard
                             </a>
                         </li>
@@ -801,14 +815,16 @@
                     <div class="nav-actions">
                         <!-- Mobile Burger Button -->
                         <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="3" y1="12" x2="21" y2="12"></line>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
-                        
-                        <select class="select lang-switcher" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
+
+                        <select class="select lang-switcher"
+                            style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
                             <option value="en">English</option>
                             <option value="ta">தமிழ்</option>
                         </select>
@@ -816,7 +832,8 @@
                         <!-- Notification Bell -->
                         <div class="notification-wrapper">
                             <div class="header-bell" id="notification-bell">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                                 </svg>
@@ -825,7 +842,8 @@
                             <div class="notification-dropdown" id="notification-dropdown">
                                 <div class="notification-header">
                                     <span>Notifications</span>
-                                    <button id="mark-all-read" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; color: var(--primary);">Mark all as read</button>
+                                    <button id="mark-all-read" class="btn btn-ghost btn-sm"
+                                        style="font-size: 0.75rem; color: var(--primary);">Mark all as read</button>
                                 </div>
                                 <div class="notification-list" id="notification-list">
                                     <!-- Dynamic -->
@@ -834,7 +852,8 @@
                         </div>
 
                         <!-- User Profile Circle & Action Buttons -->
-                        <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
                             <a href="user-details.html" style="text-decoration: none;">
                                 <div class="user-avatar-sidebar"
                                     style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2); overflow: hidden;"
@@ -842,7 +861,8 @@
                                     C
                                 </div>
                             </a>
-                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm"
+                                style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
                         </div>
                     </div>
                 </nav>
@@ -852,7 +872,7 @@
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
                             <div class="logo">
-                                <span>MakkalSevi</span>
+                                <span>MakkalKural</span>
                             </div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
@@ -884,7 +904,8 @@
                                     <div class="mobile-drawer-user-role">City Admin</div>
                                 </div>
                             </div>
-                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;" id="drawer-logout-btn">Logout</button>
+                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;"
+                                id="drawer-logout-btn">Logout</button>
                         </div>
                     </div>
                 </div>
@@ -897,28 +918,35 @@
                     <div>
                         <h2 class="page-title" id="page-title-visible">City-Wide Management</h2>
                         <div id="mla-info-header" style="display: none; margin-bottom: 8px; font-size: 0.95rem;">
-                            <span style="font-weight: 700; color: var(--primary);">District: <span id="mla-district-label" style="color: var(--text); font-weight: 600;"></span></span>
+                            <span style="font-weight: 700; color: var(--primary);">District: <span
+                                    id="mla-district-label" style="color: var(--text); font-weight: 600;"></span></span>
                             <span style="margin: 0 8px; color: var(--border);">|</span>
-                            <span style="font-weight: 700; color: var(--primary);">Constituency: <span id="mla-constituency-label" style="color: var(--text); font-weight: 600;"></span></span>
+                            <span style="font-weight: 700; color: var(--primary);">Constituency: <span
+                                    id="mla-constituency-label"
+                                    style="color: var(--text); font-weight: 600;"></span></span>
                         </div>
-                        <p class="page-subtitle" id="page-subtitle-visible">Monitor and oversee civic issue resolution across all departments.</p>
+                        <p class="page-subtitle" id="page-subtitle-visible">Monitor and oversee civic issue resolution
+                            across all departments.</p>
                     </div>
-                    
+
                     <div class="header-filters" id="issues-filters">
-                        <select id="status-filter" class="select" style="width:140px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
+                        <select id="status-filter" class="select"
+                            style="width:140px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
                             <option value="">All Statuses</option>
                             <option value="PENDING">Pending</option>
                             <option value="IN_PROGRESS">Processing</option>
                             <option value="COMPLETED">Done</option>
                         </select>
-                        <select id="dept-filter" class="select" style="width:170px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
+                        <select id="dept-filter" class="select"
+                            style="width:170px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
                             <option value="">All Departments</option>
                             <option value="TAMILNADU_CORPORATION">Tamilnadu Corporation</option>
                             <option value="TNEB">TNEB</option>
                             <option value="POLICE">Police</option>
                         </select>
                         <button id="download-excel-btn" class="btn btn-primary btn-sm"
-                            style="display:flex;align-items:center;gap:6px; border-radius:99px;" data-i18n="btn_download">
+                            style="display:flex;align-items:center;gap:6px; border-radius:99px;"
+                            data-i18n="btn_download">
                             📊 Download Excel
                         </button>
                     </div>
@@ -932,21 +960,24 @@
                                 <div class="stat-label">Total Issues</div>
                                 <div class="stat-value" id="s-total">—</div>
                             </div>
-                            <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">📋</div>
+                            <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">📋
+                            </div>
                         </div>
                         <div class="stat-card" style="border-color: rgba(255, 208, 0, 0.25);">
                             <div>
                                 <div class="stat-label" style="color:var(--warning);">Pending</div>
                                 <div class="stat-value" id="s-pending" style="color:var(--warning);">—</div>
                             </div>
-                            <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">⏳</div>
+                            <div class="stat-icon yellow"
+                                style="background: var(--warning-light); color: var(--warning);">⏳</div>
                         </div>
                         <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.25);">
                             <div>
                                 <div class="stat-label" style="color:var(--success);">Resolved</div>
                                 <div class="stat-value" id="s-resolved" style="color:var(--success);">—</div>
                             </div>
-                            <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">✅</div>
+                            <div class="stat-icon green"
+                                style="background: var(--success-light); color: var(--success);">✅</div>
                         </div>
                     </div>
                     <div id="issues-list" class="space-y-4"></div>
@@ -954,11 +985,17 @@
 
                 <!-- Heatmap Tab -->
                 <div id="tab-map" class="tab-pane">
-                    <div style="background:var(--bg-card);border:1px solid rgba(15, 23, 42, 0.06);border-radius:24px;padding:24px;margin-bottom:24px;box-shadow:var(--shadow-sm);">
-                        <h3 style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:8px;">Issue Density Matrix</h3>
-                        <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">Geographical visualization of civic issues across Tamilnadu to identify hotspots.</p>
+                    <div
+                        style="background:var(--bg-card);border:1px solid rgba(15, 23, 42, 0.06);border-radius:24px;padding:24px;margin-bottom:24px;box-shadow:var(--shadow-sm);">
+                        <h3
+                            style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--text);margin-bottom:8px;">
+                            Issue Density Matrix</h3>
+                        <p style="font-size:0.9rem;color:var(--text-muted);margin-bottom:20px;">Geographical
+                            visualization of civic issues across Tamilnadu to identify hotspots.</p>
 
-                        <div id="collector-map" style="width:100%;height:520px;border-radius:20px;z-index:1;border:1px solid var(--border);"></div>
+                        <div id="collector-map"
+                            style="width:100%;height:520px;border-radius:20px;z-index:1;border:1px solid var(--border);">
+                        </div>
                     </div>
                 </div>
 
@@ -971,7 +1008,8 @@
                                 <span class="kpi-icon">📋</span>
                                 <div class="kpi-label">Total Complaints</div>
                                 <div class="kpi-value" id="ck-total">—</div>
-                                <span class="kpi-badge green" id="ck-total-badge" style="margin-top:4px;">District-wide</span>
+                                <span class="kpi-badge green" id="ck-total-badge"
+                                    style="margin-top:4px;">District-wide</span>
                             </div>
                             <div class="kpi-card kpi-green">
                                 <span class="kpi-icon">✅</span>
@@ -1011,7 +1049,8 @@
                         <div class="analytics-grid-1">
                             <div class="chart-card">
                                 <div class="chart-card-title">Monthly District Trend</div>
-                                <div class="chart-card-subtitle">Total vs. Resolved complaints across all departments (last 6 months)</div>
+                                <div class="chart-card-subtitle">Total vs. Resolved complaints across all departments
+                                    (last 6 months)</div>
                                 <div id="col-monthly-chart"></div>
                             </div>
                         </div>
@@ -1020,7 +1059,8 @@
                         <div class="analytics-grid-1">
                             <div class="chart-card">
                                 <div class="chart-card-title">Department Performance Comparison</div>
-                                <div class="chart-card-subtitle">Resolved vs. Pending vs. In Progress per department</div>
+                                <div class="chart-card-subtitle">Resolved vs. Pending vs. In Progress per department
+                                </div>
                                 <div id="col-perf-chart"></div>
                             </div>
                         </div>
@@ -1066,20 +1106,27 @@
                     <!-- Campaigns Content -->
                     <div id="col-campaigns-content">
                         <!-- Navigation for campaigns -->
-                        <div style="display:flex;gap:20px;border-bottom:1.5px solid var(--border);padding-bottom:12px;margin-bottom:24px;justify-content:flex-start;">
+                        <div
+                            style="display:flex;gap:20px;border-bottom:1.5px solid var(--border);padding-bottom:12px;margin-bottom:24px;justify-content:flex-start;">
                             <button class="tab-sub-btn active" id="sub-tab-all-camps-btn">All Campaigns</button>
                             <button class="tab-sub-btn" id="sub-tab-pending-camps-btn" style="position:relative;">
                                 Pending Approvals
-                                <span id="camp-pending-badge" class="badge-dot" style="display:none;top:0;right:-8px;background:var(--primary);width:8px;height:8px;border-radius:50%;"></span>
+                                <span id="camp-pending-badge" class="badge-dot"
+                                    style="display:none;top:0;right:-8px;background:var(--primary);width:8px;height:8px;border-radius:50%;"></span>
                             </button>
                         </div>
 
                         <!-- All Campaigns Pane -->
                         <div id="all-campaigns-pane">
-                            <div style="background:var(--bg-card);border:1px solid rgba(15, 23, 42, 0.06);border-radius:24px;overflow:hidden;box-shadow:var(--shadow-sm);">
-                                <div style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
-                                    <h3 style="font-family:var(--font-display);font-size:1.05rem;font-weight:800;color:var(--text);">Active & Completed Campaigns</h3>
-                                    <button id="download-campaigns-btn" class="btn btn-primary btn-sm" style="border-radius:99px;">
+                            <div
+                                style="background:var(--bg-card);border:1px solid rgba(15, 23, 42, 0.06);border-radius:24px;overflow:hidden;box-shadow:var(--shadow-sm);">
+                                <div
+                                    style="padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;">
+                                    <h3
+                                        style="font-family:var(--font-display);font-size:1.05rem;font-weight:800;color:var(--text);">
+                                        Active & Completed Campaigns</h3>
+                                    <button id="download-campaigns-btn" class="btn btn-primary btn-sm"
+                                        style="border-radius:99px;">
                                         📥 Download Campaign Data
                                     </button>
                                 </div>
@@ -1104,9 +1151,12 @@
 
                 <!-- Leaderboard Tab -->
                 <div id="tab-leaderboard" class="tab-pane">
-                    <div style="background:#fff;border-radius:24px;border:1px solid rgba(15, 23, 42, 0.06);padding:24px;box-shadow:var(--shadow-sm); overflow-x:auto;">
+                    <div
+                        style="background:#fff;border-radius:24px;border:1px solid rgba(15, 23, 42, 0.06);padding:24px;box-shadow:var(--shadow-sm); overflow-x:auto;">
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                            <h3 style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--text);">Top Citizens Leaderboard</h3>
+                            <h3
+                                style="font-family:var(--font-display);font-size:1.15rem;font-weight:800;color:var(--text);">
+                                Top Citizens Leaderboard</h3>
                         </div>
                         <table class="premium-table" style="width:100%;">
                             <thead>
@@ -1140,10 +1190,12 @@
             <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
                     <div>
-                        <h3 id="cv-col-title" style="margin-bottom:4px;font-family:var(--font-display);font-weight:800;"></h3>
+                        <h3 id="cv-col-title"
+                            style="margin-bottom:4px;font-family:var(--font-display);font-weight:800;"></h3>
                     </div>
                     <div>
-                        <button id="cv-col-export-btn" class="btn btn-primary btn-sm" style="border-radius:99px;">⬇️ Download Excel/CSV</button>
+                        <button id="cv-col-export-btn" class="btn btn-primary btn-sm" style="border-radius:99px;">⬇️
+                            Download Excel/CSV</button>
                     </div>
                 </div>
 
@@ -1171,22 +1223,31 @@
         <div class="modal" style="max-width:400px;">
             <div class="modal-header">
                 <div class="modal-title">Export Campaign Data</div>
-                <button class="modal-close" onclick="document.getElementById('download-camp-modal').classList.remove('open')">✕</button>
+                <button class="modal-close"
+                    onclick="document.getElementById('download-camp-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date range for the campaign data export. The file will be downloaded in CSV format.</p>
-                
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date
+                    range for the campaign data export. The file will be downloaded in CSV format.</p>
+
                 <div style="display:flex;flex-direction:column;gap:16px;">
                     <div class="form-group">
-                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start Date</label>
-                        <input type="date" id="dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
+                        <label
+                            style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start
+                            Date</label>
+                        <input type="date" id="dl-from-date" class="form-control"
+                            style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
                     <div class="form-group">
-                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End Date</label>
-                        <input type="date" id="dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
+                        <label
+                            style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End
+                            Date</label>
+                        <input type="date" id="dl-to-date" class="form-control"
+                            style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
-                    
-                    <button id="confirm-dl-btn" class="btn btn-primary btn-lg" style="width:100%;margin-top:8px;font-weight:700;">
+
+                    <button id="confirm-dl-btn" class="btn btn-primary btn-lg"
+                        style="width:100%;margin-top:8px;font-weight:700;">
                         📥 Download CSV Report
                     </button>
                 </div>
@@ -1199,22 +1260,31 @@
         <div class="modal" style="max-width:400px;">
             <div class="modal-header">
                 <div class="modal-title">Export Reports Data</div>
-                <button class="modal-close" onclick="document.getElementById('download-reports-modal').classList.remove('open')">✕</button>
+                <button class="modal-close"
+                    onclick="document.getElementById('download-reports-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date range for the reports export. The file will be downloaded in Excel (.xlsx) format.</p>
-                
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date
+                    range for the reports export. The file will be downloaded in Excel (.xlsx) format.</p>
+
                 <div style="display:flex;flex-direction:column;gap:16px;">
                     <div class="form-group">
-                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start Date</label>
-                        <input type="date" id="rep-dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
+                        <label
+                            style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start
+                            Date</label>
+                        <input type="date" id="rep-dl-from-date" class="form-control"
+                            style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
                     <div class="form-group">
-                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End Date</label>
-                        <input type="date" id="rep-dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
+                        <label
+                            style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End
+                            Date</label>
+                        <input type="date" id="rep-dl-to-date" class="form-control"
+                            style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
-                    
-                    <button id="confirm-reports-dl-btn" class="btn btn-primary btn-lg" style="width:100%;margin-top:8px;font-weight:700;">
+
+                    <button id="confirm-reports-dl-btn" class="btn btn-primary btn-lg"
+                        style="width:100%;margin-top:8px;font-weight:700;">
                         📥 Download Excel Report
                     </button>
                 </div>
@@ -1227,7 +1297,8 @@
         <div class="modal" style="max-width:600px;">
             <div class="modal-header">
                 <div class="modal-title">Campaign Verification Details</div>
-                <button class="modal-close" onclick="document.getElementById('camp-details-modal').classList.remove('open')">✕</button>
+                <button class="modal-close"
+                    onclick="document.getElementById('camp-details-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body" id="camp-details-body" style="max-height: 80vh; overflow-y: auto; padding: 20px;">
                 <!-- Dynamic -->
@@ -1248,7 +1319,7 @@
 
         document.getElementById('sidebar-name').textContent = user.name;
         document.getElementById('drawer-name').textContent = user.name;
-        
+
         if (user.district && user.constituency) {
             document.getElementById('mla-info-header').style.display = 'block';
             document.getElementById('mla-constituency-label').textContent = user.constituency;
@@ -1269,7 +1340,7 @@
                 el.textContent = user.name.charAt(0).toUpperCase();
             }
         });
-        
+
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
         if (logoutBtn) logoutBtn.addEventListener('click', logout);
@@ -1286,7 +1357,7 @@
             try {
                 const { notifications } = await notificationsAPI.getAll();
                 const unreadCount = notifications.filter(n => !n.is_read).length;
-                
+
                 if (unreadCount > 0) {
                     notificationCount.textContent = unreadCount;
                     notificationCount.style.display = 'block';
@@ -1316,7 +1387,7 @@
                             try {
                                 const ok = confirm('Delete this notification?');
                                 if (!ok) return;
-                                
+
                                 await notificationsAPI.delete(id);
                                 loadNotifications();
                                 toast.success('Deleted', 'Notification removed.');
@@ -1335,7 +1406,7 @@
                                 if (item.classList.contains('unread')) {
                                     await notificationsAPI.markAsRead(id);
                                 }
-                                
+
                                 // Redirect based on type
                                 if (type === 'campaign') {
                                     switchTab('campaigns');
@@ -1344,7 +1415,7 @@
                                 } else if (type === 'report') {
                                     switchTab('issues');
                                 }
-                                
+
                                 notificationDropdown.classList.remove('open');
                                 loadNotifications();
                             } catch (err) {
@@ -1406,10 +1477,10 @@
             ['issues', 'analytics', 'map', 'reviews', 'campaigns', 'leaderboard'].forEach(t => {
                 const pane = document.getElementById('tab-' + t);
                 pane.style.display = t === name ? 'block' : 'none';
-                
+
                 const navLinkVisible = document.getElementById('nav-' + t + '-visible');
                 if (navLinkVisible) navLinkVisible.classList.toggle('active', t === name);
-                
+
                 const navLinkHidden = document.getElementById('nav-' + t);
                 if (navLinkHidden) navLinkHidden.classList.toggle('active', t === name);
             });
@@ -1419,9 +1490,9 @@
             syncDrawerActive(drawerByTab[name]);
 
             if (name === 'reviews') loadReviews();
-            if (name === 'campaigns' && !campaignsLoaded) { 
-                campaignsLoaded = true; 
-                loadCollectorCampaigns(); 
+            if (name === 'campaigns' && !campaignsLoaded) {
+                campaignsLoaded = true;
+                loadCollectorCampaigns();
                 loadPendingCampaigns(); // To show badge
             }
             if (name === 'leaderboard' && !leaderboardLoaded) { leaderboardLoaded = true; loadCollectorLeaderboard(); }
@@ -1529,21 +1600,21 @@
                 toast.error('No Data', 'No reports available to download.');
                 return;
             }
-            
+
             // Set default dates
             const now = new Date();
             const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            
+
             document.getElementById('rep-dl-from-date').value = thirtyDaysAgo.toISOString().split('T')[0];
             document.getElementById('rep-dl-to-date').value = now.toISOString().split('T')[0];
-            
+
             document.getElementById('download-reports-modal').classList.add('open');
         });
 
         document.getElementById('confirm-reports-dl-btn').addEventListener('click', () => {
             const fromDateStr = document.getElementById('rep-dl-from-date').value;
             const toDateStr = document.getElementById('rep-dl-to-date').value;
-            
+
             if (!fromDateStr || !toDateStr) {
                 toast.error('Selection Required', 'Please select both start and end dates.');
                 return;
@@ -1551,8 +1622,8 @@
 
             const fromDate = new Date(fromDateStr);
             const toDate = new Date(toDateStr);
-            fromDate.setHours(0,0,0,0);
-            toDate.setHours(23,59,59,999);
+            fromDate.setHours(0, 0, 0, 0);
+            toDate.setHours(23, 59, 59, 999);
 
             const filteredReports = allIssues.filter(issue => {
                 const issueDate = new Date(issue.created_at);
@@ -1769,7 +1840,7 @@
             try {
                 const data = await campaignsAPI.getPending();
                 const campaigns = data.campaigns || [];
-                
+
                 const badge = document.getElementById('camp-pending-badge');
                 if (campaigns.length > 0) {
                     badge.style.display = 'block';
@@ -1807,17 +1878,17 @@
             const container = document.getElementById('camp-details-body');
             container.innerHTML = '<div class="spinner"></div>';
             document.getElementById('camp-details-modal').classList.add('open');
-            
+
             try {
                 const data = await campaignsAPI.getPending();
                 const campaigns = data.campaigns || [];
                 const c = campaigns.find(item => item.id === id);
-                
+
                 if (!c) {
                     container.innerHTML = 'Campaign details not found.';
                     return;
                 }
-                
+
                 container.innerHTML = `
                     <div style="display:flex;flex-direction:column;gap:16px;">
                         ${c.image_url ? `<img src="${c.image_url}" style="width:100%;border-radius:20px;max-height:220px;object-fit:cover;border:1px solid var(--border);">` : '<div style="width:100%;height:140px;background:#f1f5f9;border-radius:20px;display:flex;align-items:center;justify-content:center;font-size:2rem;">📣</div>'}
@@ -1873,10 +1944,10 @@
             downloadCampaignsBtn.onclick = () => {
                 const now = new Date();
                 const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-                
+
                 document.getElementById('dl-from-date').value = thirtyDaysAgo.toISOString().split('T')[0];
                 document.getElementById('dl-to-date').value = now.toISOString().split('T')[0];
-                
+
                 document.getElementById('download-camp-modal').classList.add('open');
             };
         }
@@ -1884,7 +1955,7 @@
         document.getElementById('confirm-dl-btn').onclick = async () => {
             const fromDate = document.getElementById('dl-from-date').value;
             const toDate = document.getElementById('dl-to-date').value;
-            
+
             if (!fromDate || !toDate) {
                 return toast.error("Selection Required", "Please select both start and end dates.");
             }
@@ -1897,34 +1968,34 @@
             try {
                 const data = await campaignsAPI.getAll();
                 const allCamps = data.campaigns || [];
-                
+
                 const filtered = allCamps.filter(c => {
                     const campDate = new Date(c.start_date);
                     const start = new Date(fromDate);
                     const end = new Date(toDate);
-                    campDate.setHours(0,0,0,0);
-                    start.setHours(0,0,0,0);
-                    end.setHours(23,59,59,999);
+                    campDate.setHours(0, 0, 0, 0);
+                    start.setHours(0, 0, 0, 0);
+                    end.setHours(23, 59, 59, 999);
                     return campDate >= start && campDate <= end;
                 });
-                
+
                 if (filtered.length === 0) {
                     toast.error("No Data", "No campaigns found for the selected date range.");
                     return;
                 }
-                
+
                 const now = new Date();
                 let csvContent = "data:text/csv;charset=utf-8,Category,Title,Organizer,Contact,Location,Reg Date,Start Date,End Date,Volunteers Needed,Registered,Status\n";
-                
+
                 filtered.forEach(c => {
                     const start = new Date(`${c.start_date}T${c.start_time}`);
                     const end = new Date(`${c.end_date}T${c.end_time}`);
                     const status = now < start ? 'UPCOMING' : now <= end ? 'ACTIVE' : 'ENDED';
                     const regDate = new Date(c.created_at).toLocaleDateString();
-                    
+
                     csvContent += `"${status}","${c.title.replace(/"/g, '""')}","${c.created_by_name || ''}","${c.contact_number || ''}","${(c.location_name || '').replace(/"/g, '""')}","${regDate}","${c.start_date} ${c.start_time}","${c.end_date} ${c.end_time}","${c.volunteers_needed}","${c.registered_count}","${status}"\n`;
                 });
-                
+
                 const encodedUri = encodeURI(csvContent);
                 const link = document.createElement("a");
                 link.setAttribute("href", encodedUri);
@@ -1932,7 +2003,7 @@
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
-                
+
                 document.getElementById('download-camp-modal').classList.remove('open');
                 toast.success("Download Complete", "Campaign data exported successfully.");
             } catch (err) {
@@ -1948,9 +2019,9 @@
                 await campaignsAPI.verify(id, status);
                 toast.success(status === 'approved' ? 'Campaign Approved ✅' : 'Campaign Rejected ❌', `Campaign has been ${status}.`);
                 document.getElementById('ccard-' + id)?.remove();
-                
+
                 loadCollectorCampaigns();
-                
+
                 const data = await campaignsAPI.getPending();
                 if ((data.campaigns || []).length === 0) {
                     document.getElementById('camp-pending-badge').style.display = 'none';

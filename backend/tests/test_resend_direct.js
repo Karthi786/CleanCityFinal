@@ -22,7 +22,7 @@ async function testResend() {
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({
-                from: 'MakkalSevi <onboarding@resend.dev>',
+                from: 'MakkalKural <onboarding@resend.dev>',
                 to: ['kevinashvarman20@gmail.com'], // Send to the owner email
                 subject: 'Test Resend Delivery',
                 html: '<p>Test verification code: <strong>123456</strong></p>'

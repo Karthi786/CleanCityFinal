@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Department Dashboard — MakkalSevi</title>
+    <title>Department Dashboard — MakkalKural</title>
     <link rel="stylesheet" href="css/styles.css" />
     <!-- ApexCharts & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
@@ -96,7 +96,8 @@
             transition: all var(--transition);
         }
 
-        .nav-link-item:hover, .nav-link-item.active {
+        .nav-link-item:hover,
+        .nav-link-item.active {
             color: var(--primary);
         }
 
@@ -182,8 +183,16 @@
         }
 
         @keyframes fadeInScale {
-            from { opacity: 0; transform: scale(0.95) translateY(-10px); transform-origin: top right; }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-10px);
+                transform-origin: top right;
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         .notification-dropdown.open {
@@ -748,23 +757,26 @@
             <div class="nav-island-container">
                 <nav class="nav-island">
                     <div class="logo">
-                        <span>MakkalSevi</span>
+                        <span>MakkalKural</span>
                     </div>
 
                     <!-- Top Doc Navigation Links -->
                     <ul class="nav-links">
                         <li>
-                            <a class="nav-link-item active" href="#" id="nav-issues" onclick="event.preventDefault(); switchTab('issues');">
+                            <a class="nav-link-item active" href="#" id="nav-issues"
+                                onclick="event.preventDefault(); switchTab('issues');">
                                 My Issues
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-reviews" onclick="event.preventDefault(); switchTab('reviews');">
+                            <a class="nav-link-item" href="#" id="nav-reviews"
+                                onclick="event.preventDefault(); switchTab('reviews');">
                                 Reviews
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-analytics" onclick="event.preventDefault(); switchTab('analytics');">
+                            <a class="nav-link-item" href="#" id="nav-analytics"
+                                onclick="event.preventDefault(); switchTab('analytics');">
                                 Analytics
                             </a>
                         </li>
@@ -773,14 +785,16 @@
                     <div class="nav-actions">
                         <!-- Mobile Burger Button -->
                         <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="3" y1="12" x2="21" y2="12"></line>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
                             </svg>
                         </button>
-                        
-                        <select class="select lang-switcher" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
+
+                        <select class="select lang-switcher"
+                            style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px; background: rgba(15,23,42,0.04); border: 1px solid rgba(15,23,42,0.08); color: var(--text); cursor: pointer; outline: none;">
                             <option value="en">English</option>
                             <option value="ta">தமிழ்</option>
                         </select>
@@ -788,7 +802,8 @@
                         <!-- Notification Bell -->
                         <div class="notification-wrapper">
                             <div class="header-bell" id="notification-bell">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                     <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                                 </svg>
@@ -797,7 +812,8 @@
                             <div class="notification-dropdown" id="notification-dropdown">
                                 <div class="notification-header">
                                     <span>Notifications</span>
-                                    <button id="mark-all-read" class="btn btn-ghost btn-sm" style="font-size: 0.75rem; color: var(--primary);">Mark all as read</button>
+                                    <button id="mark-all-read" class="btn btn-ghost btn-sm"
+                                        style="font-size: 0.75rem; color: var(--primary);">Mark all as read</button>
                                 </div>
                                 <div class="notification-list" id="notification-list">
                                     <!-- Dynamic -->
@@ -806,17 +822,22 @@
                         </div>
 
                         <!-- User Info Profile Circle & Action Buttons -->
-                        <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
                             <div class="user-avatar-sidebar"
                                 style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2);"
                                 id="sidebar-avatar-visible">
                                 D
                             </div>
-                            <div style="display:flex; flex-direction:column; gap:2px; font-family:var(--font-display); display: none;">
-                                <span id="sidebar-name-visible" style="font-weight:700; font-size:0.85rem; color:var(--text);">Staff</span>
-                                <span id="sidebar-role-visible" style="font-size:0.7rem; color:var(--text-muted);">Dept</span>
+                            <div
+                                style="display:flex; flex-direction:column; gap:2px; font-family:var(--font-display); display: none;">
+                                <span id="sidebar-name-visible"
+                                    style="font-weight:700; font-size:0.85rem; color:var(--text);">Staff</span>
+                                <span id="sidebar-role-visible"
+                                    style="font-size:0.7rem; color:var(--text-muted);">Dept</span>
                             </div>
-                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm"
+                                style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Logout</button>
                         </div>
                     </div>
                 </nav>
@@ -826,7 +847,7 @@
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
                             <div class="logo">
-                                <span>MakkalSevi</span>
+                                <span>MakkalKural</span>
                             </div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
@@ -849,7 +870,8 @@
                                     <div class="mobile-drawer-user-role">Staff</div>
                                 </div>
                             </div>
-                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;" id="drawer-logout-btn">Logout</button>
+                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;"
+                                id="drawer-logout-btn">Logout</button>
                         </div>
                     </div>
                 </div>
@@ -861,18 +883,22 @@
                 <div class="page-header animate-in stagger-1">
                     <div id="page-header-text">
                         <h2 class="page-title" id="page-title">Issues Management</h2>
-                        <p class="page-subtitle" id="dept-title">Review, update and resolve civic complaints in your area.</p>
+                        <p class="page-subtitle" id="dept-title">Review, update and resolve civic complaints in your
+                            area.</p>
                     </div>
-                    
-                    <div class="header-filters" id="issues-filter-wrap" style="display:flex;gap:12px;align-items:center;">
-                        <select id="status-filter" class="select" style="width:160px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
+
+                    <div class="header-filters" id="issues-filter-wrap"
+                        style="display:flex;gap:12px;align-items:center;">
+                        <select id="status-filter" class="select"
+                            style="width:160px;padding:6px 12px;font-size:0.85rem; border-radius:99px;">
                             <option value="">All Statuses</option>
                             <option value="PENDING">Pending</option>
                             <option value="IN_PROGRESS">Processing</option>
                             <option value="COMPLETED">Done</option>
                         </select>
                         <button id="download-excel-btn" class="btn btn-primary btn-sm"
-                            style="display:flex;align-items:center;gap:6px; border-radius:99px;" data-i18n="btn_download">
+                            style="display:flex;align-items:center;gap:6px; border-radius:99px;"
+                            data-i18n="btn_download">
                             📊 Download Excel
                         </button>
                     </div>
@@ -886,21 +912,24 @@
                                 <div class="stat-label">Assigned Issues</div>
                                 <div class="stat-value" id="s-total">—</div>
                             </div>
-                            <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">📋</div>
+                            <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">📋
+                            </div>
                         </div>
                         <div class="stat-card" style="border-color: rgba(255, 208, 0, 0.25);">
                             <div>
                                 <div class="stat-label" style="color:var(--warning);">Pending</div>
                                 <div class="stat-value" id="s-pending" style="color:var(--warning);">—</div>
                             </div>
-                            <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">⏳</div>
+                            <div class="stat-icon yellow"
+                                style="background: var(--warning-light); color: var(--warning);">⏳</div>
                         </div>
                         <div class="stat-card" style="border-color: rgba(22, 163, 74, 0.25);">
                             <div>
                                 <div class="stat-label" style="color:var(--success);">Completed</div>
                                 <div class="stat-value" id="s-resolved" style="color:var(--success);">—</div>
                             </div>
-                            <div class="stat-icon green" style="background: var(--success-light); color: var(--success);">✅</div>
+                            <div class="stat-icon green"
+                                style="background: var(--success-light); color: var(--success);">✅</div>
                         </div>
                     </div>
                     <div id="issues-list" class="space-y-4"></div>
@@ -924,7 +953,8 @@
                                 <span class="kpi-icon">📋</span>
                                 <div class="kpi-label" data-i18n="lbl_total_reports">Total Complaints</div>
                                 <div class="kpi-value" id="ak-total">—</div>
-                                <span class="kpi-badge green" id="ak-total-badge" style="margin-top: 4px;">Loading…</span>
+                                <span class="kpi-badge green" id="ak-total-badge"
+                                    style="margin-top: 4px;">Loading…</span>
                             </div>
                             <div class="kpi-card kpi-green">
                                 <span class="kpi-icon">✅</span>
@@ -1061,7 +1091,8 @@
                 <button class="btn btn-outline" id="modal-cancel">Cancel</button>
                 <button class="btn btn-primary btn-lg" id="update-submit">
                     <span id="update-text">Update Status</span>
-                    <div class="spinner spinner-sm" id="update-spinner" style="display:none; border-top-color: white;"></div>
+                    <div class="spinner spinner-sm" id="update-spinner" style="display:none; border-top-color: white;">
+                    </div>
                 </button>
             </div>
         </div>
@@ -1072,22 +1103,31 @@
         <div class="modal" style="max-width:420px;">
             <div class="modal-header">
                 <div class="modal-title">Export Reports Data</div>
-                <button class="modal-close" onclick="document.getElementById('download-reports-modal').classList.remove('open')">✕</button>
+                <button class="modal-close"
+                    onclick="document.getElementById('download-reports-modal').classList.remove('open')">✕</button>
             </div>
             <div class="modal-body">
-                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date range for the reports export. The file will be downloaded in Excel (.xlsx) format.</p>
-                
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:20px;line-height:1.5;">Select the date
+                    range for the reports export. The file will be downloaded in Excel (.xlsx) format.</p>
+
                 <div style="display:flex;flex-direction:column;gap:16px;">
                     <div class="form-group">
-                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start Date</label>
-                        <input type="date" id="rep-dl-from-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
+                        <label
+                            style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">Start
+                            Date</label>
+                        <input type="date" id="rep-dl-from-date" class="form-control"
+                            style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
                     <div class="form-group">
-                        <label style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End Date</label>
-                        <input type="date" id="rep-dl-to-date" class="form-control" style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
+                        <label
+                            style="display:block;font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:8px;">End
+                            Date</label>
+                        <input type="date" id="rep-dl-to-date" class="form-control"
+                            style="width:100% !important;padding:10px;border-radius:12px;border:1px solid var(--border);">
                     </div>
-                    
-                    <button id="confirm-reports-dl-btn" class="btn btn-primary btn-lg" style="width:100%;margin-top:8px;font-weight:700;">
+
+                    <button id="confirm-reports-dl-btn" class="btn btn-primary btn-lg"
+                        style="width:100%;margin-top:8px;font-weight:700;">
                         📥 Download Excel Report
                     </button>
                 </div>
@@ -1135,7 +1175,7 @@
             try {
                 const { notifications } = await notificationsAPI.getAll();
                 const unreadCount = notifications.filter(n => !n.is_read).length;
-                
+
                 if (unreadCount > 0) {
                     notificationCount.textContent = unreadCount;
                     notificationCount.style.display = 'block';
@@ -1165,7 +1205,7 @@
                             try {
                                 const ok = confirm('Delete this notification?');
                                 if (!ok) return;
-                                
+
                                 await notificationsAPI.delete(id);
                                 loadNotifications();
                                 toast.success('Deleted', 'Notification removed.');
@@ -1184,13 +1224,13 @@
                                 if (item.classList.contains('unread')) {
                                     await notificationsAPI.markAsRead(id);
                                 }
-                                
+
                                 // Redirect based on type
                                 if (type === 'report' && relatedId) {
                                     switchTab('issues');
                                     openUpdate(relatedId);
                                 }
-                                
+
                                 notificationDropdown.classList.remove('open');
                                 loadNotifications();
                             } catch (err) {
@@ -1243,7 +1283,7 @@
             ['issues', 'reviews', 'analytics'].forEach(t => {
                 const pane = document.getElementById('tab-' + t);
                 pane.style.display = t === name ? 'block' : 'none';
-                
+
                 const navLink = document.getElementById('nav-' + t);
                 if (navLink) navLink.classList.toggle('active', t === name);
             });
@@ -1412,21 +1452,21 @@
                 toast.error('No Data', 'No reports available to download.');
                 return;
             }
-            
+
             // Set default dates
             const now = new Date();
             const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            
+
             document.getElementById('rep-dl-from-date').value = thirtyDaysAgo.toISOString().split('T')[0];
             document.getElementById('rep-dl-to-date').value = now.toISOString().split('T')[0];
-            
+
             document.getElementById('download-reports-modal').classList.add('open');
         });
 
         document.getElementById('confirm-reports-dl-btn').addEventListener('click', () => {
             const fromDateStr = document.getElementById('rep-dl-from-date').value;
             const toDateStr = document.getElementById('rep-dl-to-date').value;
-            
+
             if (!fromDateStr || !toDateStr) {
                 toast.error('Selection Required', 'Please select both start and end dates.');
                 return;
@@ -1434,8 +1474,8 @@
 
             const fromDate = new Date(fromDateStr);
             const toDate = new Date(toDateStr);
-            fromDate.setHours(0,0,0,0);
-            toDate.setHours(23,59,59,999);
+            fromDate.setHours(0, 0, 0, 0);
+            toDate.setHours(23, 59, 59, 999);
 
             const filteredReports = allIssues.filter(issue => {
                 const issueDate = new Date(issue.created_at);
