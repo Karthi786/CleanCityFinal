@@ -320,6 +320,14 @@
                                         <div class="role-desc">Manage users, verify accounts, and oversee the platform</div>
                                     </div>
                                 </label>
+                                <label class="role-option" data-role="COMMISSIONER">
+                                    <input type="radio" name="role" value="COMMISSIONER" />
+                                    <span class="role-icon">🏢</span>
+                                    <div>
+                                        <div class="role-label">District Commissioner</div>
+                                        <div class="role-desc">Monitor issues, analytics, heatmap, and departments within assigned district</div>
+                                    </div>
+                                </label>
                                 <label class="role-option" data-role="CM">
                                     <input type="radio" name="role" value="CM" />
                                     <span class="role-icon">🏵️</span>
@@ -523,7 +531,7 @@
                 profilePhotoGroup.style.display = selectedRole !== 'USER' ? 'flex' : 'none';
                 
                 // Collectors, Departments, and CM do not need a constituency
-                if (selectedRole === 'COLLECTOR' || selectedRole === 'DEPT' || selectedRole === 'CM') {
+                if (selectedRole === 'COLLECTOR' || selectedRole === 'DEPT' || selectedRole === 'CM' || selectedRole === 'COMMISSIONER') {
                     constGroup.style.display = 'none';
                     document.getElementById('constituency').required = false;
                 } else {
@@ -644,11 +652,11 @@
             countdownInterval = setInterval(() => {
                 timeRemaining--;
                 if (timeRemaining <= 0) {
-                    clearInterval(countdownInterval);
-                    timerEl.textContent = '';
-                    resendBtn.disabled = false;
+                     clearInterval(countdownInterval);
+                     timerEl.textContent = '';
+                     resendBtn.disabled = false;
                 } else {
-                    timerEl.textContent = `Resend available in ${timeRemaining}s`;
+                     timerEl.textContent = `Resend available in ${timeRemaining}s`;
                 }
             }, 1000);
         }
@@ -663,7 +671,7 @@
             const password = document.getElementById('password').value;
             const phone_number = document.getElementById('phone_number').value.trim();
             const district = document.getElementById('district').value;
-            const constituency = (selectedRole !== 'COLLECTOR' && selectedRole !== 'DEPT' && selectedRole !== 'CM') ? document.getElementById('constituency').value : null;
+            const constituency = (selectedRole !== 'COLLECTOR' && selectedRole !== 'DEPT' && selectedRole !== 'CM' && selectedRole !== 'COMMISSIONER') ? document.getElementById('constituency').value : null;
             const dept = document.getElementById('department').value;
             const description = selectedRole === 'MLA' ? document.getElementById('description').value.trim() : null;
             const photoInput = document.getElementById('profile-photo');
@@ -673,7 +681,7 @@
                 toast.error('Missing Fields', 'Please fill in all required fields.');
                 return;
             }
-            if (selectedRole !== 'COLLECTOR' && selectedRole !== 'DEPT' && selectedRole !== 'CM' && !constituency) {
+            if (selectedRole !== 'COLLECTOR' && selectedRole !== 'DEPT' && selectedRole !== 'CM' && selectedRole !== 'COMMISSIONER' && !constituency) {
                 toast.error('Missing Fields', 'Please select your constituency.');
                 return;
             }

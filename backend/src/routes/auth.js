@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN', 'MLA', 'CM'];
+    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN', 'MLA', 'CM', 'COMMISSIONER'];
     if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role.' });
     }
@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
 
         const userId = authData.user.id;
         const verificationStatus = role === 'USER' ? 'approved' : 'pending_verification';
-        const finalDept = (role !== 'USER' && role !== 'COLLECTOR' && role !== 'ADMIN' && role !== 'MLA') ? role : (department || null);
+        const finalDept = (role !== 'USER' && role !== 'COLLECTOR' && role !== 'ADMIN' && role !== 'MLA' && role !== 'CM' && role !== 'COMMISSIONER') ? role : (department || null);
 
         // Insert into users table
         const { data: userRecord, error: dbError } = await supabaseAdmin
@@ -161,6 +161,7 @@ router.post('/login', async (req, res) => {
             ADMIN: '/admin-dashboard.html',
             MLA: '/mla-dashboard.html',
             CM: '/cm-dashboard.html',
+            COMMISSIONER: '/commissioner-dashboard.html',
         };
 
         return res.json({

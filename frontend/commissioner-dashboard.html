@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Collector Dashboard — MakkalKural</title>
+    <title>Commissioner Dashboard — MakkalKural</title>
     <meta name="description"
-        content="District Collector Dashboard — Monitor civic issues, department performance, and analytics for your assigned district." />
+        content="District Commissioner Dashboard — Monitor civic issues, department performance, and analytics for your assigned district." />
     <link rel="stylesheet" href="css/styles.css" />
 
     <!-- Leaflet for Heatmap -->
@@ -28,16 +28,16 @@
 
     <style>
         /* ══════════════════════════════════════════
-           COLLECTOR DASHBOARD THEME
-           Crimson Red — distinct from indigo (Comm.)
+           COMMISSIONER DASHBOARD THEME
+           Indigo/Purple accent — distinct from red (Collector)
            and gold (CM)
         ══════════════════════════════════════════ */
         :root {
-            --comm-primary: #B00000;
-            --comm-primary-light: rgba(176, 0, 0, 0.08);
-            --comm-primary-glow: rgba(176, 0, 0, 0.2);
-            --comm-secondary: #EF4444;
-            --comm-accent: #F59E0B;
+            --comm-primary: #4F46E5;
+            --comm-primary-light: rgba(79, 70, 229, 0.08);
+            --comm-primary-glow: rgba(79, 70, 229, 0.2);
+            --comm-secondary: #7C3AED;
+            --comm-accent: #06B6D4;
             --sidebar-width: 0px;
         }
 
@@ -194,7 +194,7 @@
 
         /* ── Page Hero ── */
         .page-hero {
-            background: linear-gradient(135deg, var(--comm-primary) 0%, var(--comm-secondary) 60%, #991b1b 100%);
+            background: linear-gradient(135deg, var(--comm-primary) 0%, var(--comm-secondary) 60%, #5B21B6 100%);
             border-radius: 28px;
             padding: 36px 40px;
             margin-bottom: 32px;
@@ -222,7 +222,7 @@
             width: 160px;
             height: 160px;
             border-radius: 50%;
-            background: rgba(245, 158, 11, 0.12);
+            background: rgba(6, 182, 212, 0.12);
         }
 
         .hero-content { position: relative; z-index: 1; }
@@ -309,10 +309,10 @@
             border-radius: 20px 20px 0 0;
         }
 
-        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg, #B00000, #EF4444); }
+        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg, #4F46E5, #7C3AED); }
         .kpi-card.kpi-green::before  { background: linear-gradient(90deg, #10B981, #06B6D4); }
         .kpi-card.kpi-amber::before  { background: linear-gradient(90deg, #F59E0B, #EF4444); }
-        .kpi-card.kpi-blue::before   { background: linear-gradient(90deg, #2563EB, #EF4444); }
+        .kpi-card.kpi-blue::before   { background: linear-gradient(90deg, #2563EB, #4F46E5); }
         .kpi-card.kpi-purple::before { background: linear-gradient(90deg, #7C3AED, #06B6D4); }
         .kpi-card.kpi-cyan::before   { background: linear-gradient(90deg, #06B6D4, #3B82F6); }
 
@@ -441,7 +441,7 @@
             transition: background 0.15s;
         }
 
-        .issues-table tbody tr:hover td { background: rgba(176, 0, 0, 0.02); }
+        .issues-table tbody tr:hover td { background: rgba(79, 70, 229, 0.02); }
         .issues-table tbody tr:last-child td { border-bottom: none; }
 
         /* ── Status Badges ── */
@@ -670,7 +670,7 @@
             border-bottom: 1px solid rgba(15, 23, 42, 0.04);
         }
 
-        .constituency-table tbody tr:hover td { background: rgba(176, 0, 0, 0.02); }
+        .constituency-table tbody tr:hover td { background: rgba(79, 70, 229, 0.02); }
 
         .inline-bar {
             display: flex;
@@ -714,7 +714,7 @@
         .report-option-card:hover {
             border-color: var(--comm-primary);
             transform: translateY(-3px);
-            box-shadow: 0 8px 24px rgba(176, 0, 0, 0.12);
+            box-shadow: 0 8px 24px rgba(79, 70, 229, 0.12);
         }
 
         .report-option-card.selected {
@@ -798,6 +798,106 @@
             border-radius: 50%;
         }
 
+        /* ── Mobile Drawer ── */
+        .mobile-nav-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+
+        .mobile-nav-overlay.open { visibility: visible; opacity: 1; }
+
+        .mobile-nav-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.4);
+            backdrop-filter: blur(6px);
+        }
+
+        .mobile-nav-drawer {
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 280px;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -8px 0 40px rgba(0, 0, 0, 0.12);
+            transform: translateX(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1;
+        }
+
+        .mobile-nav-overlay.open .mobile-nav-drawer { transform: translateX(0); }
+
+        .mobile-drawer-header {
+            padding: 20px 20px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+        }
+
+        .mobile-drawer-close {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-muted, #64748b);
+            padding: 4px 8px;
+            border-radius: 8px;
+        }
+
+        .mobile-drawer-nav { padding: 16px 12px; flex: 1; }
+
+        .mobile-drawer-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            color: var(--text-muted, #64748b);
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: none;
+            background: none;
+            width: 100%;
+            text-align: left;
+            font-family: var(--font-display, 'Outfit', sans-serif);
+        }
+
+        .mobile-drawer-link:hover,
+        .mobile-drawer-link.active {
+            background: var(--comm-primary-light);
+            color: var(--comm-primary);
+        }
+
+        .mobile-drawer-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(15, 23, 42, 0.07);
+        }
+
+        /* ── Animations ── */
+        .animate-in {
+            animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .stagger-1 { animation-delay: 0.06s; }
+        .stagger-2 { animation-delay: 0.12s; }
+        .stagger-3 { animation-delay: 0.18s; }
+
+        @keyframes fadeSlideUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
         /* ── Responsive ── */
         @media(max-width: 900px) {
             .nav-links { display: none; }
@@ -818,7 +918,7 @@
             body { background: white !important; }
             .dash-main { padding-top: 0 !important; }
             .tab-pane { display: block !important; }
-            .page-hero { background: #B00000 !important; -webkit-print-color-adjust: exact; }
+            .page-hero { background: #4F46E5 !important; -webkit-print-color-adjust: exact; }
         }
     </style>
 </head>
@@ -832,7 +932,7 @@
                 <nav class="nav-island" id="nav-island">
                     <div class="nav-logo">
                         <span>MakkalKural</span>
-                        <span class="nav-logo-badge" style="background:#B00000;">COLLECTOR</span>
+                        <span class="nav-logo-badge">COMMISSIONER</span>
                     </div>
 
                     <ul class="nav-links">
@@ -855,7 +955,7 @@
                         <div style="display:flex;align-items:center;gap:8px;border-left:1px solid rgba(15,23,42,0.1);padding-left:12px;">
                             <div class="comm-avatar" id="comm-avatar-el">CO</div>
                             <div style="display:flex;flex-direction:column;">
-                                <span id="comm-name-el" style="font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.84rem;color:var(--text,#0f172a);">Collector</span>
+                                <span id="comm-name-el" style="font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.84rem;color:var(--text,#0f172a);">Commissioner</span>
                                 <span id="comm-district-el" style="font-size:0.7rem;color:var(--text-muted,#64748b);">District</span>
                             </div>
                             <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding:6px 12px;font-size:0.82rem;border-radius:99px;margin-left:4px;">Sign Out</button>
@@ -867,7 +967,7 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="nav-logo" style="font-size:1rem;">MakkalKural <span class="nav-logo-badge" style="background:#B00000;font-size:0.62rem;">COLLECTOR</span></div>
+                            <div class="nav-logo" style="font-size:1rem;">MakkalKural <span class="nav-logo-badge" style="font-size:0.62rem;">COMMISSIONER</span></div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">
@@ -882,7 +982,7 @@
                             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
                                 <div class="comm-avatar" style="width:40px;height:40px;" id="drawer-avatar-el">CO</div>
                                 <div>
-                                    <div id="drawer-name-el" style="font-weight:700;font-size:0.88rem;">Collector</div>
+                                    <div id="drawer-name-el" style="font-weight:700;font-size:0.88rem;">Commissioner</div>
                                     <div id="drawer-dist-el" style="font-size:0.74rem;color:var(--text-muted,#64748b);">District</div>
                                 </div>
                             </div>
@@ -899,7 +999,7 @@
                 <div class="page-hero animate-in">
                     <div class="hero-content">
                         <div class="hero-eyebrow">Government of Tamil Nadu</div>
-                        <h1 class="hero-title">Collector's District Portal</h1>
+                        <h1 class="hero-title">Commissioner's District Portal</h1>
                         <p class="hero-subtitle">Monitor civic issues, department performance, and analytics for your assigned district</p>
                         <div class="hero-district-badge">🏛️ <span id="hero-district-name">Loading...</span> District</div>
                     </div>
@@ -1232,11 +1332,11 @@
 
                     <!-- Map -->
                     <div class="chart-card animate-in stagger-2" style="padding:0;overflow:hidden;">
-                        <div id="collector-map-el" style="width:100%;height:520px;border-radius:22px;z-index:1;"></div>
+                        <div id="commissioner-map" style="width:100%;height:520px;border-radius:22px;z-index:1;"></div>
                     </div>
 
                     <!-- Heatmap info note -->
-                    <div style="margin-top:14px;padding:14px 18px;background:var(--comm-primary-light);border-radius:14px;border:1px solid rgba(176, 0, 0, 0.15);font-size:0.84rem;color:var(--comm-primary);">
+                    <div style="margin-top:14px;padding:14px 18px;background:var(--comm-primary-light);border-radius:14px;border:1px solid rgba(79,70,229,0.15);font-size:0.84rem;color:var(--comm-primary);">
                         💡 <strong>Tip:</strong> Only issues with GPS coordinates will appear on the map. Issues without location data are excluded from the heatmap visualization.
                     </div>
                 </div>
@@ -1369,24 +1469,41 @@
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
         import { toast } from './js/toast.js';
-        import { issuesAPI } from './js/api.js';
         import { downloadSingleIssuePDF } from './js/pdf-export.js';
 
-        // ── Guard: Only COLLECTOR role ──
-        const user = guardPage(['COLLECTOR']);
+        // ── Guard: Only COMMISSIONER role ──
+        const user = guardPage(['COMMISSIONER']);
         if (!user) throw new Error('Access denied');
+
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5001/api'
+            : 'https://cleancityfinal.onrender.com/api';
 
         // ── Set user info ──
         const district = user.district || 'N/A';
         const initials = (user.name || 'CO').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
         document.getElementById('comm-avatar-el').textContent = initials;
-        document.getElementById('comm-name-el').textContent = user.name || 'Collector';
+        document.getElementById('comm-name-el').textContent = user.name || 'Commissioner';
         document.getElementById('comm-district-el').textContent = district + ' District';
         document.getElementById('drawer-avatar-el').textContent = initials;
-        document.getElementById('drawer-name-el').textContent = user.name || 'Collector';
+        document.getElementById('drawer-name-el').textContent = user.name || 'Commissioner';
         document.getElementById('drawer-dist-el').textContent = district + ' District';
         document.getElementById('hero-district-name').textContent = district;
         document.getElementById('last-updated-label').textContent = 'Updated: ' + new Date().toLocaleString('en-IN');
+
+        // ── Auth fetch helper ──
+        async function commFetch(path) {
+            const token = localStorage.getItem('cm_token');
+            const res = await fetch(`${API_BASE}${path}`, {
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+            if (res.status === 401) { await logout(); return null; }
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || 'Request failed');
+            }
+            return res.json();
+        }
 
         // ── Logout ──
         const doLogout = () => logout();
@@ -1412,16 +1529,16 @@
             document.getElementById('nav-' + tab)?.classList.add('active');
             document.querySelectorAll(`.mobile-drawer-link[data-tab="${tab}"]`).forEach(b => b.classList.add('active'));
             activeTab = tab;
-            // Lazy init / refresh charts
+            // Lazy init
             if (!tabInitialized[tab]) {
                 tabInitialized[tab] = true;
-                if (tab === 'departments') renderDepartmentsTab();
-                if (tab === 'analytics')   renderAnalyticsTab();
-                if (tab === 'heatmap')     renderHeatmapTab();
-                if (tab === 'issues')      renderIssuesTab();
-                if (tab === 'reports')     renderReportsTab();
+                if (tab === 'departments') loadDepartments();
+                if (tab === 'analytics')   loadAnalytics();
+                if (tab === 'heatmap')     loadHeatmap();
+                if (tab === 'issues')      loadIssues();
+                if (tab === 'reports')     loadIssues(); // preload data for reports
             }
-            // Re-init heatmap on tab switch
+            // Re-init heatmap on tab switch (leaflet needs visible container)
             if (tab === 'heatmap') setTimeout(refreshMap, 100);
         }
 
@@ -1450,7 +1567,7 @@
         Chart.defaults.plugins.legend.labels.padding = 16;
 
         const P = {
-            indigo: '#B00000', indigoL: 'rgba(176,0,0,0.12)',
+            indigo: '#4F46E5', indigoL: 'rgba(79,70,229,0.12)',
             green:  '#10B981', greenL:  'rgba(16,185,129,0.12)',
             amber:  '#F59E0B', amberL:  'rgba(245,158,11,0.12)',
             blue:   '#2563EB', blueL:   'rgba(37,99,235,0.12)',
@@ -1470,14 +1587,13 @@
         }
 
         // ═══════════════════════════════════════════════════
-        // GLOBAL DATA CACHE & CLIENT COMPUTATION
+        // GLOBAL DATA CACHE
         // ═══════════════════════════════════════════════════
         let globalIssues = [];
         let globalOverview = null;
         let globalDepts = [];
         let globalMonthly = null;
         let globalAnalytics = null;
-        let globalConstituencies = [];
 
         const DEPT_LABELS = {
             TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
@@ -1503,9 +1619,685 @@
             return new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
         }
 
+        // ═══════════════════════════════════════════════════
+        // LOAD OVERVIEW
+        // ═══════════════════════════════════════════════════
+        async function loadOverview() {
+            try {
+                const [ovData, constData] = await Promise.all([
+                    commFetch('/commissioner/overview'),
+                    commFetch('/commissioner/constituencies'),
+                ]);
+
+                if (!ovData) return;
+                globalOverview = ovData;
+
+                document.getElementById('ov-total').textContent = ovData.total.toLocaleString();
+                document.getElementById('ov-resolved').textContent = ovData.resolved.toLocaleString();
+                document.getElementById('ov-pending').textContent = ovData.pending.toLocaleString();
+                document.getElementById('ov-inprogress').textContent = ovData.inProgress.toLocaleString();
+                document.getElementById('ov-rate').textContent = ovData.resolutionRate + '%';
+                document.getElementById('ov-const').textContent = ovData.totalConstituencies;
+                document.getElementById('ov-resolved-pct').textContent = ovData.resolutionRate + '% rate';
+
+                // Status Donut
+                createChart('ovStatusChart', {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Resolved', 'In Progress', 'Pending'],
+                        datasets: [{
+                            data: [ovData.resolved, ovData.inProgress, ovData.pending],
+                            backgroundColor: [P.green, P.blue, P.amber],
+                            borderWidth: 0, hoverOffset: 8,
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, cutout: '68%',
+                        plugins: {
+                            legend: { position: 'bottom' },
+                            tooltip: {
+                                callbacks: {
+                                    label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${ovData.total > 0 ? Math.round(ctx.parsed / ovData.total * 100) : 0}%)`
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Also load dept for efficiency chart
+                const deptData = await commFetch('/commissioner/departments');
+                if (deptData) {
+                    globalDepts = deptData.departments;
+                    createChart('ovDeptChart', {
+                        type: 'bar',
+                        data: {
+                            labels: deptData.departments.map(d => d.label),
+                            datasets: [{
+                                label: 'Efficiency %',
+                                data: deptData.departments.map(d => d.efficiencyRate),
+                                backgroundColor: [P.indigoL, P.amberL, P.purpleL],
+                                borderColor: [P.indigo, P.amber, P.purple],
+                                borderWidth: 2, borderRadius: 8,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            scales: {
+                                x: { max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
+                                y: { grid: { display: false } }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                // Category chart via analytics
+                const anData = await commFetch('/commissioner/analytics');
+                if (anData) {
+                    globalAnalytics = anData;
+                    renderCategoryApex(anData.byCategory);
+                }
+
+                // Constituency table
+                if (constData) {
+                    renderConstTable(constData.constituencies);
+                }
+
+            } catch (err) {
+                console.error('Overview error:', err);
+                toast.error('Error', 'Failed to load overview.');
+            }
+        }
+
+        function renderConstTable(constituencies) {
+            const tbody = document.getElementById('const-tbody');
+            if (!constituencies.length) {
+                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">No constituency data available yet.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = constituencies.map((c, i) => {
+                const rateColor = c.resolutionRate >= 70 ? '#16a34a' : c.resolutionRate >= 40 ? '#d97706' : '#dc2626';
+                return `<tr>
+                    <td style="font-weight:700;color:var(--text-muted,#64748b);">${i + 1}</td>
+                    <td style="font-weight:700;">${c.name}</td>
+                    <td>${c.total}</td>
+                    <td style="color:#16a34a;font-weight:600;">${c.resolved}</td>
+                    <td style="color:#d97706;font-weight:600;">${c.pending}</td>
+                    <td>
+                        <div class="inline-bar">
+                            <div class="bar-track"><div class="bar-fill" style="width:${c.resolutionRate}%;"></div></div>
+                            <span class="bar-pct" style="color:${rateColor};">${c.resolutionRate}%</span>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function renderCategoryApex(byCategory) {
+            const sorted = [...byCategory].sort((a, b) => b.count - a.count);
+            if (typeof ApexCharts === 'undefined') return;
+            const el = document.getElementById('ovCategoryApex');
+            if (!el) return;
+            if (el._apexChart) { el._apexChart.destroy(); }
+            const chart = new ApexCharts(el, {
+                chart: { type: 'bar', height: 220, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
+                series: [{ name: 'Issues', data: sorted.map(c => c.count) }],
+                xaxis: { categories: sorted.map(c => c.name) },
+                colors: [P.indigo],
+                plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
+                dataLabels: { enabled: false },
+                grid: { strokeDashArray: 4, borderColor: 'rgba(0,0,0,0.06)' },
+                yaxis: { labels: { style: { colors: '#64748b', fontSize: '12px' } } },
+            });
+            chart.render();
+            el._apexChart = chart;
+        }
+
+        // ═══════════════════════════════════════════════════
+        // LOAD ISSUES
+        // ═══════════════════════════════════════════════════
+        async function loadIssues(filters = {}) {
+            try {
+                const params = new URLSearchParams(filters).toString();
+                const data = await commFetch('/commissioner/issues' + (params ? '?' + params : ''));
+                if (!data) return;
+                globalIssues = data.issues;
+                renderIssuesTable(data.issues);
+            } catch (err) {
+                console.error('Issues error:', err);
+                toast.error('Error', 'Failed to load issues.');
+            }
+        }
+
+        function renderIssuesTable(issues) {
+            const tbody = document.getElementById('issues-tbody');
+            document.getElementById('issues-count-label').textContent = issues.length;
+            if (!issues.length) {
+                tbody.innerHTML = '<tr class="loading-row"><td colspan="8">No issues found with these filters.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = issues.map((issue, i) => `
+                <tr onclick="openIssueDetails('${issue.id}')" style="cursor:pointer;">
+                    <td style="font-weight:700;color:var(--text-muted,#64748b);">${i + 1}</td>
+                    <td style="max-width:220px;">
+                        <div style="font-weight:700;font-size:0.88rem;margin-bottom:2px;">${issue.title || '—'}</div>
+                        <div style="font-size:0.75rem;color:var(--text-muted,#64748b);">#${(issue.id || '').slice(0, 8)}…</div>
+                    </td>
+                    <td><span style="background:rgba(79,70,229,0.08);color:#4F46E5;padding:2px 8px;border-radius:99px;font-size:0.75rem;font-weight:700;">${issue.category || '—'}</span></td>
+                    <td style="font-size:0.84rem;">${DEPT_LABELS[issue.department] || issue.department || '—'}</td>
+                    <td style="font-size:0.82rem;color:var(--text-muted,#64748b);">${issue.location_name || `${issue.reporter_constituency || '—'}`}</td>
+                    <td style="font-size:0.82rem;">${issue.reporter_name || issue.reported_by_name || '—'}</td>
+                    <td>${statusBadge(issue.status)}</td>
+                    <td style="font-size:0.8rem;color:var(--text-muted,#64748b);white-space:nowrap;">${fmtDate(issue.created_at)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // Issues filter handlers
+        document.getElementById('apply-issue-filters').addEventListener('click', () => {
+            const filters = {};
+            const s = document.getElementById('if-status').value;
+            const d = document.getElementById('if-dept').value;
+            const c = document.getElementById('if-cat').value;
+            const f = document.getElementById('if-from').value;
+            const t = document.getElementById('if-to').value;
+            if (s) filters.status = s;
+            if (d) filters.department = d;
+            if (c) filters.category = c;
+            if (f) filters.dateFrom = f;
+            if (t) filters.dateTo = t;
+            loadIssues(filters);
+        });
+
+        document.getElementById('clear-issue-filters').addEventListener('click', () => {
+            ['if-status','if-dept','if-cat','if-from','if-to'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            loadIssues();
+        });
+
+        // Issues export
+        document.getElementById('issues-export-excel').addEventListener('click', () => exportIssuesExcel());
+        document.getElementById('issues-export-pdf').addEventListener('click', () => exportIssuesPDF());
+
+        // ═══════════════════════════════════════════════════
+        // LOAD DEPARTMENTS
+        // ═══════════════════════════════════════════════════
+        async function loadDepartments() {
+            try {
+                const data = await commFetch('/commissioner/departments');
+                if (!data) return;
+                globalDepts = data.departments;
+                renderDeptCards(data.departments);
+                renderDeptCompareChart(data.departments);
+                renderResolutionTime(data.departments);
+            } catch (err) {
+                console.error('Departments error:', err);
+                toast.error('Error', 'Failed to load department data.');
+            }
+        }
+
+        function renderDeptCards(departments) {
+            const container = document.getElementById('dept-grid');
+            if (!departments.length) {
+                container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><div class="empty-state-msg">No department data yet.</div></div>';
+                return;
+            }
+            container.innerHTML = departments.map(dept => {
+                const meta = DEPT_ICONS[dept.key] || { icon: '🏛️', color: P.blueL, border: P.blue };
+                const effColor = dept.efficiencyRate >= 70 ? '#16a34a' : dept.efficiencyRate >= 40 ? '#d97706' : '#dc2626';
+                const avgHrs = dept.avgResolutionHours !== null
+                    ? (dept.avgResolutionHours < 24 ? dept.avgResolutionHours + 'h' : Math.round(dept.avgResolutionHours / 24) + 'd')
+                    : 'N/A';
+                return `
+                <div class="dept-card">
+                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+                        <div class="dept-icon-circle" style="background:${meta.color};border:1px solid ${meta.border}22;">${meta.icon}</div>
+                        <div>
+                            <div style="font-family:var(--font-display,'Outfit',sans-serif);font-size:1rem;font-weight:800;color:var(--text,#0f172a);">${dept.label}</div>
+                            <div style="font-size:0.76rem;color:var(--text-muted,#64748b);">${dept.total} total complaints</div>
+                        </div>
+                    </div>
+                    <div class="dept-stats-row">
+                        <div class="dept-stat">
+                            <div class="dept-stat-val">${dept.total}</div>
+                            <div class="dept-stat-lbl">Total</div>
+                        </div>
+                        <div class="dept-stat">
+                            <div class="dept-stat-val" style="color:#10b981;">${dept.resolved}</div>
+                            <div class="dept-stat-lbl">Resolved</div>
+                        </div>
+                        <div class="dept-stat">
+                            <div class="dept-stat-val" style="color:#f59e0b;">${dept.pending}</div>
+                            <div class="dept-stat-lbl">Pending</div>
+                        </div>
+                    </div>
+                    <div class="efficiency-bar-track">
+                        <div class="efficiency-bar-fill" style="width:${dept.efficiencyRate}%;"></div>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px;">
+                        <span style="font-size:0.82rem;color:var(--text-muted,#64748b);font-weight:600;">Efficiency Rate</span>
+                        <span style="font-family:var(--font-display,'Outfit',sans-serif);font-size:1rem;font-weight:800;color:${effColor};">${dept.efficiencyRate}%</span>
+                    </div>
+                    <div style="margin-top:10px;padding-top:10px;border-top:1px solid rgba(15,23,42,0.06);display:flex;justify-content:space-between;font-size:0.8rem;color:var(--text-muted,#64748b);">
+                        <span>⏱️ Avg resolution: <strong style="color:var(--text,#0f172a);">${avgHrs}</strong></span>
+                        <span>🔄 In progress: <strong style="color:#2563eb;">${dept.inProgress}</strong></span>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function renderDeptCompareChart(departments) {
+            createChart('deptCompareChart', {
+                type: 'bar',
+                data: {
+                    labels: departments.map(d => d.label),
+                    datasets: [
+                        { label: 'Total', data: departments.map(d => d.total), backgroundColor: P.blueL, borderColor: P.blue, borderWidth: 2, borderRadius: 6 },
+                        { label: 'Resolved', data: departments.map(d => d.resolved), backgroundColor: P.greenL, borderColor: P.green, borderWidth: 2, borderRadius: 6 },
+                        { label: 'Pending', data: departments.map(d => d.pending), backgroundColor: P.amberL, borderColor: P.amber, borderWidth: 2, borderRadius: 6 },
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { grid: { color: 'rgba(0,0,0,0.04)' } }
+                    },
+                    plugins: { legend: { position: 'top' } }
+                }
+            });
+        }
+
+        function renderResolutionTime(departments) {
+            const container = document.getElementById('resTimeDeptGrid');
+            container.innerHTML = departments.map(dept => {
+                const meta = DEPT_ICONS[dept.key] || { icon: '🏛️', color: P.blueL, border: P.blue };
+                const avgHrs = dept.avgResolutionHours !== null
+                    ? (dept.avgResolutionHours < 24 ? dept.avgResolutionHours + ' hours' : Math.round(dept.avgResolutionHours / 24) + ' days')
+                    : 'No data';
+                return `
+                <div style="background:#f8fafc;border-radius:16px;padding:16px;border:1px solid rgba(15,23,42,0.06);">
+                    <div style="font-size:1.5rem;margin-bottom:8px;">${meta.icon}</div>
+                    <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">${dept.label}</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted,#64748b);">Avg Resolution Time</div>
+                    <div style="font-family:var(--font-display,'Outfit',sans-serif);font-size:1.3rem;font-weight:800;color:var(--comm-primary);margin-top:4px;">${avgHrs}</div>
+                </div>`;
+            }).join('');
+        }
+
+        // ═══════════════════════════════════════════════════
+        // LOAD ANALYTICS
+        // ═══════════════════════════════════════════════════
+        async function loadAnalytics() {
+            try {
+                const [anData, monthData] = await Promise.all([
+                    commFetch('/commissioner/analytics'),
+                    commFetch('/commissioner/monthly?months=6'),
+                ]);
+
+                if (anData) {
+                    globalAnalytics = anData;
+                    document.getElementById('an-total').textContent = anData.total.toLocaleString();
+                    document.getElementById('an-resolved').textContent = anData.completed.toLocaleString();
+                    document.getElementById('an-pending').textContent = anData.pending.toLocaleString();
+                    document.getElementById('an-rate').textContent = anData.resolutionRate + '%';
+
+                    // Status chart
+                    createChart('anStatusChart', {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Resolved', 'In Progress', 'Pending'],
+                            datasets: [{
+                                data: [anData.completed, anData.inProgress, anData.pending],
+                                backgroundColor: [P.green, P.blue, P.amber],
+                                borderWidth: 0, hoverOffset: 8,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false, cutout: '68%',
+                            plugins: { legend: { position: 'bottom' } }
+                        }
+                    });
+
+                    // Dept efficiency bar
+                    createChart('anDeptEffChart', {
+                        type: 'bar',
+                        data: {
+                            labels: anData.byDepartment.map(d => d.label),
+                            datasets: [{
+                                label: 'Efficiency %',
+                                data: anData.byDepartment.map(d => d.efficiencyRate),
+                                backgroundColor: [P.indigoL, P.amberL, P.purpleL],
+                                borderColor: [P.indigo, P.amber, P.purple],
+                                borderWidth: 2, borderRadius: 8,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false, indexAxis: 'y',
+                            scales: {
+                                x: { max: 100, ticks: { callback: v => v + '%' }, grid: { color: 'rgba(0,0,0,0.04)' } },
+                                y: { grid: { display: false } }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+                if (monthData) {
+                    globalMonthly = monthData;
+
+                    // Monthly trend line
+                    createChart('monthlyTrendChart', {
+                        type: 'line',
+                        data: {
+                            labels: monthData.months,
+                            datasets: [
+                                {
+                                    label: 'Reports Received',
+                                    data: monthData.totalCounts,
+                                    borderColor: P.indigo, backgroundColor: P.indigoL,
+                                    borderWidth: 2.5, fill: true, tension: 0.4,
+                                    pointBackgroundColor: P.indigo, pointRadius: 4,
+                                },
+                                {
+                                    label: 'Resolved',
+                                    data: monthData.resolvedCounts,
+                                    borderColor: P.green, backgroundColor: P.greenL,
+                                    borderWidth: 2.5, fill: true, tension: 0.4,
+                                    pointBackgroundColor: P.green, pointRadius: 4,
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            scales: {
+                                x: { grid: { display: false } },
+                                y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true }
+                            },
+                            plugins: { legend: { position: 'top' } }
+                        }
+                    });
+
+                    // Pending trend bar
+                    createChart('anPendingChart', {
+                        type: 'bar',
+                        data: {
+                            labels: monthData.months,
+                            datasets: [{
+                                label: 'Pending Issues',
+                                data: monthData.pendingCounts,
+                                backgroundColor: P.amberL,
+                                borderColor: P.amber,
+                                borderWidth: 2, borderRadius: 6,
+                            }]
+                        },
+                        options: {
+                            responsive: true, maintainAspectRatio: false,
+                            scales: {
+                                x: { grid: { display: false } },
+                                y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true }
+                            },
+                            plugins: { legend: { display: false } }
+                        }
+                    });
+                }
+
+            } catch (err) {
+                console.error('Analytics error:', err);
+                toast.error('Error', 'Failed to load analytics.');
+            }
+        }
+
+        // ═══════════════════════════════════════════════════
+        // HEATMAP
+        // ═══════════════════════════════════════════════════
+        let commMap = null;
+        let heatLayer = null;
+        let markerLayer = null;
+        let heatData = [];
+
+        async function loadHeatmap(filters = {}) {
+            try {
+                const params = new URLSearchParams(filters).toString();
+                const data = await commFetch('/commissioner/heatmap' + (params ? '?' + params : ''));
+                if (!data) return;
+                heatData = data.points;
+                document.getElementById('hm-points-count').textContent = heatData.length;
+                renderHeatmap(heatData);
+            } catch (err) {
+                console.error('Heatmap error:', err);
+                toast.error('Error', 'Failed to load heatmap.');
+            }
+        }
+
+        function renderHeatmap(points) {
+            if (!commMap) {
+                commMap = L.map('commissioner-map').setView([10.8505, 76.2711], 8);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(commMap);
+            }
+
+            if (heatLayer) commMap.removeLayer(heatLayer);
+            if (markerLayer) commMap.removeLayer(markerLayer);
+
+            if (points.length === 0) return;
+
+            const latlngs = points.map(p => [p.lat, p.lng, 1.0]);
+            heatLayer = L.heatLayer(latlngs, {
+                radius: 22, blur: 18, maxZoom: 17,
+                gradient: { 0.2: '#22c55e', 0.5: '#f59e0b', 0.8: '#ef4444', 1.0: '#7c0000' }
+            }).addTo(commMap);
+
+            // Fit map to points
+            const bounds = L.latLngBounds(points.map(p => [p.lat, p.lng]));
+            if (bounds.isValid()) commMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+        }
+
+        function refreshMap() {
+            if (commMap) commMap.invalidateSize();
+        }
+
+        // Heatmap filter handlers
+        document.getElementById('apply-heatmap-filters').addEventListener('click', () => {
+            const filters = {};
+            const s = document.getElementById('hm-status').value;
+            const d = document.getElementById('hm-dept').value;
+            const c = document.getElementById('hm-cat').value;
+            if (s) filters.status = s;
+            if (d) filters.department = d;
+            if (c) filters.category = c;
+            loadHeatmap(filters);
+        });
+
+        document.getElementById('reset-heatmap-filters').addEventListener('click', () => {
+            ['hm-status','hm-dept','hm-cat'].forEach(id => { document.getElementById(id).value = ''; });
+            loadHeatmap();
+        });
+
+        // ═══════════════════════════════════════════════════
+        // REPORTS
+        // ═══════════════════════════════════════════════════
+        let selectedReport = 'all';
+
+        document.querySelectorAll('.report-option-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.report-option-card').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+                selectedReport = card.dataset.report;
+                document.getElementById('date-report-filters').style.display = selectedReport === 'date' ? 'flex' : 'none';
+            });
+        });
+
+        document.getElementById('report-dl-pdf').addEventListener('click', () => generateReportPDF());
+        document.getElementById('report-dl-excel').addEventListener('click', () => generateReportExcel());
+
+        function getFilteredIssues() {
+            let issues = [...globalIssues];
+            if (selectedReport === 'date') {
+                const from = document.getElementById('rep-date-from').value;
+                const to   = document.getElementById('rep-date-to').value;
+                if (from) issues = issues.filter(i => new Date(i.created_at) >= new Date(from));
+                if (to)   issues = issues.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59Z'));
+            }
+            return issues;
+        }
+
+        function generateReportPDF() {
+            const issues = getFilteredIssues();
+            const dists = district;
+            const now = new Date().toLocaleString('en-IN');
+            const reportTitle = {
+                all: 'All Issues Report',
+                dept: 'Department-wise Report',
+                status: 'Status-wise Report',
+                date: 'Date Range Report',
+                constituency: 'Constituency Report',
+                category: 'Category Report',
+            }[selectedReport] || 'District Report';
+
+            const printWin = window.open('', '_blank');
+            printWin.document.write(`<!DOCTYPE html><html><head>
+                <title>Commissioner Report — ${dists} District</title>
+                <style>
+                    body{font-family:Arial,sans-serif;margin:32px;color:#0f172a;}
+                    h1{color:#4F46E5;font-size:1.7rem;border-bottom:3px solid #4F46E5;padding-bottom:10px;}
+                    h2{color:#1e293b;font-size:1.1rem;margin-top:24px;margin-bottom:8px;}
+                    table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.85rem;}
+                    th{background:#f8fafc;padding:10px 12px;text-align:left;border:1px solid #e2e8f0;font-weight:700;}
+                    td{padding:9px 12px;border:1px solid #e2e8f0;}
+                    tr:nth-child(even) td{background:#f9fafb;}
+                    .hero{background:#4F46E5;color:white;padding:20px 24px;border-radius:10px;margin-bottom:24px;}
+                    .stat-row{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+                    .stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:110px;}
+                    .stat-val{font-size:1.5rem;font-weight:800;color:#4F46E5;}
+                    .stat-lbl{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;}
+                    .footer{margin-top:36px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:0.76rem;color:#94a3b8;}
+                </style>
+            </head><body>
+                <div class="hero">
+                    <h1 style="color:white;border-bottom:none;padding-bottom:0;margin-bottom:4px;">🏛️ MakkalKural — ${reportTitle}</h1>
+                    <div style="font-size:0.88rem;opacity:0.85;">Generated: ${now} | District: ${dists}</div>
+                </div>
+                ${globalOverview ? `<h2>District Overview</h2>
+                <div class="stat-row">
+                    <div class="stat-box"><div class="stat-val">${globalOverview.total}</div><div class="stat-lbl">Total Issues</div></div>
+                    <div class="stat-box"><div class="stat-val" style="color:#10b981;">${globalOverview.resolved}</div><div class="stat-lbl">Resolved</div></div>
+                    <div class="stat-box"><div class="stat-val" style="color:#f59e0b;">${globalOverview.pending}</div><div class="stat-lbl">Pending</div></div>
+                    <div class="stat-box"><div class="stat-val" style="color:#2563eb;">${globalOverview.inProgress}</div><div class="stat-lbl">In Progress</div></div>
+                    <div class="stat-box"><div class="stat-val">${globalOverview.resolutionRate}%</div><div class="stat-lbl">Resolution Rate</div></div>
+                </div>` : ''}
+                <h2>Issues List</h2>
+                <table><thead><tr>
+                    <th>#</th><th>Title</th><th>Category</th><th>Department</th><th>Location</th><th>Reporter</th><th>Status</th><th>Date</th>
+                </tr></thead><tbody>
+                ${issues.map((issue, i) => `<tr>
+                    <td>${i + 1}</td>
+                    <td><b>${issue.title || '—'}</b></td>
+                    <td>${issue.category || '—'}</td>
+                    <td>${DEPT_LABELS[issue.department] || issue.department || '—'}</td>
+                    <td>${issue.location_name || issue.reporter_constituency || '—'}</td>
+                    <td>${issue.reporter_name || issue.reported_by_name || '—'}</td>
+                    <td style="font-weight:700;color:${issue.status === 'COMPLETED' ? '#16a34a' : issue.status === 'PENDING' ? '#d97706' : '#2563eb'}">${issue.status}</td>
+                    <td>${fmtDate(issue.created_at)}</td>
+                </tr>`).join('')}
+                </tbody></table>
+                ${globalDepts.length ? `<h2>Department Performance</h2>
+                <table><thead><tr><th>Department</th><th>Total</th><th>Resolved</th><th>In Progress</th><th>Pending</th><th>Efficiency</th></tr></thead><tbody>
+                ${globalDepts.map(d => `<tr>
+                    <td><b>${d.label}</b></td><td>${d.total}</td>
+                    <td style="color:#16a34a;">${d.resolved}</td>
+                    <td style="color:#2563eb;">${d.inProgress}</td>
+                    <td style="color:#d97706;">${d.pending}</td>
+                    <td><b>${d.efficiencyRate}%</b></td>
+                </tr>`).join('')}</tbody></table>` : ''}
+                <div class="footer">© ${new Date().getFullYear()} Tamil Nadu District Administration · MakkalKural Civic Platform · Confidential Government Document</div>
+            </body></html>`);
+            printWin.document.close();
+            setTimeout(() => printWin.print(), 400);
+        }
+
+        function generateReportExcel() {
+            const issues = getFilteredIssues();
+            const wb = XLSX.utils.book_new();
+
+            // Sheet 1: Overview
+            if (globalOverview) {
+                const ov = globalOverview;
+                const ovSheet = [
+                    ['MakkalKural — Commissioner District Report', '', '', '', ''],
+                    ['Generated', new Date().toLocaleString('en-IN'), '', '', ''],
+                    ['District', district, '', '', ''],
+                    [''],
+                    ['Metric', 'Value'],
+                    ['Total Issues', ov.total],
+                    ['Resolved', ov.resolved],
+                    ['In Progress', ov.inProgress],
+                    ['Pending', ov.pending],
+                    ['Resolution Rate (%)', ov.resolutionRate],
+                    ['Total Constituencies', ov.totalConstituencies],
+                ];
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ovSheet), 'Overview');
+            }
+
+            // Sheet 2: Issues
+            const issuesHeaders = ['#', 'Issue ID', 'Title', 'Category', 'Department', 'Location', 'Constituency', 'Reporter Name', 'Status', 'Priority Score', 'Supports', 'Created Date', 'Updated Date'];
+            const issuesRows = issues.map((issue, i) => [
+                i + 1,
+                issue.id,
+                issue.title,
+                issue.category,
+                DEPT_LABELS[issue.department] || issue.department,
+                issue.location_name || '',
+                issue.reporter_constituency || '',
+                issue.reporter_name || issue.reported_by_name || '',
+                issue.status,
+                issue.priority_score || 0,
+                issue.supports_count || 0,
+                fmtDate(issue.created_at),
+                fmtDate(issue.updated_at),
+            ]);
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([issuesHeaders, ...issuesRows]), 'Issues');
+
+            // Sheet 3: Departments
+            if (globalDepts.length) {
+                const dHeaders = ['Department', 'Total', 'Resolved', 'In Progress', 'Pending', 'Efficiency (%)', 'Avg Resolution'];
+                const dRows = globalDepts.map(d => [
+                    d.label, d.total, d.resolved, d.inProgress, d.pending, d.efficiencyRate,
+                    d.avgResolutionHours !== null ? (d.avgResolutionHours < 24 ? d.avgResolutionHours + 'h' : Math.round(d.avgResolutionHours / 24) + 'd') : 'N/A'
+                ]);
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([dHeaders, ...dRows]), 'Departments');
+            }
+
+            // Sheet 4: Monthly Trends
+            if (globalMonthly) {
+                const mHeaders = ['Month', 'Total Reports', 'Resolved', 'Pending'];
+                const mRows = globalMonthly.months.map((m, i) => [
+                    m, globalMonthly.totalCounts[i], globalMonthly.resolvedCounts[i], globalMonthly.pendingCounts[i]
+                ]);
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([mHeaders, ...mRows]), 'Monthly Trends');
+            }
+
+            const filename = `MakkalKural_Commissioner_${district}_${selectedReport}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            XLSX.writeFile(wb, filename);
+            toast.success('Downloaded', `Report saved as ${filename}`);
+        }
+
+        // Issues export shortcuts
+        function exportIssuesExcel() {
+            selectedReport = 'all';
+            generateReportExcel();
+        }
+
+        function exportIssuesPDF() {
+            selectedReport = 'all';
+            generateReportPDF();
+        }
+
         let currentDetailIssueId = null;
 
-        // ── Issue Details Modal trigger ──
         window.openIssueDetails = (id) => {
             const issue = globalIssues.find(i => i.id === id);
             if (!issue) return;
@@ -1581,763 +2373,16 @@
             }
         });
 
-        // ── Data computation engine ──
-        async function fetchAndCompute() {
-            try {
-                const res = await issuesAPI.getAll();
-                globalIssues = res.issues || [];
-
-                // 1. Overview computation
-                const total = globalIssues.length;
-                const resolved = globalIssues.filter(i => i.status === 'COMPLETED').length;
-                const inProgress = globalIssues.filter(i => i.status === 'IN_PROGRESS').length;
-                const pending = globalIssues.filter(i => i.status === 'PENDING').length;
-                const resolutionRate = total > 0 ? Math.round((resolved / total) * 100) : 0;
-
-                const constsSet = new Set();
-                globalIssues.forEach(i => { if (i.reporter_constituency) constsSet.add(i.reporter_constituency); });
-
-                globalOverview = {
-                    total,
-                    resolved,
-                    inProgress,
-                    pending,
-                    resolutionRate,
-                    totalConstituencies: constsSet.size
-                };
-
-                // 2. Departments computation
-                const deptKeys = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
-                globalDepts = deptKeys.map(key => {
-                    const deptIssues = globalIssues.filter(i => i.department === key);
-                    const dTotal = deptIssues.length;
-                    const dResolved = deptIssues.filter(i => i.status === 'COMPLETED').length;
-                    const dInProgress = deptIssues.filter(i => i.status === 'IN_PROGRESS').length;
-                    const dPending = deptIssues.filter(i => i.status === 'PENDING').length;
-
-                    const times = [];
-                    deptIssues.forEach(i => {
-                        if (i.status === 'COMPLETED' && i.created_at && i.updated_at) {
-                            const hrs = (new Date(i.updated_at) - new Date(i.created_at)) / (1000 * 60 * 60);
-                            if (hrs >= 0) times.push(hrs);
-                        }
-                    });
-                    const avgResolutionHours = times.length > 0 ? Math.round(times.reduce((a, b) => a + b, 0) / times.length) : null;
-
-                    return {
-                        key,
-                        label: DEPT_LABELS[key] || key,
-                        total: dTotal,
-                        resolved: dResolved,
-                        inProgress: dInProgress,
-                        pending: dPending,
-                        efficiencyRate: dTotal > 0 ? Math.round((dResolved / dTotal) * 100) : 0,
-                        avgResolutionHours
-                    };
-                }).sort((a, b) => b.total - a.total);
-
-                // 3. Analytics computation
-                const CATEGORIES = ['Waste', 'Water', 'Roads', 'Electricity', 'Law & Order'];
-                const byCategory = CATEGORIES.map(cat => ({
-                    name: cat,
-                    count: globalIssues.filter(i => i.category === cat).length
-                }));
-                globalAnalytics = {
-                    total,
-                    pending,
-                    inProgress,
-                    completed: resolved,
-                    resolutionRate,
-                    byCategory,
-                    byDepartment: globalDepts
-                };
-
-                // 4. Monthly trends computation
-                const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                const months = [];
-                const totalCounts = [];
-                const resolvedCounts = [];
-                const pendingCounts = [];
-                const now = new Date();
-                for (let i = 5; i >= 0; i--) {
-                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    months.push(MONTH_NAMES[d.getMonth()] + ' ' + d.getFullYear().toString().slice(2));
-
-                    const monthIssues = globalIssues.filter(issue => {
-                        const id = new Date(issue.created_at);
-                        return id.getFullYear() === d.getFullYear() && id.getMonth() === d.getMonth();
-                    });
-                    totalCounts.push(monthIssues.length);
-                    resolvedCounts.push(monthIssues.filter(i => i.status === 'COMPLETED').length);
-                    pendingCounts.push(monthIssues.filter(i => i.status === 'PENDING').length);
-                }
-                globalMonthly = { months, totalCounts, resolvedCounts, pendingCounts };
-
-                // 5. Constituencies computation
-                const constMap = {};
-                globalIssues.forEach(i => {
-                    const c = i.reporter_constituency || 'N/A';
-                    if (!constMap[c]) constMap[c] = { total: 0, resolved: 0, inProgress: 0, pending: 0 };
-                    constMap[c].total++;
-                    if (i.status === 'COMPLETED') constMap[c].resolved++;
-                    else if (i.status === 'IN_PROGRESS') constMap[c].inProgress++;
-                    else constMap[c].pending++;
-                });
-                globalConstituencies = Object.entries(constMap).map(([name, stats]) => ({
-                    name,
-                    total: stats.total,
-                    resolved: stats.resolved,
-                    inProgress: stats.inProgress,
-                    pending: stats.pending,
-                    resolutionRate: stats.total > 0 ? Math.round((stats.resolved / stats.total) * 100) : 0,
-                })).sort((a, b) => b.total - a.total);
-
-            } catch (err) {
-                console.error("Computation initialization failed:", err);
-                toast.error("Error", "Failed to compile district statistics.");
-            }
-        }
-
-        // ═══════════════════════════════════════════════════
-        // RENDER: OVERVIEW
-        // ═══════════════════════════════════════════════════
-        async function loadOverview() {
-            await fetchAndCompute();
-            if (!globalOverview) return;
-
-            document.getElementById('ov-total').textContent = globalOverview.total.toLocaleString();
-            document.getElementById('ov-resolved').textContent = globalOverview.resolved.toLocaleString();
-            document.getElementById('ov-pending').textContent = globalOverview.pending.toLocaleString();
-            document.getElementById('ov-inprogress').textContent = globalOverview.inProgress.toLocaleString();
-            document.getElementById('ov-rate').textContent = globalOverview.resolutionRate + '%';
-            document.getElementById('ov-const').textContent = globalOverview.totalConstituencies;
-            document.getElementById('ov-resolved-pct').textContent = globalOverview.resolutionRate + '% rate';
-
-            // Status Donut
-            createChart('ovStatusChart', {
-                type: 'doughnut',
-                data: {
-                    labels: ['Resolved', 'In Progress', 'Pending'],
-                    datasets: [{
-                        data: [globalOverview.resolved, globalOverview.inProgress, globalOverview.pending],
-                        backgroundColor: [P.green, P.blue, P.amber],
-                        borderWidth: 0, hoverOffset: 8,
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '68%',
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: {
-                            callbacks: {
-                                label: ctx => ` ${ctx.label}: ${ctx.parsed.toLocaleString()} (${globalOverview.total > 0 ? Math.round(ctx.parsed / globalOverview.total * 100) : 0}%)`
-                            }
-                        }
-                    }
-                }
-            });
-
-            // Department efficiency rate chart
-            createChart('ovDeptChart', {
-                type: 'bar',
-                data: {
-                    labels: globalDepts.map(d => d.label),
-                    datasets: [{
-                        label: 'Efficiency %',
-                        data: globalDepts.map(d => d.efficiencyRate),
-                        backgroundColor: [P.indigoL, P.amberL, P.purpleL],
-                        borderColor: [P.indigo, P.amber, P.purple],
-                        borderWidth: 2, borderRadius: 8,
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    scales: {
-                        x: { max: 100, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: v => v + '%' } },
-                        y: { grid: { display: false } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // Apex category chart
-            renderCategoryApex(globalAnalytics.byCategory);
-
-            // Constituencies table
-            renderConstTable(globalConstituencies);
-        }
-
-        function renderConstTable(constituencies) {
-            const tbody = document.getElementById('const-tbody');
-            if (!constituencies.length) {
-                tbody.innerHTML = '<tr class="loading-row"><td colspan="6">No constituency data available yet.</td></tr>';
-                return;
-            }
-            tbody.innerHTML = constituencies.map((c, i) => {
-                const rateColor = c.resolutionRate >= 70 ? '#16a34a' : c.resolutionRate >= 40 ? '#d97706' : '#dc2626';
-                return `<tr>
-                    <td style="font-weight:700;color:var(--text-muted,#64748b);">${i + 1}</td>
-                    <td style="font-weight:700;">${c.name}</td>
-                    <td>${c.total}</td>
-                    <td style="color:#16a34a;font-weight:600;">${c.resolved}</td>
-                    <td style="color:#d97706;font-weight:600;">${c.pending}</td>
-                    <td>
-                        <div class="inline-bar">
-                            <div class="bar-track"><div class="bar-fill" style="width:${c.resolutionRate}%;background:var(--comm-primary);"></div></div>
-                            <span class="bar-pct" style="color:${rateColor};">${c.resolutionRate}%</span>
-                        </div>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
-
-        function renderCategoryApex(byCategory) {
-            const sorted = [...byCategory].sort((a, b) => b.count - a.count);
-            if (typeof ApexCharts === 'undefined') return;
-            const el = document.getElementById('ovCategoryApex');
-            if (!el) return;
-            if (el._apexChart) { el._apexChart.destroy(); }
-            const chart = new ApexCharts(el, {
-                chart: { type: 'bar', height: 220, toolbar: { show: false }, fontFamily: 'Inter, sans-serif' },
-                series: [{ name: 'Issues', data: sorted.map(c => c.count) }],
-                xaxis: { categories: sorted.map(c => c.name) },
-                colors: [P.indigo],
-                plotOptions: { bar: { borderRadius: 6, columnWidth: '50%' } },
-                dataLabels: { enabled: false },
-                grid: { strokeDashArray: 4, borderColor: 'rgba(0,0,0,0.06)' },
-                yaxis: { labels: { style: { colors: '#64748b', fontSize: '12px' } } },
-            });
-            chart.render();
-            el._apexChart = chart;
-        }
-
-        // ═══════════════════════════════════════════════════
-        // RENDER: ISSUES TAB
-        // ═══════════════════════════════════════════════════
-        function renderIssuesTab() {
-            applyIssueFilters();
-        }
-
-        function applyIssueFilters() {
-            const status = document.getElementById('if-status').value;
-            const dept = document.getElementById('if-dept').value;
-            const cat = document.getElementById('if-cat').value;
-            const from = document.getElementById('if-from').value;
-            const to = document.getElementById('if-to').value;
-
-            let filtered = [...globalIssues];
-            if (status) filtered = filtered.filter(i => i.status === status);
-            if (dept)   filtered = filtered.filter(i => i.department === dept);
-            if (cat)    filtered = filtered.filter(i => i.category === cat);
-            if (from)   filtered = filtered.filter(i => new Date(i.created_at) >= new Date(from));
-            if (to)     filtered = filtered.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59.999Z'));
-
-            renderIssuesTable(filtered);
-        }
-
-        function renderIssuesTable(issues) {
-            const tbody = document.getElementById('issues-tbody');
-            document.getElementById('issues-count-label').textContent = issues.length;
-            if (!issues.length) {
-                tbody.innerHTML = '<tr class="loading-row"><td colspan="8">No issues found with these filters.</td></tr>';
-                return;
-            }
-            tbody.innerHTML = issues.map((issue, i) => `
-                <tr onclick="openIssueDetails('${issue.id}')" style="cursor:pointer;">
-                    <td style="font-weight:700;color:var(--text-muted,#64748b);">${i + 1}</td>
-                    <td style="max-width:220px;">
-                        <div style="font-weight:700;font-size:0.88rem;margin-bottom:2px;">${issue.title || '—'}</div>
-                        <div style="font-size:0.75rem;color:var(--text-muted,#64748b);">#${(issue.id || '').slice(0, 8)}…</div>
-                    </td>
-                    <td><span style="background:rgba(176,0,0,0.08);color:var(--comm-primary);padding:2px 8px;border-radius:99px;font-size:0.75rem;font-weight:700;">${issue.category || '—'}</span></td>
-                    <td style="font-size:0.84rem;">${DEPT_LABELS[issue.department] || issue.department || '—'}</td>
-                    <td style="font-size:0.82rem;color:var(--text-muted,#64748b);">${issue.location_name || `${issue.reporter_constituency || '—'}`}</td>
-                    <td style="font-size:0.82rem;">${issue.reporter_name || issue.reported_by_name || '—'}</td>
-                    <td>${statusBadge(issue.status)}</td>
-                    <td style="font-size:0.8rem;color:var(--text-muted,#64748b);white-space:nowrap;">${fmtDate(issue.created_at)}</td>
-                </tr>
-            `).join('');
-        }
-
-        document.getElementById('apply-issue-filters').addEventListener('click', () => applyIssueFilters());
-        document.getElementById('clear-issue-filters').addEventListener('click', () => {
-            ['if-status','if-dept','if-cat','if-from','if-to'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = '';
-            });
-            applyIssueFilters();
-        });
-
-        // Issues exports shortcuts
-        document.getElementById('issues-export-excel').addEventListener('click', () => exportIssuesExcel());
-        document.getElementById('issues-export-pdf').addEventListener('click', () => exportIssuesPDF());
-
-        // ═══════════════════════════════════════════════════
-        // RENDER: DEPARTMENTS TAB
-        // ═══════════════════════════════════════════════════
-        function renderDepartmentsTab() {
-            if (!globalDepts.length) return;
-            renderDeptCards(globalDepts);
-            renderDeptCompareChart(globalDepts);
-            renderResolutionTime(globalDepts);
-        }
-
-        function renderDeptCards(departments) {
-            const container = document.getElementById('dept-grid');
-            if (!departments.length) {
-                container.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><div class="empty-state-icon">📭</div><div class="empty-state-msg">No department data yet.</div></div>';
-                return;
-            }
-            container.innerHTML = departments.map(dept => {
-                const meta = DEPT_ICONS[dept.key] || { icon: '🏛️', color: P.blueL, border: P.blue };
-                const effColor = dept.efficiencyRate >= 70 ? '#16a34a' : dept.efficiencyRate >= 40 ? '#d97706' : '#dc2626';
-                const avgHrs = dept.avgResolutionHours !== null
-                    ? (dept.avgResolutionHours < 24 ? dept.avgResolutionHours + 'h' : Math.round(dept.avgResolutionHours / 24) + 'd')
-                    : 'N/A';
-                return `
-                <div class="dept-card">
-                    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
-                        <div class="dept-icon-circle" style="background:${meta.color};border:1px solid ${meta.border}22;">${meta.icon}</div>
-                        <div>
-                            <div style="font-family:var(--font-display,'Outfit',sans-serif);font-size:1rem;font-weight:800;color:var(--text,#0f172a);">${dept.label}</div>
-                            <div style="font-size:0.76rem;color:var(--text-muted,#64748b);">${dept.total} total complaints</div>
-                        </div>
-                    </div>
-                    <div class="dept-stats-row">
-                        <div class="dept-stat">
-                            <div class="dept-stat-val">${dept.total}</div>
-                            <div class="dept-stat-lbl">Total</div>
-                        </div>
-                        <div class="dept-stat">
-                            <div class="dept-stat-val" style="color:#10b981;">${dept.resolved}</div>
-                            <div class="dept-stat-lbl">Resolved</div>
-                        </div>
-                        <div class="dept-stat">
-                            <div class="dept-stat-val" style="color:#f59e0b;">${dept.pending}</div>
-                            <div class="dept-stat-lbl">Pending</div>
-                        </div>
-                    </div>
-                    <div style="margin-top:12px;">
-                        <div style="display:flex;justify-content:between;font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:4px;">
-                            <span>Efficiency</span>
-                            <span style="color:${effColor};margin-left:auto;">${dept.efficiencyRate}%</span>
-                        </div>
-                        <div class="efficiency-bar-track">
-                            <div class="efficiency-bar-fill" style="width:${dept.efficiencyRate}%;"></div>
-                        </div>
-                        <div style="display:flex;justify-content:between;font-size:0.74rem;color:var(--text-muted,#64748b);margin-top:8px;">
-                            <span>Avg Resolution Time</span>
-                            <span style="font-weight:700;color:var(--comm-primary);margin-left:auto;">${avgHrs}</span>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
-
-        function renderDeptCompareChart(departments) {
-            createChart('deptCompareChart', {
-                type: 'bar',
-                data: {
-                    labels: departments.map(d => d.label),
-                    datasets: [
-                        { label: 'Total', data: departments.map(d => d.total), backgroundColor: P.indigoL, borderColor: P.indigo, borderWidth: 1.5, borderRadius: 6 },
-                        { label: 'Resolved', data: departments.map(d => d.resolved), backgroundColor: P.greenL, borderColor: P.green, borderWidth: 1.5, borderRadius: 6 },
-                        { label: 'Pending', data: departments.map(d => d.pending), backgroundColor: P.amberL, borderColor: P.amber, borderWidth: 1.5, borderRadius: 6 }
-                    ]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: {
-                        x: { grid: { display: false } },
-                        y: { grid: { color: 'rgba(0,0,0,0.04)' } }
-                    },
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-        }
-
-        function renderResolutionTime(departments) {
-            const grid = document.getElementById('resTimeDeptGrid');
-            grid.innerHTML = departments.map(dept => {
-                const meta = DEPT_ICONS[dept.key] || { icon: '🏛️' };
-                const avgHrs = dept.avgResolutionHours !== null
-                    ? (dept.avgResolutionHours < 24 ? dept.avgResolutionHours + ' hours' : Math.round(dept.avgResolutionHours / 24) + ' days')
-                    : 'No data';
-                return `
-                <div style="background:#f8fafc;border-radius:16px;padding:16px;border:1px solid rgba(15,23,42,0.06);">
-                    <div style="font-size:1.5rem;margin-bottom:8px;">${meta.icon}</div>
-                    <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">${dept.label}</div>
-                    <div style="font-size:0.75rem;color:var(--text-muted,#64748b);">Avg Resolution Time</div>
-                    <div style="font-family:var(--font-display,'Outfit',sans-serif);font-size:1.3rem;font-weight:800;color:var(--comm-primary);margin-top:4px;">${avgHrs}</div>
-                </div>`;
-            }).join('');
-        }
-
-        // ═══════════════════════════════════════════════════
-        // RENDER: ANALYTICS TAB
-        // ═══════════════════════════════════════════════════
-        function renderAnalyticsTab() {
-            if (!globalAnalytics) return;
-
-            document.getElementById('an-total').textContent = globalAnalytics.total.toLocaleString();
-            document.getElementById('an-resolved').textContent = globalAnalytics.completed.toLocaleString();
-            document.getElementById('an-pending').textContent = globalAnalytics.pending.toLocaleString();
-            document.getElementById('an-rate').textContent = globalAnalytics.resolutionRate + '%';
-
-            // Status doughnut
-            createChart('anStatusChart', {
-                type: 'doughnut',
-                data: {
-                    labels: ['Resolved', 'In Progress', 'Pending'],
-                    datasets: [{
-                        data: [globalAnalytics.completed, globalAnalytics.inProgress, globalAnalytics.pending],
-                        backgroundColor: [P.green, P.blue, P.amber],
-                        borderWidth: 0, hoverOffset: 8,
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, cutout: '68%',
-                    plugins: { legend: { position: 'bottom' } }
-                }
-            });
-
-            // Dept efficiency bar
-            createChart('anDeptEffChart', {
-                type: 'bar',
-                data: {
-                    labels: globalAnalytics.byDepartment.map(d => d.label),
-                    datasets: [{
-                        label: 'Efficiency %',
-                        data: globalAnalytics.byDepartment.map(d => d.efficiencyRate),
-                        backgroundColor: [P.indigoL, P.amberL, P.purpleL],
-                        borderColor: [P.indigo, P.amber, P.purple],
-                        borderWidth: 2, borderRadius: 8,
-                    }]
-                },
-                options: {
-                    responsive: true, maintainAspectRatio: false, indexAxis: 'y',
-                    scales: {
-                        x: { max: 100, ticks: { callback: v => v + '%' }, grid: { color: 'rgba(0,0,0,0.04)' } },
-                        y: { grid: { display: false } }
-                    },
-                    plugins: { legend: { display: false } }
-                }
-            });
-
-            // Monthly trend charts
-            if (globalMonthly) {
-                // Monthly trend line
-                createChart('monthlyTrendChart', {
-                    type: 'line',
-                    data: {
-                        labels: globalMonthly.months,
-                        datasets: [
-                            {
-                                label: 'Reports Received',
-                                data: globalMonthly.totalCounts,
-                                borderColor: P.indigo, backgroundColor: P.indigoL,
-                                borderWidth: 2.5, fill: true, tension: 0.4,
-                                pointBackgroundColor: P.indigo, pointRadius: 4,
-                            },
-                            {
-                                label: 'Resolved',
-                                data: globalMonthly.resolvedCounts,
-                                borderColor: P.green, backgroundColor: P.greenL,
-                                borderWidth: 2.5, fill: true, tension: 0.4,
-                                pointBackgroundColor: P.green, pointRadius: 4,
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true }
-                        },
-                        plugins: { legend: { position: 'top' } }
-                    }
-                });
-
-                // Pending trend bar
-                createChart('anPendingChart', {
-                    type: 'bar',
-                    data: {
-                        labels: globalMonthly.months,
-                        datasets: [{
-                            label: 'Pending Issues',
-                            data: globalMonthly.pendingCounts,
-                            backgroundColor: P.amberL,
-                            borderColor: P.amber,
-                            borderWidth: 2, borderRadius: 6,
-                        }]
-                    },
-                    options: {
-                        responsive: true, maintainAspectRatio: false,
-                        scales: {
-                            x: { grid: { display: false } },
-                            y: { grid: { color: 'rgba(0,0,0,0.04)' }, beginAtZero: true }
-                        },
-                        plugins: { legend: { display: false } }
-                    }
-                });
-            }
-        }
-
-        // ═══════════════════════════════════════════════════
-        // RENDER: HEATMAP TAB
-        // ═══════════════════════════════════════════════════
-        let colMap = null;
-        let heatLayer = null;
-
-        function renderHeatmapTab() {
-            applyHeatmapFilters();
-        }
-
-        function applyHeatmapFilters() {
-            const status = document.getElementById('hm-status').value;
-            const dept = document.getElementById('hm-dept').value;
-            const cat = document.getElementById('hm-cat').value;
-
-            let filtered = [...globalIssues];
-            if (status) filtered = filtered.filter(i => i.status === status);
-            if (dept)   filtered = filtered.filter(i => i.department === dept);
-            if (cat)    filtered = filtered.filter(i => i.category === cat);
-
-            const points = filtered
-                .filter(i => i.latitude && i.longitude)
-                .map(i => ({
-                    lat: parseFloat(i.latitude),
-                    lng: parseFloat(i.longitude),
-                    status: i.status,
-                    department: i.department,
-                    category: i.category
-                }));
-
-            document.getElementById('hm-points-count').textContent = points.length;
-            renderHeatmap(points);
-        }
-
-        function renderHeatmap(points) {
-            if (!colMap) {
-                colMap = L.map('collector-map-el').setView([10.8505, 76.2711], 8);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '© OpenStreetMap contributors'
-                }).addTo(colMap);
-            }
-
-            if (heatLayer) colMap.removeLayer(heatLayer);
-
-            if (points.length === 0) return;
-
-            const latlngs = points.map(p => [p.lat, p.lng, 1.0]);
-            heatLayer = L.heatLayer(latlngs, {
-                radius: 22, blur: 18, maxZoom: 17,
-                gradient: { 0.2: '#22c55e', 0.5: '#f59e0b', 0.8: '#ef4444', 1.0: '#7c0000' }
-            }).addTo(colMap);
-
-            // Fit map bounds
-            const bounds = L.latLngBounds(points.map(p => [p.lat, p.lng]));
-            if (bounds.isValid()) colMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
-        }
-
-        function refreshMap() {
-            if (colMap) colMap.invalidateSize();
-        }
-
-        document.getElementById('apply-heatmap-filters').addEventListener('click', () => applyHeatmapFilters());
-        document.getElementById('reset-heatmap-filters').addEventListener('click', () => {
-            ['hm-status','hm-dept','hm-cat'].forEach(id => { document.getElementById(id).value = ''; });
-            applyHeatmapFilters();
-        });
-
-        // ═══════════════════════════════════════════════════
-        // RENDER: REPORTS TAB
-        // ═══════════════════════════════════════════════════
-        let selectedReport = 'all';
-
-        function renderReportsTab() {
-            document.querySelectorAll('.report-option-card').forEach(card => {
-                card.addEventListener('click', () => {
-                    document.querySelectorAll('.report-option-card').forEach(c => c.classList.remove('selected'));
-                    card.classList.add('selected');
-                    selectedReport = card.dataset.report;
-                    document.getElementById('date-report-filters').style.display = selectedReport === 'date' ? 'flex' : 'none';
-                });
-            });
-        }
-
-        document.getElementById('report-dl-pdf').addEventListener('click', () => generateReportPDF());
-        document.getElementById('report-dl-excel').addEventListener('click', () => generateReportExcel());
-
-        function getFilteredIssues() {
-            let issues = [...globalIssues];
-            if (selectedReport === 'date') {
-                const from = document.getElementById('rep-date-from').value;
-                const to   = document.getElementById('rep-date-to').value;
-                if (from) issues = issues.filter(i => new Date(i.created_at) >= new Date(from));
-                if (to)   issues = issues.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59.999Z'));
-            }
-            return issues;
-        }
-
-        function generateReportPDF() {
-            const issues = getFilteredIssues();
-            const dists = district;
-            const now = new Date().toLocaleString('en-IN');
-            const reportTitle = {
-                all: 'All Issues Report',
-                dept: 'Department-wise Report',
-                status: 'Status-wise Report',
-                date: 'Date Range Report',
-                constituency: 'Constituency Report',
-                category: 'Category Report',
-            }[selectedReport] || 'District Report';
-
-            const printWin = window.open('', '_blank');
-            printWin.document.write(`<!DOCTYPE html><html><head>
-                <title>Collector Report — ${dists} District</title>
-                <style>
-                    body{font-family:Arial,sans-serif;margin:32px;color:#0f172a;}
-                    h1{color:#B00000;font-size:1.7rem;border-bottom:3px solid #B00000;padding-bottom:10px;}
-                    h2{color:#1e293b;font-size:1.1rem;margin-top:24px;margin-bottom:8px;}
-                    table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:0.85rem;}
-                    th{background:#f8fafc;padding:10px 12px;text-align:left;border:1px solid #e2e8f0;font-weight:700;}
-                    td{padding:9px 12px;border:1px solid #e2e8f0;}
-                    tr:nth-child(even) td{background:#f9fafb;}
-                    .hero{background:#B00000;color:white;padding:20px 24px;border-radius:10px;margin-bottom:24px;}
-                    .stat-row{display:flex;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
-                    .stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:12px 16px;min-width:110px;}
-                    .stat-val{font-size:1.5rem;font-weight:800;color:#B00000;}
-                    .stat-lbl{font-size:0.72rem;color:#64748b;text-transform:uppercase;letter-spacing:0.06em;}
-                    .footer{margin-top:36px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:0.76rem;color:#94a3b8;}
-                </style>
-            </head><body>
-                <div class="hero">
-                    <h1 style="color:white;border-bottom:none;padding-bottom:0;margin-bottom:4px;">🏛️ MakkalKural — ${reportTitle}</h1>
-                    <div style="font-size:0.88rem;opacity:0.85;">Generated: ${now} | District: ${dists}</div>
-                </div>
-                ${globalOverview ? `<h2>District Overview</h2>
-                <div class="stat-row">
-                    <div class="stat-box"><div class="stat-val">${globalOverview.total}</div><div class="stat-lbl">Total Issues</div></div>
-                    <div class="stat-box"><div class="stat-val" style="color:#10b981;">${globalOverview.resolved}</div><div class="stat-lbl">Resolved</div></div>
-                    <div class="stat-box"><div class="stat-val" style="color:#f59e0b;">${globalOverview.pending}</div><div class="stat-lbl">Pending</div></div>
-                    <div class="stat-box"><div class="stat-val" style="color:#2563eb;">${globalOverview.inProgress}</div><div class="stat-lbl">In Progress</div></div>
-                    <div class="stat-box"><div class="stat-val">${globalOverview.resolutionRate}%</div><div class="stat-lbl">Resolution Rate</div></div>
-                </div>` : ''}
-                <h2>Issues List</h2>
-                <table><thead><tr>
-                    <th>#</th><th>Title</th><th>Category</th><th>Department</th><th>Location</th><th>Reporter</th><th>Status</th><th>Date</th>
-                </tr></thead><tbody>
-                ${issues.map((issue, i) => `<tr>
-                    <td>${i + 1}</td>
-                    <td><b>${issue.title || '—'}</b></td>
-                    <td>${issue.category || '—'}</td>
-                    <td>${DEPT_LABELS[issue.department] || issue.department || '—'}</td>
-                    <td>${issue.location_name || issue.reporter_constituency || '—'}</td>
-                    <td>${issue.reporter_name || issue.reported_by_name || '—'}</td>
-                    <td style="font-weight:700;color:${issue.status === 'COMPLETED' ? '#16a34a' : issue.status === 'PENDING' ? '#d97706' : '#2563eb'}">${issue.status}</td>
-                    <td>${fmtDate(issue.created_at)}</td>
-                </tr>`).join('')}
-                </tbody></table>
-                ${globalDepts.length ? `<h2>Department Performance</h2>
-                <table><thead><tr><th>Department</th><th>Total</th><th>Resolved</th><th>In Progress</th><th>Pending</th><th>Efficiency</th></tr></thead><tbody>
-                ${globalDepts.map(d => `<tr>
-                    <td><b>${d.label}</b></td><td>${d.total}</td>
-                    <td style="color:#16a34a;">${d.resolved}</td>
-                    <td style="color:#2563eb;">${d.inProgress}</td>
-                    <td style="color:#d97706;">${d.pending}</td>
-                    <td><b>${d.efficiencyRate}%</b></td>
-                </tr>`).join('')}</tbody></table>` : ''}
-                <div class="footer">© ${new Date().getFullYear()} Tamil Nadu District Administration · MakkalKural Civic Platform · Confidential Government Document</div>
-            </body></html>`);
-            printWin.document.close();
-            setTimeout(() => printWin.print(), 400);
-        }
-
-        function generateReportExcel() {
-            const issues = getFilteredIssues();
-            const wb = XLSX.utils.book_new();
-
-            // Sheet 1: Overview
-            if (globalOverview) {
-                const ov = globalOverview;
-                const ovSheet = [
-                    ['MakkalKural — Collector District Report', '', '', '', ''],
-                    ['Generated', new Date().toLocaleString('en-IN'), '', '', ''],
-                    ['District', district, '', '', ''],
-                    [''],
-                    ['Metric', 'Value'],
-                    ['Total Issues', ov.total],
-                    ['Resolved', ov.resolved],
-                    ['In Progress', ov.inProgress],
-                    ['Pending', ov.pending],
-                    ['Resolution Rate (%)', ov.resolutionRate],
-                    ['Total Constituencies', ov.totalConstituencies],
-                ];
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(ovSheet), 'Overview');
-            }
-
-            // Sheet 2: Issues
-            const issuesHeaders = ['#', 'Issue ID', 'Title', 'Category', 'Department', 'Location', 'Constituency', 'Reporter Name', 'Status', 'Priority Score', 'Supports', 'Created Date', 'Updated Date'];
-            const issuesRows = issues.map((issue, i) => [
-                i + 1,
-                issue.id,
-                issue.title,
-                issue.category,
-                DEPT_LABELS[issue.department] || issue.department,
-                issue.location_name || '',
-                issue.reporter_constituency || '',
-                issue.reporter_name || issue.reported_by_name || '',
-                issue.status,
-                issue.priority_score || 0,
-                issue.supports_count || 0,
-                fmtDate(issue.created_at),
-                fmtDate(issue.updated_at),
-            ]);
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([issuesHeaders, ...issuesRows]), 'Issues');
-
-            // Sheet 3: Departments
-            if (globalDepts.length) {
-                const dHeaders = ['Department', 'Total', 'Resolved', 'In Progress', 'Pending', 'Efficiency (%)', 'Avg Resolution'];
-                const dRows = globalDepts.map(d => [
-                    d.label, d.total, d.resolved, d.inProgress, d.pending, d.efficiencyRate,
-                    d.avgResolutionHours !== null ? (d.avgResolutionHours < 24 ? d.avgResolutionHours + 'h' : Math.round(d.avgResolutionHours / 24) + 'd') : 'N/A'
-                ]);
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([dHeaders, ...dRows]), 'Departments');
-            }
-
-            // Sheet 4: Monthly Trends
-            if (globalMonthly) {
-                const mHeaders = ['Month', 'Total Reports', 'Resolved', 'Pending'];
-                const mRows = globalMonthly.months.map((m, i) => [
-                    m, globalMonthly.totalCounts[i], globalMonthly.resolvedCounts[i], globalMonthly.pendingCounts[i]
-                ]);
-                XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([mHeaders, ...mRows]), 'Monthly Trends');
-            }
-
-            const filename = `MakkalKural_Collector_${district}_${selectedReport}_${new Date().toISOString().slice(0,10)}.xlsx`;
-            XLSX.writeFile(wb, filename);
-            toast.success('Downloaded', `Report saved as ${filename}`);
-        }
-
-        function exportIssuesExcel() {
-            selectedReport = 'all';
-            generateReportExcel();
-        }
-
-        function exportIssuesPDF() {
-            selectedReport = 'all';
-            generateReportPDF();
-        }
-
         // ═══════════════════════════════════════════════════
         // INITIALISE
         // ═══════════════════════════════════════════════════
         async function init() {
             tabInitialized['overview'] = true;
             tabInitialized['issues'] = true;
-            await loadOverview();
-            renderIssuesTab();
+            await Promise.all([
+                loadOverview(),
+                loadIssues(),
+            ]);
         }
 
         init();

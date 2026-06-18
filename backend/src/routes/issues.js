@@ -29,22 +29,13 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
         }
 
         // If district or constituency filters requested, use a joined query
-        const needsUserJoin = req.query.district || req.query.constituency;
+        const needsUserJoin = true;
 
-        let query;
-        if (needsUserJoin) {
-            query = supabaseAdmin
-                .from('issues')
-                .select('*, reporter:users!issues_reported_by_id_fkey(district, constituency)')
-                .neq('department', 'FIRE_STATION')
-                .order('created_at', { ascending: false });
-        } else {
-            query = supabaseAdmin
-                .from('issues')
-                .select('*')
-                .neq('department', 'FIRE_STATION')
-                .order('created_at', { ascending: false });
-        }
+        let query = supabaseAdmin
+            .from('issues')
+            .select('*, reporter:users!issues_reported_by_id_fkey(name, email, phone_number, district, constituency)')
+            .neq('department', 'FIRE_STATION')
+            .order('created_at', { ascending: false });
 
         if (req.query.department) {
             query = query.eq('department', req.query.department);
@@ -73,7 +64,14 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
         if (needsUserJoin && data) {
             data = data.map(issue => {
                 const { reporter, ...rest } = issue;
-                return { ...rest, reporter_district: reporter?.district, reporter_constituency: reporter?.constituency };
+                return {
+                    ...rest,
+                    reporter_name: reporter?.name,
+                    reporter_email: reporter?.email,
+                    reporter_phone: reporter?.phone_number,
+                    reporter_district: reporter?.district,
+                    reporter_constituency: reporter?.constituency
+                };
             });
         }
 

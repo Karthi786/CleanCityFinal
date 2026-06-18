@@ -1088,6 +1088,7 @@
                 </form>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-outline" id="download-pdf-btn" type="button" style="margin-right: auto; display: flex; align-items: center; gap: 6px;">📄 Download PDF</button>
                 <button class="btn btn-outline" id="modal-cancel">Cancel</button>
                 <button class="btn btn-primary btn-lg" id="update-submit">
                     <span id="update-text">Update Status</span>
@@ -1142,6 +1143,7 @@
         import { toast } from './js/toast.js';
         import { t } from './js/i18n.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
+        import { downloadSingleIssuePDF } from './js/pdf-export.js';
 
         const DEPT_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
         const user = guardPage(DEPT_ROLES);
@@ -1402,6 +1404,15 @@
             document.getElementById('proof-file-name').textContent = 'No file chosen';
             modal.classList.add('open');
         };
+
+        document.getElementById('download-pdf-btn').addEventListener('click', async () => {
+            const issue = allIssues.find(i => i.id === currentIssueId);
+            if (issue) {
+                await downloadSingleIssuePDF(issue);
+            } else {
+                toast.error('Error', 'No active issue details found.');
+            }
+        });
 
         document.getElementById('update-submit').addEventListener('click', async () => {
             const statusRadio = document.querySelector('input[name="new-status"]:checked');

@@ -38,6 +38,7 @@ export const ROLE_DASHBOARDS = {
     ADMIN: 'admin-dashboard.html',
     MLA: 'mla-dashboard.html',
     CM: 'cm-dashboard.html',
+    COMMISSIONER: 'commissioner-dashboard.html',
 };
 
 export const ROLE_LABELS = {
@@ -49,6 +50,7 @@ export const ROLE_LABELS = {
     ADMIN: 'System Administrator',
     MLA: 'Member of Legislative Assembly',
     CM: 'Chief Minister',
+    COMMISSIONER: 'District Commissioner',
 };
 
 /* ── Get dashboard path for a role ── */

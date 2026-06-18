@@ -326,7 +326,7 @@
         import { toast } from './js/toast.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
 
-        const ROLE_LABELS = { USER: 'Citizen', TAMILNADU_CORPORATION: 'Tamilnadu Corp.', TNEB: 'TNEB', POLICE: 'Police', COLLECTOR: 'Collector', ADMIN: 'Admin' };
+        const ROLE_LABELS = { USER: 'Citizen', TAMILNADU_CORPORATION: 'Tamilnadu Corp.', TNEB: 'TNEB', POLICE: 'Police', COLLECTOR: 'Collector', ADMIN: 'Admin', MLA: 'MLA', CM: 'Chief Minister', COMMISSIONER: 'Commissioner' };
 
         const user = guardPage(['ADMIN']);
         if (!user) throw new Error('Unauthorized');
@@ -397,6 +397,7 @@
                       <p class="text-muted text-sm" style="margin:4px 0;">📧 ${u.email}</p>
                       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px; align-items:center;">
                         <span class="badge badge-yellow" style="font-size:0.75rem; padding:3px 10px; border-radius:99px;">${ROLE_LABELS[u.role] || u.role}</span>
+                        ${u.district ? `<span class="badge badge-blue" style="font-size:0.75rem; padding:3px 10px; border-radius:99px;">📍 ${u.district}</span>` : ''}
                         <span class="text-xs text-muted" style="font-size:0.78rem;">Registered: ${new Date(u.created_at).toLocaleDateString()}</span>
                       </div>
                     </div>
@@ -440,6 +441,7 @@
                           <th>Name</th>
                           <th>Email</th>
                           <th>Role / Dept</th>
+                          <th>District / Location</th>
                           <th>Status</th>
                           <th>Joined</th>
                           <th>Actions</th>
@@ -454,8 +456,12 @@
                                   ${u.department ? `<span style="font-size:0.75rem;color:var(--text-muted); font-weight: 500; margin-top:2px;">🏢 ${u.department}</span>` : ''}
                               </div>
                             </td>
+                            <td style="font-size: 0.85rem; color: var(--text);">
+                              ${u.district ? `<strong>📍 ${u.district}</strong>` : '—'}
+                              ${u.constituency ? `<div style="font-size:0.75rem;color:var(--text-muted); font-weight: 500; margin-top:2px;">🏛️ ${u.constituency}</div>` : ''}
+                            </td>
                             <td>
-                              <span class="badge ${u.verification_status === 'approved' ? 'badge-green' : u.verification_status === 'rejected' ? 'badge-red' : 'badge-yellow'}" style="font-size: 0.72rem; padding: 3px 10px; border-radius: 99px;">
+                              <span class="badge ${u.verification_status === 'approved' ? 'badge-green' : u.verification_status === 'rejected' ? 'badge-red' : u.verification_status === 'pending_verification' ? 'badge-yellow' : 'badge-red'}" style="font-size: 0.72rem; padding: 3px 10px; border-radius: 99px;">
                                 ${u.verification_status}
                               </span>
                             </td>

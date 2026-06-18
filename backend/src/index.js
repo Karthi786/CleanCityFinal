@@ -87,6 +87,7 @@ app.use('/api/notifications', require('./routes/notifications').router);
 app.use('/api/image', require('./routes/image'));
 app.use('/api/ezhil-ai', require('./routes/ai'));
 app.use('/api/cm', require('./routes/cm'));
+app.use('/api/commissioner', require('./routes/commissioner'));
 
 /*
 ========================================
