@@ -81,4 +81,67 @@ router.post('/', verifyToken, async (req, res) => {
     }
 });
 
+
+// ── Voice Transcription Polish Endpoint ──
+// Receives raw speech-to-text from browser, polishes it into a formal complaint
+// No audio is sent — only already-transcribed plain text
+const TRANSCRIBE_MODEL = "openai/gpt-oss-120b:free";
+
+router.post('/transcribe', verifyToken, async (req, res) => {
+    const { rawText } = req.body;
+
+    if (!rawText || typeof rawText !== 'string' || rawText.trim().length === 0) {
+        return res.status(400).json({ error: 'rawText is required.' });
+    }
+
+    if (!OPENROUTER_API_KEY) {
+        return res.status(500).json({ error: 'AI service unavailable.' });
+    }
+
+    const systemPrompt = `You are a helper that converts informal speech-to-text into a clear, polite civic complaint description.
+
+Rules:
+- Keep the SAME LANGUAGE as the input (Tamil stays Tamil, English stays English).
+- Fix grammar, punctuation, and clarity.
+- Keep it concise and factual — describe the civic issue directly.
+- Do NOT translate between languages.
+- Do NOT add information not present in the input.
+- Return ONLY the polished complaint description text. No preamble, no labels.`;
+
+    try {
+        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${OPENROUTER_API_KEY}`,
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://cleancitymdu.netlify.app",
+                "X-Title": "CleanTamilnadu Voice Complaint"
+            },
+            body: JSON.stringify({
+                "model": TRANSCRIBE_MODEL,
+                "messages": [
+                    { "role": "system", "content": systemPrompt },
+                    { "role": "user", "content": rawText.trim() }
+                ],
+                "temperature": 0.3,
+                "max_tokens": 300
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('OpenRouter Transcribe Error:', data);
+            throw new Error(data.error?.message || 'OpenRouter API error');
+        }
+
+        const polished = data.choices[0].message.content.trim();
+        res.json({ polished });
+
+    } catch (err) {
+        console.error('Voice Polish Error:', err);
+        res.status(500).json({ error: 'AI polish unavailable. Please use raw text.' });
+    }
+});
+
 module.exports = router;

@@ -514,6 +514,12 @@
                 gap: 16px;
             }
         }
+
+        /* ── Voice Panel Animation ── */
+        @keyframes voicePulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.5; }
+        }
     </style>
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -907,6 +913,53 @@
                             <div class="form-group">
                                 <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Description *</label>
                                 <textarea id="issue-desc" class="textarea" placeholder="Describe the issue in detail..." required></textarea>
+
+                                <!-- ── Voice to Text Panel ── -->
+                                <div id="voice-panel" style="margin-top:10px; background: linear-gradient(135deg,rgba(16,185,129,0.06) 0%,rgba(37,99,235,0.06) 100%); border:1.5px dashed rgba(16,185,129,0.4); border-radius:18px; padding:14px 16px;">
+                                    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                        <select id="voice-lang-select"
+                                            style="padding:7px 12px; border-radius:99px; border:1.5px solid rgba(15,23,42,0.12); background:#f8fafc; color:var(--text,#0f172a); font-size:0.84rem; font-weight:600; cursor:pointer; outline:none; font-family:inherit;">
+                                            <option value="en-IN">🇮🇳 English</option>
+                                            <option value="ta-IN">தமிழ்</option>
+                                        </select>
+                                        <button type="button" id="voice-record-btn"
+                                            style="display:flex; align-items:center; gap:7px; padding:8px 18px; border-radius:99px; border:none; background:var(--primary,#10b981); color:#fff; font-weight:700; font-size:0.88rem; cursor:pointer; font-family:var(--font-display,'Outfit',sans-serif); transition:all 0.2s; white-space:nowrap;">
+                                            🎙️ Record Voice
+                                        </button>
+                                        <button type="button" id="voice-stop-btn"
+                                            style="display:none; align-items:center; gap:7px; padding:8px 18px; border-radius:99px; border:none; background:#ef4444; color:#fff; font-weight:700; font-size:0.88rem; cursor:pointer; font-family:var(--font-display,'Outfit',sans-serif); transition:all 0.2s; white-space:nowrap;">
+                                            ⏹️ Stop
+                                        </button>
+                                        <span id="voice-status" style="font-size:0.8rem; color:var(--text-muted,#64748b); font-weight:600;"></span>
+                                        <span id="voice-recording-pulse" style="display:none; width:10px; height:10px; border-radius:50%; background:#ef4444; animation:voicePulse 1s ease-in-out infinite;"></span>
+                                    </div>
+
+                                    <!-- Live transcript preview -->
+                                    <div id="voice-transcript-box" style="display:none; margin-top:12px;">
+                                        <div style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.07em; color:var(--text-muted,#64748b); margin-bottom:6px;">📝 Transcribed Text</div>
+                                        <div id="voice-transcript" style="background:white; border:1px solid rgba(15,23,42,0.1); border-radius:12px; padding:12px 14px; font-size:0.9rem; color:var(--text,#0f172a); line-height:1.6; min-height:48px; white-space:pre-wrap; word-break:break-word;"></div>
+                                        <div style="display:flex; gap:8px; margin-top:10px; flex-wrap:wrap;">
+                                            <button type="button" id="voice-polish-btn"
+                                                style="padding:7px 16px; border-radius:99px; border:none; background:linear-gradient(135deg,#2563eb,#7c3aed); color:#fff; font-weight:700; font-size:0.82rem; cursor:pointer; font-family:var(--font-display,'Outfit',sans-serif); transition:all 0.2s;">
+                                                ✨ Polish with AI
+                                            </button>
+                                            <button type="button" id="voice-insert-btn"
+                                                style="padding:7px 16px; border-radius:99px; border:none; background:var(--primary,#10b981); color:#fff; font-weight:700; font-size:0.82rem; cursor:pointer; font-family:var(--font-display,'Outfit',sans-serif); transition:all 0.2s;">
+                                                ✅ Insert into Description
+                                            </button>
+                                            <button type="button" id="voice-clear-btn"
+                                                style="padding:7px 14px; border-radius:99px; border:1.5px solid rgba(15,23,42,0.12); background:white; color:var(--text-muted,#64748b); font-weight:600; font-size:0.82rem; cursor:pointer; font-family:var(--font-display,'Outfit',sans-serif); transition:all 0.2s;">
+                                                🗑️ Clear
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <div style="margin-top:8px; font-size:0.75rem; color:var(--text-muted,#64748b);">
+                                        🔒 Voice is processed locally — no audio is stored or uploaded.
+                                        &nbsp;|&nbsp; Supports: <strong>English</strong> & <strong>தமிழ்</strong>
+                                    </div>
+                                </div>
+                                <!-- ── End Voice Panel ── -->
                             </div>
                             <div class="form-group">
                                 <label class="label">Upload Image *</label>
@@ -2695,6 +2748,181 @@
           .toast p { color: var(--text-muted) !important; font-size: 0.85rem !important; margin-top: 4px !important; }
         `;
         document.head.appendChild(style);
+
+        // ═══════════════════════════════════════════════════
+        // VOICE TO TEXT — Citizen Complaint Recorder
+        // Uses Web Speech API (browser-native, no audio stored)
+        // + OpenRouter AI to polish the transcribed text
+        // ═══════════════════════════════════════════════════
+        (function initVoiceToText() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+            const recordBtn    = document.getElementById('voice-record-btn');
+            const stopBtn      = document.getElementById('voice-stop-btn');
+            const statusEl     = document.getElementById('voice-status');
+            const pulseEl      = document.getElementById('voice-recording-pulse');
+            const transcriptBox = document.getElementById('voice-transcript-box');
+            const transcriptEl  = document.getElementById('voice-transcript');
+            const polishBtn    = document.getElementById('voice-polish-btn');
+            const insertBtn    = document.getElementById('voice-insert-btn');
+            const clearBtn     = document.getElementById('voice-clear-btn');
+            const descTextarea  = document.getElementById('issue-desc');
+
+            const langSelect   = document.getElementById('voice-lang-select');
+
+            if (!SpeechRecognition) {
+                // Browser doesn't support Web Speech API — hide panel gracefully
+                statusEl.textContent = '⚠️ Voice not supported in this browser. Use Chrome or Edge.';
+                recordBtn.disabled = true;
+                recordBtn.style.opacity = '0.5';
+                return;
+            }
+
+            let recognition = null;
+            let isRecording = false;
+            let accumulatedTranscript = '';
+            let interimTranscript = '';
+
+            function setRecordingState(recording) {
+                isRecording = recording;
+                recordBtn.style.display = recording ? 'none' : 'flex';
+                stopBtn.style.display   = recording ? 'flex' : 'none';
+                pulseEl.style.display   = recording ? 'inline-block' : 'none';
+                statusEl.textContent    = recording ? '🔴 Recording... Speak now' : '';
+            }
+
+            function showTranscript(text) {
+                if (!text.trim()) return;
+                transcriptEl.textContent = text;
+                transcriptBox.style.display = 'block';
+            }
+
+            // ── Start Recording ──
+            recordBtn.addEventListener('click', () => {
+                accumulatedTranscript = '';
+                interimTranscript = '';
+
+                recognition = new SpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+
+                // Use the explicitly selected language from the dropdown
+                recognition.lang = langSelect ? langSelect.value : 'en-IN';
+
+                recognition.onstart = () => {
+                    setRecordingState(true);
+                    transcriptEl.textContent = '';
+                    transcriptBox.style.display = 'none';
+                    statusEl.textContent = '🔴 Recording... Speak now (' + (recognition.lang === 'ta-IN' ? 'தமிழ்' : 'English') + ')';
+                };
+
+                recognition.onresult = (event) => {
+                    interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const result = event.results[i];
+                        if (result.isFinal) {
+                            accumulatedTranscript += result[0].transcript + ' ';
+                        } else {
+                            interimTranscript += result[0].transcript;
+                        }
+                    }
+                    const displayText = accumulatedTranscript + interimTranscript;
+                    showTranscript(displayText);
+                };
+
+                recognition.onerror = (event) => {
+                    const errMap = {
+                        'not-allowed': '❌ Microphone permission denied. Please allow mic access.',
+                        'no-speech':   '⚠️ No speech detected. Try again.',
+                        'network':     '⚠️ Network error during recognition.',
+                        'aborted':     ''
+                    };
+                    const msg = errMap[event.error] || ('⚠️ Error: ' + event.error);
+                    setRecordingState(false);
+                    if (msg) statusEl.textContent = msg;
+                };
+
+                recognition.onend = () => {
+                    setRecordingState(false);
+                    const finalText = (accumulatedTranscript + interimTranscript).trim();
+                    if (finalText) {
+                        showTranscript(finalText);
+                        statusEl.textContent = '✅ Recording complete';
+                    } else {
+                        statusEl.textContent = '⚠️ No speech captured. Try again.';
+                    }
+                };
+
+                recognition.start();
+            });
+
+            // ── Stop Recording ──
+            stopBtn.addEventListener('click', () => {
+                if (recognition) recognition.stop();
+            });
+
+            // ── Clear ──
+            clearBtn.addEventListener('click', () => {
+                accumulatedTranscript = '';
+                interimTranscript = '';
+                transcriptEl.textContent = '';
+                transcriptBox.style.display = 'none';
+                statusEl.textContent = '';
+            });
+
+            // ── Insert into Description ──
+            insertBtn.addEventListener('click', () => {
+                const text = transcriptEl.textContent.trim();
+                if (!text) return;
+                const existing = descTextarea.value.trim();
+                descTextarea.value = existing ? existing + '\n' + text : text;
+                descTextarea.dispatchEvent(new Event('input'));
+                statusEl.textContent = '✅ Text inserted into description!';
+                setTimeout(() => { statusEl.textContent = ''; }, 3000);
+            });
+
+            // ── Polish with AI ──
+            polishBtn.addEventListener('click', async () => {
+                const rawText = transcriptEl.textContent.trim();
+                if (!rawText) return;
+
+                const originalLabel = polishBtn.textContent;
+                polishBtn.textContent = '⏳ Polishing...';
+                polishBtn.disabled = true;
+
+                try {
+                    const token = localStorage.getItem('cm_token');
+                    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+                        ? 'http://localhost:5001/api'
+                        : 'https://cleancityfinal.onrender.com/api';
+
+                    const res = await fetch(`${API_BASE}/ezhil-ai/transcribe`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ rawText })
+                    });
+
+                    if (!res.ok) throw new Error('AI unavailable');
+                    const data = await res.json();
+                    if (data.polished) {
+                        transcriptEl.textContent = data.polished;
+                        statusEl.textContent = '✨ AI polished successfully!';
+                        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+                    }
+                } catch (err) {
+                    console.error('Voice AI polish error:', err);
+                    statusEl.textContent = '⚠️ AI polish unavailable. You can still insert the raw text.';
+                    setTimeout(() => { statusEl.textContent = ''; }, 4000);
+                } finally {
+                    polishBtn.textContent = originalLabel;
+                    polishBtn.disabled = false;
+                }
+            });
+        })();
+
     </script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
