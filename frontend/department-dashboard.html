@@ -9,6 +9,12 @@
     <!-- ApexCharts & SheetJS -->
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
     <!-- Language Script -->
     <script type="module" src="js/i18n.js"></script>
     <style>
@@ -729,6 +735,299 @@
                 transform: translateX(-50%) !important;
             }
         }
+
+        /* ── Map View Tab ── */
+        #dept-map {
+            width: 100%;
+            height: 520px;
+            border-radius: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            background: #f1f5f9;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 768px) {
+            #dept-map { height: 360px; }
+        }
+
+        .map-filter-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+            align-items: flex-start;
+        }
+
+        .map-filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .map-filter-label {
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-right: 2px;
+        }
+
+        .map-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 14px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1.5px solid rgba(15, 23, 42, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .map-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .map-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(176, 0, 0, 0.2);
+        }
+
+        .map-stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .map-stat-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-sm);
+            color: var(--text);
+        }
+
+        .map-no-location-info {
+            background: rgba(15, 23, 42, 0.03);
+            border: 1.5px dashed var(--border);
+            border-radius: 16px;
+            padding: 12px 18px;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            margin-top: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Leaflet popup overrides */
+        .leaflet-popup-content-wrapper {
+            border-radius: 20px !important;
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18) !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(15, 23, 42, 0.06) !important;
+        }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            width: 290px !important;
+        }
+
+        .leaflet-popup-tip-container { margin-top: -1px; }
+
+        .map-popup-card { font-family: 'Inter', sans-serif; overflow: hidden; }
+
+        .map-popup-image {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            display: block;
+            background: #f1f5f9;
+        }
+
+        .map-popup-image-placeholder {
+            width: 100%;
+            height: 90px;
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+        }
+
+        .map-popup-body { padding: 14px 16px 8px 16px; }
+
+        .map-popup-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.93rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .map-popup-desc {
+            font-size: 0.79rem;
+            color: #475569;
+            line-height: 1.45;
+            margin-bottom: 9px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .map-popup-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+
+        .map-popup-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .map-popup-badge.pending   { background: #fef3c7; color: #d97706; }
+        .map-popup-badge.in-progress { background: #dbeafe; color: #2563eb; }
+        .map-popup-badge.completed  { background: #dcfce7; color: #16a34a; }
+        .map-popup-badge.high-pri   { background: #fce7f3; color: #be185d; }
+
+        .map-popup-info-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.77rem;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .map-popup-footer {
+            padding: 10px 16px 14px 16px;
+            border-top: 1px solid rgba(15,23,42,0.06);
+        }
+
+        /* Get Direction button text color */
+        .map-popup-dir-btn {
+            color: #fff; /* white text */
+        }
+
+        .map-popup-dir-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 8px 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .map-popup-dir-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(176,0,0,0.3);
+        }
+
+        /* Custom marker div icons */
+        .custom-map-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .cm-pending    { background: #d97706; }
+        .cm-inprogress { background: #2563eb; }
+        .cm-completed  { background: #16a34a; }
+
+        .map-legend {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+            align-items: center;
+        }
+
+        .map-legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .map-dept-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 99px;
+            background: var(--primary-light);
+            border: 1.5px solid rgba(176, 0, 0, 0.18);
+            color: var(--primary);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
+        }
+
+        .map-dept-badge .dept-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulseDot 1.8s ease-in-out infinite;
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50%       { opacity: 0.4; transform: scale(0.75); }
+        }
+
+        .map-legend-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        }
     </style>
 </head>
 
@@ -778,6 +1077,12 @@
                             <a class="nav-link-item" href="#" id="nav-analytics"
                                 onclick="event.preventDefault(); switchTab('analytics');">
                                 Analytics
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link-item" href="#" id="nav-map"
+                                onclick="event.preventDefault(); switchTab('map');">
+                                🗺️ Map View
                             </a>
                         </li>
                     </ul>
@@ -860,6 +1165,9 @@
                             </a>
                             <a href="#" class="mobile-drawer-link" id="drawer-analytics">
                                 <span class="drawer-icon">📊</span> Analytics
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-map">
+                                <span class="drawer-icon">🗺️</span> Map View
                             </a>
                         </div>
                         <div class="mobile-drawer-footer">
@@ -996,6 +1304,58 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Map View Tab -->
+                <div id="tab-map" class="tab-pane">
+                    <!-- Department Scope Badge -->
+                    <div class="map-dept-badge">
+                        <span class="dept-dot"></span>
+                        <span>Showing issues assigned to: <strong id="map-dept-label">—</strong></span>
+                        <span style="font-size:0.75rem;font-weight:600;opacity:0.7;">(your department only)</span>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="map-stats-row">
+                        <div class="map-stat-chip">📍 <span id="map-stat-total">0</span> on Map</div>
+                        <div class="map-stat-chip" style="color:#d97706;">⏳ <span id="map-stat-pending">0</span> Pending</div>
+                        <div class="map-stat-chip" style="color:#2563eb;">🔵 <span id="map-stat-inprogress">0</span> In Progress</div>
+                        <div class="map-stat-chip" style="color:#16a34a;">✅ <span id="map-stat-completed">0</span> Completed</div>
+                    </div>
+
+                    <!-- Filter Toolbar -->
+                    <div class="map-filter-toolbar">
+                        <div class="map-filter-group">
+                            <span class="map-filter-label">Status:</span>
+                            <button class="map-pill active" data-filter-type="status" data-filter-val="">All</button>
+                            <button class="map-pill" data-filter-type="status" data-filter-val="PENDING">⏳ Pending</button>
+                            <button class="map-pill" data-filter-type="status" data-filter-val="IN_PROGRESS">🔵 In Progress</button>
+                            <button class="map-pill" data-filter-type="status" data-filter-val="COMPLETED">✅ Done</button>
+                        </div>
+
+                        <div class="map-filter-group">
+                            <span class="map-filter-label">Priority:</span>
+                            <button class="map-pill active" data-filter-type="priority" data-filter-val="">All</button>
+                            <button class="map-pill" data-filter-type="priority" data-filter-val="high">🔥 High Priority</button>
+                        </div>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div id="dept-map"></div>
+
+                    <!-- Map Legend -->
+                    <div class="map-legend">
+                        <span style="font-size:0.72rem;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Legend:</span>
+                        <div class="map-legend-item"><div class="map-legend-dot" style="background:#d97706;"></div>Pending</div>
+                        <div class="map-legend-item"><div class="map-legend-dot" style="background:#2563eb;"></div>In Progress</div>
+                        <div class="map-legend-item"><div class="map-legend-dot" style="background:#16a34a;"></div>Completed</div>
+                        <div class="map-legend-item" style="margin-left:auto;"><span style="font-size:0.72rem;color:var(--text-light);">© OpenStreetMap contributors</span></div>
+                    </div>
+
+                    <!-- No-location notice -->
+                    <div class="map-no-location-info" id="map-no-location-notice" style="display:none;">
+                        ℹ️ <span id="map-no-location-count">0</span> issue(s) are not shown on the map because they have no GPS coordinates.
+                    </div>
+                </div>
             </div>
         </main>
     </div>
@@ -1036,6 +1396,17 @@
                         <div class="cit-img-box">
                             <img id="modal-issue-img" src="" alt="Citizen image issue preview" />
                         </div>
+                    </div>
+
+                    <!-- Live photo info block -->
+                    <div id="modal-live-photo-sec" style="margin-top:12px; display:none; background:rgba(16,185,129,0.06); border:1.5px dashed rgba(16,185,129,0.4); border-radius:18px; padding:14px; flex-direction:column; gap:4px;">
+                        <span style="font-size:0.8rem; font-weight:800; color:#10b981; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:4px;">
+                            <span>📸</span> Live Photo Capture Verified
+                        </span>
+                        <span style="font-size:0.82rem; color:var(--text-muted);">
+                            <b>Captured At:</b> <span id="modal-captured-time">—</span><br/>
+                            <b>Capture Location:</b> <span id="modal-captured-loc">—</span>
+                        </span>
                     </div>
 
                     <div class="section-title">Status Management</div>
@@ -1160,6 +1531,10 @@
         if (deptTitleEl) deptTitleEl.textContent = `${deptLabel} Dashboard`;
         document.getElementById('page-title').textContent = `${deptLabel} Issues`;
 
+        // Set the map department scope badge
+        const mapDeptLabelEl = document.getElementById('map-dept-label');
+        if (mapDeptLabelEl) mapDeptLabelEl.textContent = deptLabel;
+
         // Wire up logout buttons
         const logoutBtn = document.getElementById('logout-btn');
         const mobileLogoutBtn = document.getElementById('mobile-logout-btn');
@@ -1279,12 +1654,13 @@
 
         // Tab switching
         let analyticsLoaded = false;
-        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', analytics: 'drawer-analytics' };
+        let mapInitialized = false;
+        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', analytics: 'drawer-analytics', map: 'drawer-map' };
         window.switchTab = (name) => {
             sessionStorage.setItem('departmentDashboardTab', name);
-            ['issues', 'reviews', 'analytics'].forEach(t => {
+            ['issues', 'reviews', 'analytics', 'map'].forEach(t => {
                 const pane = document.getElementById('tab-' + t);
-                pane.style.display = t === name ? 'block' : 'none';
+                if (pane) pane.style.display = t === name ? 'block' : 'none';
 
                 const navLink = document.getElementById('nav-' + t);
                 if (navLink) navLink.classList.toggle('active', t === name);
@@ -1296,6 +1672,15 @@
             if (name === 'analytics' && !analyticsLoaded) {
                 analyticsLoaded = true;
                 loadAnalytics();
+            }
+            if (name === 'map') {
+                if (!mapInitialized) {
+                    mapInitialized = true;
+                    initDeptMap();
+                }
+                renderMapMarkers(getFilteredMapIssues());
+                // Force Leaflet to recalculate size after display:block
+                if (deptMap) setTimeout(() => deptMap.invalidateSize(), 150);
             }
         };
 
@@ -1391,6 +1776,21 @@
             document.getElementById('modal-issue-loc').textContent = issue.location_name || 'N/A';
             document.getElementById('modal-issue-date').textContent = new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
             document.getElementById('modal-issue-img').src = issue.image_url || 'https://via.placeholder.com/600x400.png?text=No+Image';
+
+            // Populate live photo metadata if present
+            const livePhotoSec = document.getElementById('modal-live-photo-sec');
+            const livePhotoTime = document.getElementById('modal-captured-time');
+            const livePhotoLoc = document.getElementById('modal-captured-loc');
+            
+            if (livePhotoSec) {
+                if (issue.captured_image_url) {
+                    livePhotoSec.style.display = 'flex';
+                    if (livePhotoTime) livePhotoTime.textContent = new Date(issue.captured_at || issue.created_at).toLocaleString('en-IN');
+                    if (livePhotoLoc) livePhotoLoc.textContent = issue.location_name || 'N/A';
+                } else {
+                    livePhotoSec.style.display = 'none';
+                }
+            }
 
             // Set radio values
             const status = issue.status;
@@ -1546,6 +1946,10 @@
                 document.getElementById('s-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
                 document.getElementById('s-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
                 applyFilter();
+                // Refresh map markers if the map has been initialized
+                if (mapInitialized && deptMap) {
+                    renderMapMarkers(getFilteredMapIssues());
+                }
             } catch (err) {
                 toast.error('Failed to load issues', err.message);
             }
@@ -1644,6 +2048,188 @@
             if (analyticsLoaded) loadAnalytics();
         });
 
+        // ── Map View Logic ──
+        let deptMap = null;
+        let markerClusterGroup = null;
+        const mapFilters = { status: '', category: '', priority: '' };
+
+        function initDeptMap() {
+            const mapContainer = document.getElementById('dept-map');
+            if (!mapContainer || deptMap) return;
+
+            // Default center: Tamil Nadu, India
+            deptMap = L.map('dept-map', {
+                center: [11.1271, 78.6569],
+                zoom: 7,
+                zoomControl: true,
+                attributionControl: false,
+            });
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+            }).addTo(deptMap);
+
+            markerClusterGroup = L.markerClusterGroup({
+                maxClusterRadius: 50,
+                spiderfyOnMaxZoom: true,
+                showCoverageOnHover: false,
+                zoomToBoundsOnClick: true,
+                iconCreateFunction: (cluster) => {
+                    const count = cluster.getChildCount();
+                    return L.divIcon({
+                        html: `<div style="background:var(--primary);color:white;width:34px;height:34px;border-radius:50%;border:3px solid white;box-shadow:0 3px 10px rgba(176,0,0,0.35);display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:800;font-size:0.78rem;">${count}</div>`,
+                        iconSize: [34, 34],
+                        iconAnchor: [17, 34],
+                        className: '',
+                    });
+                },
+            });
+            deptMap.addLayer(markerClusterGroup);
+        }
+
+        function getMarkerCssClass(status) {
+            if (status === 'COMPLETED') return 'cm-completed';
+            if (status === 'IN_PROGRESS') return 'cm-inprogress';
+            return 'cm-pending';
+        }
+
+        function getStatusBadgeCls(status) {
+            if (status === 'COMPLETED') return 'completed';
+            if (status === 'IN_PROGRESS') return 'in-progress';
+            return 'pending';
+        }
+
+        function getStatusLabel(status) {
+            if (status === 'COMPLETED') return '✅ Done';
+            if (status === 'IN_PROGRESS') return '🔵 In Progress';
+            return '⏳ Pending';
+        }
+
+
+
+        function getFilteredMapIssues() {
+            return allIssues.filter(issue => {
+                if (mapFilters.status && issue.status !== mapFilters.status) return false;
+                if (mapFilters.priority === 'high' && (issue.supports_count || 0) < 3) return false;
+                return true;
+            });
+        }
+
+        function renderMapMarkers(issues) {
+            if (!deptMap || !markerClusterGroup) return;
+            markerClusterGroup.clearLayers();
+
+            const mappable = issues.filter(i => i.latitude && i.longitude);
+            const noLocationCount = issues.length - mappable.length;
+
+            // Update stat chips
+            document.getElementById('map-stat-total').textContent = mappable.length;
+            document.getElementById('map-stat-pending').textContent = mappable.filter(i => i.status === 'PENDING').length;
+            document.getElementById('map-stat-inprogress').textContent = mappable.filter(i => i.status === 'IN_PROGRESS').length;
+            document.getElementById('map-stat-completed').textContent = mappable.filter(i => i.status === 'COMPLETED').length;
+
+            // No location notice
+            const notice = document.getElementById('map-no-location-notice');
+            if (noLocationCount > 0) {
+                notice.style.display = 'flex';
+                document.getElementById('map-no-location-count').textContent = noLocationCount;
+            } else {
+                notice.style.display = 'none';
+            }
+
+            if (mappable.length === 0) return;
+
+            const bounds = [];
+
+            mappable.forEach(issue => {
+                const lat = parseFloat(issue.latitude);
+                const lng = parseFloat(issue.longitude);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                const markerCls = getMarkerCssClass(issue.status);
+
+                const divIcon = L.divIcon({
+                    html: `<div class="custom-map-marker ${markerCls}">📍</div>`,
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 30],
+                    popupAnchor: [0, -34],
+                    className: '',
+                });
+
+                const marker = L.marker([lat, lng], { icon: divIcon });
+
+                const reportedDate = new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+                const reportedTime = new Date(issue.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+                const isHighPriority = (issue.supports_count || 0) >= 3;
+
+                const imageHtml = issue.image_url
+                    ? `<img class="map-popup-image" src="${issue.image_url}" alt="Issue" onerror="this.parentElement.innerHTML='<div class=map-popup-image-placeholder>📍</div>'" />`
+                    : `<div class="map-popup-image-placeholder">📍</div>`;
+
+                const popupHtml = `
+                    <div class="map-popup-card">
+                        ${imageHtml}
+                        <div class="map-popup-body">
+                            <div class="map-popup-title">${issue.title}</div>
+                            <div class="map-popup-desc">${issue.description}</div>
+                            <div class="map-popup-meta">
+                                <span class="map-popup-badge ${getStatusBadgeCls(issue.status)}">${getStatusLabel(issue.status)}</span>
+                                ${isHighPriority ? '<span class="map-popup-badge high-pri">🔥 High Priority</span>' : ''}
+                            </div>
+                            <div class="map-popup-info-row">
+                                <span>📍 ${issue.location_name || 'Location not specified'}</span>
+                                <span>📅 ${reportedDate} at ${reportedTime}</span>
+                                <span>👤 Reported by: ${issue.reported_by_name || 'Citizen'}</span>
+                                <span>👍 ${issue.supports_count || 0} community supports</span>
+                            </div>
+                        </div>
+                        <div class="map-popup-footer">
+                            <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="map-popup-dir-btn">
+                                📍 Get Directions
+                            </a>
+                        </div>
+                    </div>`;
+
+                marker.bindPopup(popupHtml, {
+                    maxWidth: 310,
+                    minWidth: 290,
+                    className: 'dept-issue-popup',
+                });
+
+                markerClusterGroup.addLayer(marker);
+                bounds.push([lat, lng]);
+            });
+
+            if (bounds.length > 0) {
+                try {
+                    if (bounds.length === 1) {
+                        deptMap.setView(bounds[0], 14);
+                    } else {
+                        deptMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 });
+                    }
+                } catch (e) {
+                    console.error('Map fitBounds error:', e);
+                }
+            }
+        }
+
+        // Map filter pill click handlers
+        document.querySelectorAll('.map-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                const type = pill.dataset.filterType;
+                const val = pill.dataset.filterVal;
+                document.querySelectorAll(`.map-pill[data-filter-type="${type}"]`).forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                mapFilters[type] = val;
+                if (mapInitialized && deptMap) {
+                    renderMapMarkers(getFilteredMapIssues());
+                }
+            });
+        });
+
         // Scroll effect for island navbar
         window.addEventListener('scroll', () => {
             const nav = document.querySelector('.nav-island');
@@ -1658,13 +2244,14 @@
             linkMap: {
                 'drawer-issues': 'nav-issues',
                 'drawer-reviews': 'nav-reviews',
-                'drawer-analytics': 'nav-analytics'
+                'drawer-analytics': 'nav-analytics',
+                'drawer-map': 'nav-map'
             },
             onLogout: logout
         });
 
         // Init: restore the last selected tab when the page is refreshed.
-        const departmentTabs = ['issues', 'reviews', 'analytics'];
+        const departmentTabs = ['issues', 'reviews', 'analytics', 'map'];
         const savedDepartmentTab = sessionStorage.getItem('departmentDashboardTab');
         switchTab(departmentTabs.includes(savedDepartmentTab) ? savedDepartmentTab : 'issues');
         loadData();

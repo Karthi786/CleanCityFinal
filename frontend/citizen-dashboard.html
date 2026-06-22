@@ -962,12 +962,38 @@
                                 <!-- ── End Voice Panel ── -->
                             </div>
                             <div class="form-group">
-                                <label class="label">Upload Image *</label>
-                                <div style="display:flex; gap:12px; align-items:center;">
-                                    <input id="issue-image" class="input" type="file" accept="image/*" required style="flex:1; max-width: calc(100% - 140px);" />
-                                    <button type="button" id="image-check-btn" class="btn btn-outline btn-sm" style="white-space:nowrap; display:none; font-weight:700; flex-shrink: 0;">
-                                        🔍 Image Check
-                                    </button>
+                                <label class="label">Image Attachment *</label>
+                                <div style="display:flex; flex-direction:column; gap:12px;">
+                                    <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                                        <input id="issue-image" class="input" type="file" accept="image/*" required style="flex:1; min-width:200px;" />
+                                        <button type="button" id="image-check-btn" class="btn btn-outline btn-sm" style="white-space:nowrap; display:none; font-weight:700;">
+                                            🔍 Image Check
+                                        </button>
+                                        <button type="button" id="camera-start-btn" class="btn btn-outline btn-sm" style="white-space:nowrap; font-weight:700; display:flex; align-items:center; gap:6px; border-color:var(--primary); color:var(--primary);">
+                                            📸 Camera
+                                        </button>
+                                    </div>
+                                    
+                                    <!-- Camera Container (Hidden by default) -->
+                                    <div id="camera-container" style="display:none; flex-direction:column; gap:12px; background:rgba(15,23,42,0.03); border:1.5px dashed var(--border); padding:16px; border-radius:20px; position:relative;">
+                                        <video id="camera-video" autoplay playsinline style="width:100%; max-height:300px; border-radius:12px; object-fit:cover; background:#000;"></video>
+                                        <div style="display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap;">
+                                            <button type="button" id="camera-capture-btn" class="btn btn-primary btn-sm">📸 Capture Photo</button>
+                                            <button type="button" id="camera-stop-btn" class="btn btn-ghost btn-sm">Cancel</button>
+                                        </div>
+                                    </div>
+
+                                    <!-- Captured Preview (Hidden by default) -->
+                                    <div id="captured-preview-container" style="display:none; flex-direction:column; gap:8px; border-radius:12px; overflow:hidden; border:1px solid var(--border); padding:12px; background:#f8fafc;">
+                                        <div style="font-size:0.8rem; font-weight:700; color:var(--success); display:flex; align-items:center; gap:4px; margin-bottom:4px;">
+                                            <span style="font-size:1rem;">✅</span> Live Photo Captured
+                                        </div>
+                                        <img id="captured-preview-img" style="width:100%; max-height:220px; object-fit:cover; border-radius:8px; border:1px solid rgba(0,0,0,0.05);" />
+                                        <div style="display:flex; gap:8px; margin-top:4px;">
+                                            <button type="button" id="camera-retake-btn" class="btn btn-outline btn-sm" style="font-size:0.8rem; padding:4px 12px;">Retake</button>
+                                            <button type="button" id="camera-remove-btn" class="btn btn-ghost btn-sm" style="font-size:0.8rem; padding:4px 12px; color:#ef4444;">Remove</button>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div id="image-verify-status"
                                     style="margin-top:12px; padding:16px; border-radius:20px; font-size:0.88rem; display:none; flex-direction:column; gap:6px;">
@@ -1067,6 +1093,20 @@
                 <div style="margin-bottom:24px; background:rgba(15,23,42,0.03); border-radius:20px; padding:20px; border: 1px solid var(--border);">
                     <h4 style="margin-bottom:14px; font-size:0.95rem; font-family: var(--font-display);">Issue Timeline</h4>
                     <div id="det-timeline" style="display:flex; flex-direction:column; gap:12px; font-size: 0.9rem;"></div>
+                </div>
+
+                <!-- Live Photo Metadata Section -->
+                <div id="det-live-photo-sec" style="margin-bottom:24px; display:none; background:rgba(16,185,129,0.04); border:1px solid rgba(16,185,129,0.2); border-radius:20px; padding:16px;">
+                    <div style="font-size:0.82rem; font-weight:700; color:#10b981; text-transform:uppercase; letter-spacing:0.05em; margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                        <span>📸</span> Live Photo Capture Verified
+                    </div>
+                    <div style="width:100%; height:160px; border-radius:12px; overflow:hidden; border:1px solid rgba(16,185,129,0.2); margin-bottom:12px;">
+                        <img id="det-captured-img" src="" style="width:100%; height:100%; object-fit:cover;" />
+                    </div>
+                    <div style="font-size:0.85rem; color:var(--text); line-height:1.5;">
+                        <b>Captured At:</b> <span id="det-captured-time">—</span><br/>
+                        <b>Capture Location:</b> <span id="det-captured-loc">—</span>
+                    </div>
                 </div>
 
                 <!-- Before & After Images Section -->
@@ -1474,14 +1514,37 @@
             modal.classList.add('open');
             // Reset verification UI
             imageVerified = false;
-            if (imageCheckBtn) imageCheckBtn.style.display = 'none';
-            if (imageStatusDiv) {
+            if (typeof imageCheckBtn !== 'undefined' && imageCheckBtn) imageCheckBtn.style.display = 'none';
+            if (typeof imageStatusDiv !== 'undefined' && imageStatusDiv) {
                 imageStatusDiv.style.display = 'none';
                 imageStatusDiv.innerHTML = '';
             }
+            // Reset camera state when opening modal
+            if (typeof stopCamera === 'function') stopCamera();
+            if (typeof capturedPreviewContainer !== 'undefined' && capturedPreviewContainer) {
+                capturedPreviewContainer.style.display = 'none';
+            }
+            capturedPhotoData = null;
+            capturedPhotoTime = null;
+            if (typeof fileInput !== 'undefined' && fileInput) fileInput.setAttribute('required', 'true');
         });
-        document.getElementById('modal-close').addEventListener('click', () => modal.classList.remove('open'));
-        document.getElementById('modal-cancel').addEventListener('click', () => modal.classList.remove('open'));
+        
+        function closeModalAndStopCamera() {
+            modal.classList.remove('open');
+            if (typeof stopCamera === 'function') stopCamera();
+            if (typeof capturedPreviewContainer !== 'undefined' && capturedPreviewContainer) {
+                capturedPreviewContainer.style.display = 'none';
+            }
+            capturedPhotoData = null;
+            capturedPhotoTime = null;
+            if (typeof fileInput !== 'undefined' && fileInput) {
+                fileInput.setAttribute('required', 'true');
+                fileInput.value = '';
+            }
+        }
+        
+        document.getElementById('modal-close').addEventListener('click', closeModalAndStopCamera);
+        document.getElementById('modal-cancel').addEventListener('click', closeModalAndStopCamera);
 
         // Helpers
         function timeAgo(dateStr) {
@@ -1521,6 +1584,7 @@
                 <img src="${imgUrl}" alt="Issue Image">
                 <div class="ic-badges">
                   <span class="ic-badge-status">${statusLabel}</span>
+                  ${issue.captured_image_url ? `<span class="ic-badge-status" style="background:#10b981; margin-left:6px;">📸 Live Captured</span>` : ''}
                 </div>
               </div>
               <div class="ic-body">
@@ -1781,8 +1845,118 @@
         const imageStatusDiv = document.getElementById('image-verify-status');
         const submitBtn = document.getElementById('submit-btn');
 
+        // Camera Logic elements
+        const cameraStartBtn = document.getElementById('camera-start-btn');
+        const cameraContainer = document.getElementById('camera-container');
+        const cameraVideo = document.getElementById('camera-video');
+        const cameraCaptureBtn = document.getElementById('camera-capture-btn');
+        const cameraStopBtn = document.getElementById('camera-stop-btn');
+        const capturedPreviewContainer = document.getElementById('captured-preview-container');
+        const capturedPreviewImg = document.getElementById('captured-preview-img');
+        const cameraRetakeBtn = document.getElementById('camera-retake-btn');
+        const cameraRemoveBtn = document.getElementById('camera-remove-btn');
+        const fileInput = document.getElementById('issue-image');
+
+        let cameraStream = null;
+        let capturedPhotoData = null;
+        let capturedPhotoTime = null;
+
         // Initial state
         submitBtn.disabled = true;
+
+        // Start Camera stream
+        cameraStartBtn.addEventListener('click', async () => {
+            // Reset file input
+            fileInput.value = '';
+            fileInput.removeAttribute('required');
+            imageCheckBtn.style.display = 'none';
+            imageStatusDiv.style.display = 'none';
+            
+            // Clear any previously captured photo preview
+            capturedPreviewContainer.style.display = 'none';
+            capturedPhotoData = null;
+            capturedPhotoTime = null;
+            
+            try {
+                cameraStartBtn.innerHTML = '<div class="spinner spinner-sm"></div> Opening...';
+                cameraStartBtn.disabled = true;
+                
+                cameraStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: 'environment' }, // prefer rear camera
+                    audio: false
+                });
+                
+                cameraVideo.srcObject = cameraStream;
+                cameraContainer.style.display = 'flex';
+                cameraStartBtn.style.display = 'none';
+            } catch (err) {
+                console.error("Camera access error:", err);
+                toast.error('Camera Error', 'Could not access device camera. Please check permissions.');
+                fileInput.setAttribute('required', 'true');
+            } finally {
+                cameraStartBtn.innerHTML = '📸 Camera';
+                cameraStartBtn.disabled = false;
+            }
+        });
+
+        function stopCamera() {
+            if (cameraStream) {
+                cameraStream.getTracks().forEach(track => track.stop());
+                cameraStream = null;
+            }
+            cameraVideo.srcObject = null;
+            cameraContainer.style.display = 'none';
+            cameraStartBtn.style.display = 'flex';
+        }
+
+        cameraStopBtn.addEventListener('click', () => {
+            stopCamera();
+            if (!capturedPhotoData) {
+                fileInput.setAttribute('required', 'true');
+            }
+        });
+
+        cameraCaptureBtn.addEventListener('click', () => {
+            if (!cameraStream) return;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = cameraVideo.videoWidth || 640;
+            canvas.height = cameraVideo.videoHeight || 480;
+            
+            const ctx = canvas.getContext('2d');
+            // Draw current frame to canvas
+            ctx.drawImage(cameraVideo, 0, 0, canvas.width, canvas.height);
+            
+            // Compress and convert to base64
+            capturedPhotoData = canvas.toDataURL('image/jpeg', 0.85);
+            capturedPhotoTime = new Date().toISOString();
+            
+            // Display preview
+            capturedPreviewImg.src = capturedPhotoData;
+            capturedPreviewContainer.style.display = 'flex';
+            
+            // UI state updates
+            imageVerified = true;
+            submitBtn.disabled = false;
+            
+            stopCamera();
+        });
+
+        cameraRetakeBtn.addEventListener('click', () => {
+            capturedPreviewContainer.style.display = 'none';
+            capturedPhotoData = null;
+            capturedPhotoTime = null;
+            cameraStartBtn.click();
+        });
+
+        cameraRemoveBtn.addEventListener('click', () => {
+            capturedPreviewContainer.style.display = 'none';
+            capturedPhotoData = null;
+            capturedPhotoTime = null;
+            imageVerified = false;
+            submitBtn.disabled = true;
+            fileInput.setAttribute('required', 'true');
+        });
 
         document.getElementById('issue-image').addEventListener('change', (e) => {
             const file = e.target.files[0];
@@ -1793,9 +1967,16 @@
             imageStatusDiv.style.display = 'none';
             imageStatusDiv.innerHTML = '';
             
+            // Clear camera state
+            stopCamera();
+            capturedPreviewContainer.style.display = 'none';
+            capturedPhotoData = null;
+            capturedPhotoTime = null;
+            
             if (file) {
                 // Show check button when image is uploaded
                 imageCheckBtn.style.display = 'block';
+                fileInput.setAttribute('required', 'true');
             } else {
                 imageCheckBtn.style.display = 'none';
             }
@@ -1988,15 +2169,33 @@
             btn.disabled = true;
 
             const fileInput = document.getElementById('issue-image');
-            const file = fileInput.files[0];
-            if (!file) {
-                toast.error('Image Required', 'Please upload an image for the issue.');
-                btn.disabled = false;
-                return;
+            
+            // Determine image source
+            let imageUrl = null;
+            let capturedImageUrl = null;
+            let capturedAt = null;
+
+            if (capturedPhotoData) {
+                imageUrl = capturedPhotoData;
+                capturedImageUrl = capturedPhotoData;
+                capturedAt = capturedPhotoTime;
+            } else {
+                const file = fileInput.files[0];
+                if (!file) {
+                    toast.error('Image Required', 'Please upload or capture an image for the issue.');
+                    btn.disabled = false;
+                    return;
+                }
+                try {
+                    imageUrl = await processImageFile(file);
+                } catch (eImg) {
+                    toast.error('Image Processing Error', 'Failed to process the uploaded image.');
+                    btn.disabled = false;
+                    return;
+                }
             }
 
             try {
-                const imageUrl = await processImageFile(file);
                 const lat = document.getElementById('issue-lat').value;
                 const lng = document.getElementById('issue-lng').value;
 
@@ -2014,8 +2213,18 @@
                     latitude: lat ? parseFloat(lat) : null,
                     longitude: lng ? parseFloat(lng) : null,
                     imageUrl: imageUrl,
+                    capturedImageUrl: capturedImageUrl,
+                    capturedAt: capturedAt
                 });
                 toast.success('Report Submitted! 🎉', 'Your issue has been sent.');
+                
+                // Stop camera and clean states
+                stopCamera();
+                capturedPreviewContainer.style.display = 'none';
+                capturedPhotoData = null;
+                capturedPhotoTime = null;
+                fileInput.setAttribute('required', 'true');
+                
                 modal.classList.remove('open');
                 document.getElementById('report-form').reset();
                 await loadIssues();
@@ -2623,6 +2832,23 @@
             imgSec.style.display = 'none';
             revSec.style.display = 'none';
             revForm.style.display = 'none';
+
+            // Populate live photo metadata if present
+            const livePhotoSec = document.getElementById('det-live-photo-sec');
+            const livePhotoImg = document.getElementById('det-captured-img');
+            const livePhotoTime = document.getElementById('det-captured-time');
+            const livePhotoLoc = document.getElementById('det-captured-loc');
+            
+            if (livePhotoSec) {
+                if (issue.captured_image_url) {
+                    livePhotoSec.style.display = 'block';
+                    if (livePhotoImg) livePhotoImg.src = issue.captured_image_url;
+                    if (livePhotoTime) livePhotoTime.textContent = new Date(issue.captured_at || issue.created_at).toLocaleString('en-IN');
+                    if (livePhotoLoc) livePhotoLoc.textContent = issue.location_name || 'Not Available';
+                } else {
+                    livePhotoSec.style.display = 'none';
+                }
+            }
 
             if (issue.status === 'COMPLETED') {
                 // Show resolution images

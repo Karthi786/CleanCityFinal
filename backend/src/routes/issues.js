@@ -28,6 +28,14 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
             req.query.constituency = req.user.constituency;
         }
 
+        // Enforce department-level access control:
+        // Department staff can ONLY see issues assigned to their own department.
+        // This overrides any client-supplied department filter, preventing cross-dept data exposure.
+        const DEPT_STAFF_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
+        if (DEPT_STAFF_ROLES.includes(req.user.role)) {
+            req.query.department = req.user.role;
+        }
+
         // If district or constituency filters requested, use a joined query
         const needsUserJoin = true;
 
@@ -88,7 +96,7 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
  * Create a new civic issue (USER role)
  */
 router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, res) => {
-    const { title, description, category, latitude, longitude, locationName, imageUrl } = req.body;
+    const { title, description, category, latitude, longitude, locationName, imageUrl, capturedImageUrl, capturedAt } = req.body;
 
     if (!title || !description || !category) {
         return res.status(400).json({ error: 'title, description, and category are required.' });
@@ -111,6 +119,8 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
                 longitude: longitude || null,
                 location_name: locationName || null,
                 image_url: imageUrl || null,
+                captured_image_url: capturedImageUrl || null,
+                captured_at: capturedAt || null,
                 status: 'PENDING',
                 priority_score: 0,
                 supports_count: 0,

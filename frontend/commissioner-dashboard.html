@@ -2225,6 +2225,18 @@
                         <p style="color:#475569; font-size:0.9rem; line-height:1.5; white-space:pre-wrap;">${issue.description}</p>
                     </div>
                     
+                    ${issue.captured_image_url ? `
+                    <div style="background:rgba(16,185,129,0.06); border:1.5px dashed rgba(16,185,129,0.4); border-radius:18px; padding:14px; display:flex; flex-direction:column; gap:6px;">
+                        <span style="font-size:0.8rem; font-weight:800; color:#10b981; text-transform:uppercase; letter-spacing:0.05em; display:flex; align-items:center; gap:4px;">
+                            <span>📸</span> Live Photo Capture Verified
+                        </span>
+                        <span style="font-size:0.82rem; color:#475569;">
+                            <b>Captured At:</b> ${new Date(issue.captured_at || issue.created_at).toLocaleString('en-IN')}<br/>
+                            <b>Capture Location:</b> ${issue.location_name || 'N/A'}
+                        </span>
+                    </div>
+                    ` : ''}
+                    
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; background:rgba(15,23,42,0.02); padding:16px; border-radius:16px; border:1px solid rgba(15,23,42,0.06);">
                         <div>
                             <label style="display:block; font-size:0.72rem; color:var(--text-muted,#64748b); text-transform:uppercase; font-weight:800; margin-bottom:2px;">Category</label>

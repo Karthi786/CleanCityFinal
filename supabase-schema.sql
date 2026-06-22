@@ -30,6 +30,8 @@ CREATE TABLE IF NOT EXISTS public.issues (
   location_name        TEXT,
   image_url            TEXT,
   completion_image_url TEXT,
+  captured_image_url   TEXT,
+  captured_at          TIMESTAMPTZ,
   status               TEXT NOT NULL DEFAULT 'PENDING'
                          CHECK (status IN ('PENDING','IN_PROGRESS','COMPLETED')),
   priority_score       INTEGER NOT NULL DEFAULT 0,

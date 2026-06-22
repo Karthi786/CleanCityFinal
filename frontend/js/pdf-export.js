@@ -348,6 +348,15 @@ export async function downloadSingleIssuePDF(issue) {
             <div class="info-label">Location / Address</div>
             <div class="info-val">📍 ${issue.location_name || 'N/A'} ${issue.latitude && issue.longitude ? `(${issue.latitude.toFixed(5)}, ${issue.longitude.toFixed(5)})` : ''}</div>
         </div>
+        ${issue.captured_image_url ? `
+        <div class="info-cell full-width" style="background:#f0fdf4; border-color:#bbf7d0;">
+            <div class="info-label" style="color:#15803d;">📸 Live Photo Capture Verified</div>
+            <div class="info-val" style="color:#166534; font-size:0.85rem;">
+                Captured At: ${new Date(issue.captured_at || issue.created_at).toLocaleString('en-IN')}<br/>
+                Capture Location: ${issue.location_name || 'N/A'}
+            </div>
+        </div>
+        ` : ''}
         <div class="info-cell full-width">
             <div class="info-label">Citizen Complaint Description</div>
             <div class="description-box">${cleanDescription}</div>
