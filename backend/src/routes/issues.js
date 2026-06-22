@@ -220,7 +220,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
  * Update issue status (Department / Collector / Admin)
  */
 router.put('/:id/status', verifyToken, requireApproved,
-    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN'), // Explicitly excluding MLA
+    requireRole('TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN', 'EMPLOYEE'), // Explicitly excluding MLA
     async (req, res) => {
         const { id } = req.params;
         const { status, completionImageUrl } = req.body;
@@ -235,14 +235,19 @@ router.put('/:id/status', verifyToken, requireApproved,
             let issueToUpdate;
             if (!['COLLECTOR', 'ADMIN'].includes(req.user.role)) {
                 const { data: issue } = await supabaseAdmin
-                    .from('issues').select('department, reported_by_id, points_awarded, status').eq('id', id).single();
-                if (issue && issue.department !== req.user.role) {
+                    .from('issues').select('department, reported_by_id, points_awarded, status, assigned_employee_id, title').eq('id', id).single();
+                if (req.user.role === 'EMPLOYEE') {
+                    // Employees can only update issues assigned to them
+                    if (!issue || issue.assigned_employee_id !== req.userId) {
+                        return res.status(403).json({ error: 'This issue is not assigned to you.' });
+                    }
+                } else if (issue && issue.department !== req.user.role) {
                     return res.status(403).json({ error: 'Cannot update issues from another department.' });
                 }
                 issueToUpdate = issue;
             } else {
                 const { data: issue } = await supabaseAdmin
-                    .from('issues').select('department, reported_by_id, points_awarded, status').eq('id', id).single();
+                    .from('issues').select('department, reported_by_id, points_awarded, status, assigned_employee_id, title').eq('id', id).single();
                 issueToUpdate = issue;
             }
 
@@ -333,6 +338,78 @@ router.put('/:id/status', verifyToken, requireApproved,
         }
     }
 );
+
+/**
+ * PUT /api/issues/:id/assign
+ * Assign an issue to an employee (Department Head only)
+ */
+router.put('/:id/assign', verifyToken, requireApproved, async (req, res) => {
+    const { id } = req.params;
+    const { employeeId, workRemarks } = req.body;
+
+    const DEPT_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
+    const isHead = DEPT_ROLES.includes(req.user.role) && req.user.dept_role === 'HEAD';
+    const isAdmin = req.user.role === 'ADMIN';
+
+    if (!isHead && !isAdmin) {
+        return res.status(403).json({ error: 'Only Department Head or Admin can assign issues.' });
+    }
+
+    try {
+        // Fetch the issue
+        const { data: issue } = await supabaseAdmin
+            .from('issues').select('department').eq('id', id).single();
+        if (!issue) return res.status(404).json({ error: 'Issue not found.' });
+
+        // HEAD can only assign their own dept issues
+        if (isHead && issue.department !== req.user.role) {
+            return res.status(403).json({ error: 'Cannot assign issues from another department.' });
+        }
+
+        // Validate employee belongs to same department
+        if (employeeId) {
+            const { data: emp } = await supabaseAdmin
+                .from('users').select('role, department, verification_status').eq('id', employeeId).single();
+            if (!emp || emp.role !== 'EMPLOYEE') {
+                return res.status(400).json({ error: 'Invalid employee.' });
+            }
+            if (emp.verification_status !== 'approved') {
+                return res.status(400).json({ error: 'Employee is not yet approved.' });
+            }
+            if (emp.department !== issue.department) {
+                return res.status(400).json({ error: 'Employee does not belong to this department.' });
+            }
+        }
+
+        // Fetch employee name for denormalization
+        let empName = null;
+        if (employeeId) {
+            const { data: empUser } = await supabaseAdmin
+                .from('users').select('name').eq('id', employeeId).single();
+            empName = empUser?.name || null;
+        }
+
+        const { data, error } = await supabaseAdmin
+            .from('issues')
+            .update({
+                assigned_employee_id: employeeId || null,
+                assigned_employee_name: empName,
+                assigned_by: req.userId,
+                assigned_date: employeeId ? new Date().toISOString() : null,
+                work_remarks: workRemarks || null,
+                updated_at: new Date().toISOString(),
+            })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        return res.json({ message: employeeId ? 'Issue assigned successfully.' : 'Assignment removed.', issue: data });
+    } catch (err) {
+        console.error('Assign issue error:', err);
+        return res.status(500).json({ error: 'Failed to assign issue.' });
+    }
+});
 
 /**
  * POST /api/issues/:id/support

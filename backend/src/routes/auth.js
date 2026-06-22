@@ -26,7 +26,7 @@ router.post('/register', async (req, res) => {
         return res.status(400).json({ error: 'All fields are required.' });
     }
 
-    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN', 'MLA', 'CM', 'COMMISSIONER'];
+    const validRoles = ['USER', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE', 'COLLECTOR', 'ADMIN', 'MLA', 'CM', 'COMMISSIONER', 'EMPLOYEE'];
     if (!validRoles.includes(role)) {
         return res.status(400).json({ error: 'Invalid role.' });
     }
@@ -47,6 +47,9 @@ router.post('/register', async (req, res) => {
         const userId = authData.user.id;
         const verificationStatus = role === 'USER' ? 'approved' : 'pending_verification';
         const finalDept = (role !== 'USER' && role !== 'COLLECTOR' && role !== 'ADMIN' && role !== 'MLA' && role !== 'CM' && role !== 'COMMISSIONER') ? role : (department || null);
+        // Employees keep their department from the request body; dept_role marks them as EMPLOYEE
+        const finalDeptForEmployee = role === 'EMPLOYEE' ? (department || null) : finalDept;
+        const deptRole = role === 'EMPLOYEE' ? 'EMPLOYEE' : 'HEAD';
 
         // Insert into users table
         const { data: userRecord, error: dbError } = await supabaseAdmin
@@ -56,7 +59,8 @@ router.post('/register', async (req, res) => {
                 name,
                 email,
                 role,
-                department: finalDept,
+                department: finalDeptForEmployee,
+                dept_role: deptRole,
                 verification_status: verificationStatus,
                 phone_number: phone_number || null,
                 district: district || null,
@@ -157,6 +161,7 @@ router.post('/login', async (req, res) => {
             TAMILNADU_CORPORATION: '/department-dashboard.html',
             TNEB: '/department-dashboard.html',
             POLICE: '/department-dashboard.html',
+            EMPLOYEE: '/employee-dashboard.html',
             COLLECTOR: '/collector-dashboard.html',
             ADMIN: '/admin-dashboard.html',
             MLA: '/mla-dashboard.html',
