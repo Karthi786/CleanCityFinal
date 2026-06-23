@@ -546,9 +546,7 @@
             <!-- Floating Nav Island -->
             <div class="nav-island-container">
                 <nav class="nav-island">
-                    <div class="logo">
-                        <span>MakkalKural</span>
-                    </div>
+                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
 
                     <!-- Top Doc Navigation Links -->
                     <ul class="nav-links">
@@ -608,9 +606,7 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="logo">
-                                <span>MakkalKural</span>
-                            </div>
+                            <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">
@@ -1612,9 +1608,15 @@
                   Raised by: ${raisedByText}
                 </div>
                 ${issue.assigned_employee_name ? `
-                <div style="display:flex;align-items:center;gap:6px;font-size:0.78rem;margin-top:4px;padding:5px 10px;background:#dcfce7;border-radius:8px;color:#16a34a;font-weight:700;">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-                  Assigned to: ${issue.assigned_employee_name}
+                <div style="display:flex;align-items:center;gap:10px;margin-top:8px;padding:8px 12px;background:rgba(15,23,42,0.04);border-radius:12px;border:1px solid rgba(0,0,0,0.05);">
+                  <img src="${issue.assigned_employee_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(issue.assigned_employee_name)}`}" style="width:32px; height:32px; border-radius:50%; object-fit:cover; border:2px solid white; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                  <div style="display:flex; flex-direction:column;">
+                    <span style="font-size:0.75rem; color:var(--text-muted); line-height:1.2;">Assigned to</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:0.85rem; font-weight:700; color:var(--text); line-height:1;">${issue.assigned_employee_name}</span>
+                        <span style="font-size:0.65rem; background:rgba(37,99,235,0.1); color:#2563eb; padding:2px 6px; border-radius:4px; font-weight:600;">${issue.assigned_employee_role || 'Employee'}</span>
+                    </div>
+                  </div>
                 </div>` : ''}
                 
                 <div class="ic-desc">${cleanDescription}</div>

@@ -109,8 +109,8 @@ router.get('/reviews', verifyToken, requireApproved, requireEmployee, async (req
         if (error) throw error;
         return res.json({ reviews: data || [] });
     } catch (err) {
-        console.error('GET /employee/reviews error:', err);
-        return res.status(500).json({ error: 'Failed to fetch reviews.' });
+        console.error('[Employee API] GET /employee/reviews error:', err.message, err);
+        return res.status(500).json({ error: 'Failed to fetch reviews.', detail: err.message });
     }
 });
 
@@ -123,7 +123,7 @@ router.get('/map', verifyToken, requireApproved, requireEmployee, async (req, re
         console.log(`[Employee API] Fetching map locations for employee ${req.userId}`);
         const { data, error } = await supabaseAdmin
             .from('issues')
-            .select('id, title, description, latitude, longitude, location_name, status, supports_count, created_at')
+            .select('id, title, description, latitude, longitude, location_name, status, supports_count, created_at, image_url')
             .eq('assigned_employee_id', req.userId)
             .not('latitude', 'is', null)
             .not('longitude', 'is', null);
@@ -174,6 +174,53 @@ router.put('/remarks/:id', verifyToken, requireApproved, requireEmployee, async 
     } catch (err) {
         console.error('[Employee API] PUT /employee/remarks error:', err.message, err);
         return res.status(500).json({ error: 'Failed to update remarks.', detail: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// POST /api/employee/issues/:id/completion-request
+// Submit a completion request for approval by Dept Head
+// ─────────────────────────────────────────────────────────────────
+router.post('/issues/:id/completion-request', verifyToken, requireApproved, requireEmployee, async (req, res) => {
+    try {
+        const issueId = req.params.id;
+        const employeeUserId = req.userId;
+        const { completionImageUrl, remarks } = req.body;
+
+        if (!completionImageUrl) {
+            return res.status(400).json({ error: 'At least one proof image is mandatory.' });
+        }
+
+        const { data: issue, error: fetchErr } = await supabaseAdmin
+            .from('issues')
+            .select('id, assigned_employee_id, status')
+            .eq('id', issueId)
+            .single();
+
+        if (fetchErr || !issue) return res.status(404).json({ error: 'Issue not found.' });
+        if (issue.assigned_employee_id !== employeeUserId) {
+            return res.status(403).json({ error: 'Not assigned to you.' });
+        }
+        if (issue.status === 'COMPLETED') {
+            return res.status(400).json({ error: 'Already completed.' });
+        }
+
+        const { error: updateErr } = await supabaseAdmin
+            .from('issues')
+            .update({
+                completion_status: 'PENDING_APPROVAL',
+                completion_image_url: completionImageUrl,
+                work_remarks: remarks || null,
+                completion_submitted_at: new Date().toISOString()
+            })
+            .eq('id', issueId);
+
+        if (updateErr) throw updateErr;
+
+        return res.json({ message: 'Completion request submitted successfully.' });
+    } catch (err) {
+        console.error('[Employee API] POST /employee/issues/:id/completion-request error:', err);
+        return res.status(500).json({ error: 'Failed to submit completion request.' });
     }
 });
 

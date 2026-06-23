@@ -224,28 +224,30 @@ export const imageAPI = {
 
 /* ── Employees Endpoints ── */
 export const employeesAPI = {
-    getAll: (params = {}) => {
-        const q = new URLSearchParams(params).toString();
-        return apiFetch(`/employees${q ? '?' + q : ''}`);
-    },
-    getPending: (params = {}) => {
-        const q = new URLSearchParams(params).toString();
-        return apiFetch(`/employees/pending${q ? '?' + q : ''}`);
-    },
-    verify: (id, status) => apiFetch(`/employees/${id}/verify`, {
+    // Admin ops
+    getAll: () => apiFetch('/employees'),
+    verify: (id, status) => apiFetch(`/users/${id}/verify`, { method: 'PUT', body: JSON.stringify({ status }) }),
+    getPerformance: () => apiFetch('/employees/performance'),
+    removeEmployee: (id) => apiFetch(`/employees/${id}`, { method: 'DELETE' }),
+
+    // Completion requests
+    getCompletionRequests: () => apiFetch('/employees/completion-requests'),
+    reviewCompletionRequest: (id, action) => apiFetch(`/employees/completion-requests/${id}/review`, {
         method: 'PUT',
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ action })
+    }),
+
+    // Standard ops
+    saveRemarks: (id, workRemarks) => apiFetch('/employee/remarks', {
+        method: 'PUT',
+        body: JSON.stringify({ id, workRemarks }),
     }),
     myIssues: () => apiFetch('/employee/issues'),
     myStats: () => apiFetch('/employee/stats'),
     myReviews: () => apiFetch('/employee/reviews'),
     myMap: () => apiFetch('/employee/map'),
-    saveRemarks: (issueId, remarks) => apiFetch(`/employee/remarks/${issueId}`, {
-        method: 'PUT',
-        body: JSON.stringify({ workRemarks: remarks }),
+    submitCompletionRequest: (id, payload) => apiFetch(`/employee/issues/${id}/completion-request`, {
+        method: 'POST',
+        body: JSON.stringify(payload),
     }),
-    performance: (params = {}) => {
-        const q = new URLSearchParams(params).toString();
-        return apiFetch(`/employees/performance${q ? '?' + q : ''}`);
-    },
 };

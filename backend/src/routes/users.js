@@ -23,7 +23,7 @@ router.get('/me', verifyToken, requireApproved, async (req, res) => {
     try {
         const { data, error } = await supabaseAdmin
             .from('users')
-            .select('id, name, email, role, department, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, reports_count, campaigns_participated, campaigns_organized, verification_status, phone_number, district, constituency, description')
+            .select('id, name, email, role, department, total_points, reports_points, campaign_participated_points, campaign_created_points, reports_resolved, reports_count, campaigns_participated, campaigns_organized, verification_status, phone_number, district, constituency, description, profile_image_url')
             .eq('id', req.userId)
             .single();
 
@@ -53,9 +53,14 @@ router.put('/me', verifyToken, requireApproved, async (req, res) => {
         const { name, district, constituency, profile_photo, description } = req.body;
         
         // Update users table
+        const updatePayload = { name, district, constituency, description };
+        if (profile_photo !== undefined) {
+            updatePayload.profile_image_url = profile_photo;
+        }
+
         const { data, error } = await supabaseAdmin
             .from('users')
-            .update({ name, district, constituency, description })
+            .update(updatePayload)
             .eq('id', req.userId)
             .select()
             .single();
@@ -70,6 +75,7 @@ router.put('/me', verifyToken, requireApproved, async (req, res) => {
                 user_metadata: { profile_photo }
             });
             data.profile_photo = profile_photo;
+            data.profile_image_url = profile_photo;
         } else {
             const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(req.userId);
             if (authUser && authUser.user && authUser.user.user_metadata) {

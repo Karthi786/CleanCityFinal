@@ -73,67 +73,21 @@
             font-size: 1.35rem;
         }
 
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            list-style: none;
-        }
-
-        .nav-link-item {
-            padding: 8px 18px;
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-radius: 99px;
-            position: relative;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
-
-        .nav-link-item:hover, .nav-link-item.active {
-            color: var(--primary);
-        }
-
-        .nav-link-item.active {
-            background: rgba(176, 0, 0, 0.05);
-        }
-
-        .nav-link-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 12px;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 99px;
-            box-shadow: 0 2px 6px var(--primary-glow);
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        /* nav-links, nav-link-item, nav-actions — defined in styles.css */
 
         .dash-content {
-            padding: 32px 40px !important;
+            padding: 28px 32px;
             max-width: 1300px;
             margin: 0 auto;
         }
 
         .page-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 32px !important;
+            margin-bottom: 28px;
         }
 
         .page-title {
             font-family: var(--font-display);
-            font-size: 2.2rem !important;
+            font-size: 2rem;
             font-weight: 800;
             letter-spacing: -0.02em;
             color: var(--text);
@@ -196,9 +150,7 @@
             <!-- Floating Nav Island -->
             <div class="nav-island-container">
                 <nav class="nav-island">
-                    <div class="logo">
-                        <span>MakkalKural</span>
-                    </div>
+                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
 
                     <!-- Top Doc Navigation Links -->
                     <ul class="nav-links">
@@ -246,9 +198,7 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="logo">
-                                <span>MakkalKural</span>
-                            </div>
+                            <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">

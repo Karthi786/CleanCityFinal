@@ -42,7 +42,7 @@ router.get('/', verifyToken, requireApproved, requireHeadOrAdmin, async (req, re
 
         let query = supabaseAdmin
             .from('users')
-            .select('id, name, email, phone_number, department, dept_role, verification_status, created_at')
+            .select('id, name, email, phone_number, department, dept_role, verification_status, created_at, profile_image_url')
             .eq('role', 'EMPLOYEE')
             .order('created_at', { ascending: false });
 
@@ -281,6 +281,152 @@ router.get('/performance', verifyToken, requireApproved, requireHeadOrAdmin, asy
     } catch (err) {
         console.error('GET /employees/performance error:', err);
         return res.status(500).json({ error: 'Failed to fetch performance.' });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// GET /api/employees/completion-requests
+// List pending completion requests for the Head's department
+// ─────────────────────────────────────────────────────────────────
+router.get('/completion-requests', verifyToken, requireApproved, requireHeadOrAdmin, async (req, res) => {
+    try {
+        const isAdmin = req.user.role === 'ADMIN';
+        const dept = isAdmin ? (req.query.department || null) : req.user.department;
+
+        let query = supabaseAdmin
+            .from('issues')
+            .select(`
+                id, title, location_name, status, department,
+                completion_status, completion_image_url, completion_submitted_at,
+                assigned_employee_id,
+                users!issues_assigned_employee_id_fkey (id, name, profile_image_url)
+            `)
+            .eq('completion_status', 'PENDING_APPROVAL')
+            .order('completion_submitted_at', { ascending: false });
+
+        if (dept) query = query.eq('department', dept);
+
+        const { data, error } = await query;
+        if (error) throw error;
+        
+        // Flatten users into assigned_employee
+        const requests = (data || []).map(i => {
+            const employee = i.users || {};
+            delete i.users;
+            return {
+                ...i,
+                assigned_employee: employee
+            };
+        });
+
+        return res.json({ requests });
+    } catch (err) {
+        console.error('GET /employees/completion-requests error:', err);
+        return res.status(500).json({ error: 'Failed to fetch completion requests.' });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// PUT /api/employees/completion-requests/:id/review
+// Approve or Reject a completion request
+// ─────────────────────────────────────────────────────────────────
+router.put('/completion-requests/:id/review', verifyToken, requireApproved, requireHeadOrAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { action } = req.body; // 'APPROVE' or 'REJECT'
+
+        if (!['APPROVE', 'REJECT'].includes(action)) {
+            return res.status(400).json({ error: 'Action must be APPROVE or REJECT.' });
+        }
+
+        const { data: issue, error: fetchErr } = await supabaseAdmin
+            .from('issues')
+            .select('id, department, completion_status')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !issue) return res.status(404).json({ error: 'Issue not found.' });
+        if (issue.completion_status !== 'PENDING_APPROVAL') {
+            return res.status(400).json({ error: 'This issue is not pending approval.' });
+        }
+        
+        if (req.user.role !== 'ADMIN' && issue.department !== req.user.department) {
+            return res.status(403).json({ error: 'Cannot review requests for another department.' });
+        }
+
+        const updates = {
+            completion_status: action === 'APPROVE' ? 'APPROVED' : 'REJECTED',
+            updated_at: new Date().toISOString()
+        };
+
+        if (action === 'APPROVE') {
+            updates.status = 'COMPLETED';
+            updates.approved_by = req.userId;
+            updates.approved_at = new Date().toISOString();
+        } else {
+            updates.status = 'IN_PROGRESS';
+        }
+
+        const { error: updateErr } = await supabaseAdmin
+            .from('issues')
+            .update(updates)
+            .eq('id', id);
+
+        if (updateErr) throw updateErr;
+
+        return res.json({ message: `Completion request ${action.toLowerCase()}d successfully.` });
+    } catch (err) {
+        console.error('PUT /employees/completion-requests/:id/review error:', err);
+        return res.status(500).json({ error: 'Failed to review completion request.' });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// DELETE /api/employees/:id
+// Remove an employee (disable their account)
+// ─────────────────────────────────────────────────────────────────
+router.delete('/:id', verifyToken, requireApproved, requireHeadOrAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const { data: emp, error: fetchErr } = await supabaseAdmin
+            .from('users')
+            .select('id, role, department')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !emp) return res.status(404).json({ error: 'Employee not found.' });
+        if (emp.role !== 'EMPLOYEE') return res.status(400).json({ error: 'User is not an employee.' });
+
+        if (req.user.role !== 'ADMIN' && emp.department !== req.user.department) {
+            return res.status(403).json({ error: 'Cannot remove employees from another department.' });
+        }
+
+        // Safety check: Does the employee have active assignments?
+        const { count, error: countErr } = await supabaseAdmin
+            .from('issues')
+            .select('*', { count: 'exact', head: true })
+            .eq('assigned_employee_id', id)
+            .neq('status', 'COMPLETED');
+
+        if (countErr) throw countErr;
+        
+        if (count > 0) {
+            return res.status(400).json({ error: `Cannot remove employee. They have ${count} active complaint(s) assigned. Please reassign them first.` });
+        }
+
+        // Disable employee by changing status to rejected
+        const { error: updateErr } = await supabaseAdmin
+            .from('users')
+            .update({ verification_status: 'rejected' })
+            .eq('id', id);
+
+        if (updateErr) throw updateErr;
+
+        return res.json({ message: 'Employee successfully removed.' });
+    } catch (err) {
+        console.error('DELETE /employees/:id error:', err);
+        return res.status(500).json({ error: 'Failed to remove employee.' });
     }
 });
 

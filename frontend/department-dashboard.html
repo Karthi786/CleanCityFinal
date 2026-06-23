@@ -84,51 +84,11 @@
             font-size: 1.35rem;
         }
 
-        .nav-links {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            list-style: none;
-        }
+        /* nav-links, nav-link-item, nav-actions — defined in styles.css */
 
-        .nav-link-item {
-            padding: 8px 18px;
-            font-size: 0.92rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            border-radius: 99px;
-            position: relative;
-            cursor: pointer;
-            transition: all var(--transition);
-        }
+        /* nav-link-item — defined in styles.css */
 
-        .nav-link-item:hover,
-        .nav-link-item.active {
-            color: var(--primary);
-        }
-
-        .nav-link-item.active {
-            background: rgba(176, 0, 0, 0.05);
-        }
-
-        .nav-link-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: 4px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 12px;
-            height: 3px;
-            background: var(--primary);
-            border-radius: 99px;
-            box-shadow: 0 2px 6px var(--primary-glow);
-        }
-
-        .nav-actions {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
+        /* nav-actions — defined in styles.css */
 
         /* ── Notification Dropdown ── */
         .notification-wrapper {
@@ -1055,9 +1015,7 @@
             <!-- Floating Nav Island -->
             <div class="nav-island-container">
                 <nav class="nav-island">
-                    <div class="logo">
-                        <span>MakkalKural</span>
-                    </div>
+                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
 
                     <!-- Top Doc Navigation Links -->
                     <ul class="nav-links">
@@ -1083,6 +1041,12 @@
                             <a class="nav-link-item" href="#" id="nav-analytics"
                                 onclick="event.preventDefault(); switchTab('analytics');">
                                 Analytics
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link-item" href="#" id="nav-completion"
+                                onclick="event.preventDefault(); switchTab('completion');">
+                                ✅ Approvals
                             </a>
                         </li>
                         <li>
@@ -1157,9 +1121,7 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="logo">
-                                <span>MakkalKural</span>
-                            </div>
+                            <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">
@@ -1196,8 +1158,22 @@
 
             <!-- Content Area -->
             <div class="dash-content animate-in">
+                
+                <!-- ── Completion Requests Tab ── -->
+                <div id="tab-completion" class="tab-pane">
+                    <div class="section-header">
+                        <div>
+                            <h2 class="section-title">Pending Completion Requests</h2>
+                            <p class="section-subtitle">Review and approve employee work completion requests</p>
+                        </div>
+                    </div>
+                    <div class="issues-grid" id="completion-requests-grid">
+                        <div class="empty-state"><p>Loading requests...</p></div>
+                    </div>
+                </div>
+
                 <!-- Header Filters/Controls inside visual wrapper -->
-                <div class="page-header animate-in stagger-1">
+                <div class="page-header animate-in stagger-1" id="page-header">
                     <div id="page-header-text">
                         <h2 class="page-title" id="page-title">Issues Management</h2>
                         <p class="page-subtitle" id="dept-title">Review, update and resolve civic complaints in your
@@ -1597,7 +1573,7 @@
         if (logoutBtn) logoutBtn.addEventListener('click', logout);
         if (mobileLogoutBtn) mobileLogoutBtn.addEventListener('click', logout);
 
-        // ─── Notification System ───
+        // ── Notification System ──
         const bellBtn = document.getElementById('notification-bell');
         const notificationDropdown = document.getElementById('notification-dropdown');
         const notificationList = document.getElementById('notification-list');
@@ -1712,10 +1688,13 @@
         let analyticsLoaded = false;
         let employeesLoaded = false;
         let mapInitialized = false;
-        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', employees: 'drawer-employees', analytics: 'drawer-analytics', map: 'drawer-map' };
+        let reviewsLoaded = false;
+        let completionLoaded = false;
+        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', employees: 'drawer-employees', analytics: 'drawer-analytics', map: 'drawer-map', completion: 'drawer-completion' };
+        
         window.switchTab = (name) => {
             sessionStorage.setItem('departmentDashboardTab', name);
-            ['issues', 'reviews', 'employees', 'analytics', 'map'].forEach(t => {
+            ['issues', 'reviews', 'employees', 'analytics', 'map', 'completion'].forEach(t => {
                 const pane = document.getElementById('tab-' + t);
                 if (pane) pane.style.display = t === name ? 'block' : 'none';
 
@@ -1724,23 +1703,18 @@
             });
 
             document.getElementById('issues-filter-wrap').style.display = name === 'issues' ? 'flex' : 'none';
+            document.getElementById('page-header').style.display = name === 'issues' ? 'flex' : 'none';
             syncDrawerActive(drawerByTab[name]);
-            if (name === 'reviews') loadReviews();
-            if (name === 'employees' && !employeesLoaded) {
-                employeesLoaded = true;
-                loadEmployees();
-            }
-            if (name === 'analytics' && !analyticsLoaded) {
-                analyticsLoaded = true;
-                loadAnalytics();
-            }
+            if (name === 'reviews' && !reviewsLoaded) loadReviews();
+            if (name === 'employees' && !employeesLoaded) loadEmployees();
+            if (name === 'completion' && !completionLoaded) loadCompletionRequests();
+            if (name === 'analytics' && !analyticsLoaded) loadAnalytics();
             if (name === 'map') {
                 if (!mapInitialized) {
                     mapInitialized = true;
                     initDeptMap();
                 }
                 renderMapMarkers(getFilteredMapIssues());
-                // Force Leaflet to recalculate size after display:block
                 if (deptMap) setTimeout(() => deptMap.invalidateSize(), 150);
             }
         };
@@ -1821,7 +1795,14 @@
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
             <span class="badge badge-${issue.status}" style="font-size:0.75rem; padding:3px 10px; border-radius:99px;">${t(statusLabelKey)}</span>
             <button class="btn btn-outline btn-sm" style="border-radius:99px; font-size:0.8rem; padding:4px 12px;" onclick="event.stopPropagation();openUpdate('${issue.id}')">✏️ ${t('btn_update')}</button>
-            ${issue.assigned_employee_name ? `<span style="font-size:0.72rem;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:99px;font-weight:700;">👤 ${issue.assigned_employee_name}</span>` : `<button class="btn btn-sm" style="border-radius:99px;font-size:0.78rem;padding:3px 10px;background:rgba(176,0,0,0.06);color:var(--primary);border:1px solid rgba(176,0,0,0.15);" onclick="event.stopPropagation();openAssign('${issue.id}')">+ Assign</button>`}
+            ${issue.assigned_employee_name ? `
+            <div style="display:flex; align-items:center; gap:8px; background:rgba(15,23,42,0.04); padding:4px 12px; border-radius:99px; border:1px solid var(--border);">
+                <img src="${issue.assigned_employee_photo || `https://ui-avatars.com/api/?name=${encodeURIComponent(issue.assigned_employee_name)}`}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                <div style="display:flex; flex-direction:column;">
+                    <span style="font-size:0.75rem; font-weight:700; color:var(--text); line-height:1;">${issue.assigned_employee_name}</span>
+                    <span style="font-size:0.65rem; color:var(--text-muted); line-height:1.2;">${issue.assigned_employee_role || 'Employee'}</span>
+                </div>
+            </div>` : `<button class="btn btn-sm" style="border-radius:99px;font-size:0.78rem;padding:3px 10px;background:rgba(176,0,0,0.06);color:var(--primary);border:1px solid rgba(176,0,0,0.15);" onclick="event.stopPropagation();openAssign('${issue.id}')">+ Assign</button>`}
           </div>
         </div>
       `;
@@ -2018,6 +1999,7 @@
         }
 
         async function loadReviews() {
+            reviewsLoaded = true;
             const container = document.getElementById('reviews-list');
             container.innerHTML = '<div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>';
             try {
@@ -2049,6 +2031,7 @@
         let deptStatusChart, deptMonthlyChart;
 
         async function loadAnalytics() {
+            analyticsLoaded = true;
             const dept = user.role;
             try {
                 const [stats, statusData, monthData] = await Promise.all([
@@ -2098,7 +2081,6 @@
                     tooltip: { theme: 'light' }
                 });
                 deptMonthlyChart.render();
-                analyticsLoaded = true;
             } catch (err) {
                 console.error('Analytics error:', err);
                 toast.error('Failed to load analytics', err.message);
@@ -2166,8 +2148,6 @@
             if (status === 'IN_PROGRESS') return '🔵 In Progress';
             return '⏳ Pending';
         }
-
-
 
         function getFilteredMapIssues() {
             return allIssues.filter(issue => {
@@ -2305,7 +2285,70 @@
         // ── Employees Tab Logic ──
         let allEmployees = [];
 
+        async function loadCompletionRequests() {
+            completionLoaded = true;
+            const container = document.getElementById('completion-requests-grid');
+            container.innerHTML = '<div class="loading-page"><div class="spinner"></div></div>';
+            try {
+                const data = await employeesAPI.getCompletionRequests();
+                const reqs = data.requests || [];
+                if (reqs.length === 0) {
+                    container.innerHTML = `<div class="empty-state"><div class="empty-state-icon">✅</div><p>No pending completion requests.</p></div>`;
+                    return;
+                }
+                
+                container.innerHTML = reqs.map(req => {
+                    const empName = req.assigned_employee?.name || 'Unknown';
+                    const empPhoto = req.assigned_employee?.profile_image_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(empName)}`;
+                    return `
+                    <div class="issue-card" style="border: 2px solid var(--primary-glow);">
+                        <img src="${req.completion_image_url}" class="issue-card-img" style="height:200px; object-fit:contain; background:#1e293b;" onerror="this.src='placeholder.jpg'" />
+                        <div class="issue-card-body">
+                            <div class="issue-card-badges">
+                                <span class="badge pending">⏳ Pending Approval</span>
+                                <span class="badge dept">${req.department}</span>
+                            </div>
+                            <div class="issue-card-title">${req.title}</div>
+                            <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">📍 ${req.location_name}</div>
+                            
+                            <div style="background:var(--bg); border-radius:12px; padding:12px; margin-top:12px; display:flex; align-items:center; gap:12px;">
+                                <img src="${empPhoto}" style="width:40px; height:40px; border-radius:50%; object-fit:cover;">
+                                <div>
+                                    <div style="font-weight:600; font-size:0.9rem;">${empName}</div>
+                                    <div style="font-size:0.8rem; color:var(--text-muted);">Submitted on ${new Date(req.completion_submitted_at).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="issue-card-footer" style="gap:10px;">
+                            <button class="btn btn-update" style="background:var(--success); color:white; flex:1;" onclick="reviewCompletion('${req.id}', 'APPROVE')">Approve</button>
+                            <button class="btn btn-update" style="background:var(--danger); color:white; flex:1;" onclick="reviewCompletion('${req.id}', 'REJECT')">Reject</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('[Department Dashboard] loadCompletionRequests error:', err);
+                container.innerHTML = `<div class="empty-state"><p style="color:var(--danger);">Failed to load requests: ${err.message}</p></div>`;
+            }
+        }
+
+        window.reviewCompletion = async (id, action) => {
+            if (!confirm(`Are you sure you want to ${action.toLowerCase()} this completion request?`)) return;
+            try {
+                await employeesAPI.reviewCompletionRequest(id, action);
+                toast.success('Success', `Completion request ${action.toLowerCase()}d.`);
+                await loadCompletionRequests();
+                // reload issues map to show updated statuses
+                if (document.getElementById('tab-issues').style.display !== 'none') {
+                    await loadIssues();
+                }
+            } catch (err) {
+                console.error('[Department Dashboard] reviewCompletion error:', err);
+                toast.error('Action Failed', err.message);
+            }
+        };
+
         async function loadEmployees() {
+            employeesLoaded = true;
             try {
                 const data = await employeesAPI.getAll();
                 allEmployees = data.employees || [];
@@ -2353,11 +2396,13 @@
             const statusColor = emp.verification_status === 'approved' ? '#16a34a' : emp.verification_status === 'rejected' ? '#dc2626' : '#d97706';
             const statusBg   = emp.verification_status === 'approved' ? '#dcfce7' : emp.verification_status === 'rejected' ? '#fee2e2' : '#fef3c7';
             const statusLabel = emp.verification_status === 'approved' ? '✅ Approved' : emp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
+            const profileImg = emp.profile_image_url ? `<img src="${emp.profile_image_url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">` : `${(emp.name||'?')[0].toUpperCase()}`;
+            
             return `
             <div style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                <div style="width:44px;height:44px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1rem;flex-shrink:0;">${(emp.name||'?')[0].toUpperCase()}</div>
+                <div style="width:44px;height:44px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1rem;flex-shrink:0;">${profileImg}</div>
                 <div style="flex:1;min-width:0;">
-                    <div style="font-family:var(--font-display);font-weight:700;font-size:0.95rem;color:var(--text);">${emp.name}</div>
+                    <div style="font-family:var(--font-display);font-weight:700;font-size:0.95rem;color:var(--text);">${emp.name} <span style="font-size:0.75rem; color:var(--text-muted); font-weight:500;">(${emp.dept_role || 'Employee'})</span></div>
                     <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">${emp.email} · ${emp.phone_number || '—'}</div>
                     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
                         <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${statusBg};color:${statusColor};">${statusLabel}</span>
@@ -2365,10 +2410,14 @@
                         <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:#dcfce7;color:#16a34a;">✅ ${stats.completed||0} done</span>
                     </div>
                 </div>
-                ${showActions ? `
+                ${emp.verification_status === 'pending_verification' ? `
                 <div style="display:flex;gap:8px;flex-shrink:0;">
                     <button onclick="verifyEmployee('${emp.id}','approved')" style="padding:7px 16px;border-radius:99px;background:var(--primary);color:white;border:none;cursor:pointer;font-weight:700;font-size:0.8rem;">✅ Approve</button>
                     <button onclick="verifyEmployee('${emp.id}','rejected')" style="padding:7px 16px;border-radius:99px;background:#fee2e2;color:#dc2626;border:none;cursor:pointer;font-weight:700;font-size:0.8rem;">❌ Reject</button>
+                </div>` : ''}
+                ${emp.verification_status === 'approved' ? `
+                <div style="display:flex;gap:8px;flex-shrink:0;">
+                    <button onclick="removeEmployee('${emp.id}')" style="padding:7px 16px;border-radius:99px;background:#fee2e2;color:#dc2626;border:none;cursor:pointer;font-weight:700;font-size:0.8rem;">🗑️ Remove Employee</button>
                 </div>` : ''}
             </div>`;
         }
@@ -2380,6 +2429,18 @@
                 await loadEmployees();
             } catch (err) {
                 toast.error('Error', err.message);
+            }
+        };
+
+        window.removeEmployee = async (id) => {
+            if (!confirm('Are you sure you want to remove this employee? This will disable their account. Active assignments will block removal.')) return;
+            try {
+                await employeesAPI.removeEmployee(id);
+                toast.success('Employee Removed', 'The employee account has been disabled.');
+                await loadEmployees();
+            } catch (err) {
+                console.error('removeEmployee error:', err);
+                toast.error('Cannot Remove Employee', err.message);
             }
         };
 

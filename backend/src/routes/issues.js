@@ -41,7 +41,11 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
 
         let query = supabaseAdmin
             .from('issues')
-            .select('*, reporter:users!issues_reported_by_id_fkey(name, email, phone_number, district, constituency)')
+            .select(`
+                *,
+                reporter:users!issues_reported_by_id_fkey(name, email, phone_number, district, constituency),
+                assigned_employee:users!issues_assigned_employee_id_fkey(name, profile_image_url, dept_role)
+            `)
             .neq('department', 'FIRE_STATION')
             .order('created_at', { ascending: false });
 
@@ -71,14 +75,17 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
         // Clean up reporter join data before sending
         if (needsUserJoin && data) {
             data = data.map(issue => {
-                const { reporter, ...rest } = issue;
+                const { reporter, assigned_employee, ...rest } = issue;
                 return {
                     ...rest,
                     reporter_name: reporter?.name,
                     reporter_email: reporter?.email,
                     reporter_phone: reporter?.phone_number,
                     reporter_district: reporter?.district,
-                    reporter_constituency: reporter?.constituency
+                    reporter_constituency: reporter?.constituency,
+                    assigned_employee_name: assigned_employee?.name,
+                    assigned_employee_photo: assigned_employee?.profile_image_url,
+                    assigned_employee_role: assigned_employee?.dept_role
                 };
             });
         }
@@ -240,6 +247,9 @@ router.put('/:id/status', verifyToken, requireApproved,
                     // Employees can only update issues assigned to them
                     if (!issue || issue.assigned_employee_id !== req.userId) {
                         return res.status(403).json({ error: 'This issue is not assigned to you.' });
+                    }
+                    if (status === 'COMPLETED') {
+                        return res.status(400).json({ error: 'Employees must submit a completion request for approval.' });
                     }
                 } else if (issue && issue.department !== req.user.role) {
                     return res.status(403).json({ error: 'Cannot update issues from another department.' });

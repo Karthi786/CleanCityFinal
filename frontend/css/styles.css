@@ -175,6 +175,14 @@ a {
   align-items: center;
   gap: 4px;
   list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-links li {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
 .nav-link-item {
@@ -184,19 +192,30 @@ a {
   color: var(--text-muted);
   border-radius: 99px;
   position: relative;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 .nav-link-item:hover, .nav-link-item.active {
   color: var(--primary);
 }
 
+.nav-link-item.active {
+  background: rgba(176, 0, 0, 0.05);
+}
+
 .nav-link-item.active::after {
   content: '';
   position: absolute;
-  bottom: 0px;
+  bottom: 4px;
   left: 50%;
   transform: translateX(-50%);
-  width: 14px;
+  width: 12px;
   height: 3px;
   background: var(--primary);
   border-radius: 99px;
@@ -207,6 +226,7 @@ a {
   display: flex;
   align-items: center;
   gap: 10px;
+  flex-shrink: 0;
 }
 
 /* ── Buttons ── */
@@ -1917,4 +1937,494 @@ body.drawer-open {
 /* ── Smooth scroll ── */
 html {
   scroll-behavior: smooth;
+}
+
+/* ════════════════════════════════════════════════════════════
+   GLOBAL RESPONSIVE IMPROVEMENTS
+   Applied to ALL dashboard pages via this shared stylesheet
+   ════════════════════════════════════════════════════════════ */
+
+/* ── KPI / Stat Grid Responsive ── */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 28px;
+}
+
+@media (max-width: 1200px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+}
+
+@media (max-width: 600px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  .kpi-value {
+    font-size: 1.6rem !important;
+  }
+  .kpi-label {
+    font-size: 0.7rem !important;
+  }
+  .kpi-card {
+    padding: 14px !important;
+  }
+  .kpi-icon {
+    font-size: 1.4rem !important;
+  }
+}
+
+/* ── Section Headers ── */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.section-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+/* ── Issues Grid Responsive ── */
+.issues-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 768px) {
+  .issues-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* ── Issue Card ── */
+.issue-card {
+  border-radius: 20px !important;
+}
+
+@media (max-width: 480px) {
+  .issue-card-body {
+    padding: 14px 14px;
+  }
+  .issue-card-footer {
+    padding: 12px 14px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .issue-card-img {
+    height: 140px !important;
+  }
+}
+
+/* ── Filter Bar Responsive ── */
+.issues-filter-wrap,
+#issues-filter-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+@media (max-width: 640px) {
+  .issues-filter-wrap,
+  #issues-filter-wrap {
+    gap: 8px;
+  }
+  .issues-filter-wrap select,
+  #issues-filter-wrap select,
+  .issues-filter-wrap .select,
+  #issues-filter-wrap .select {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.82rem;
+  }
+  .issues-filter-wrap .btn,
+  #issues-filter-wrap .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Empty State ── */
+.empty-state {
+  padding: 40px 24px;
+  text-align: center;
+  background: var(--bg-card);
+  border-radius: 20px;
+  border: 1.5px dashed var(--border);
+  color: var(--text-muted);
+}
+
+@media (max-width: 480px) {
+  .empty-state {
+    padding: 28px 16px;
+  }
+  .empty-state-icon {
+    font-size: 2.2rem !important;
+  }
+}
+
+/* ── Modal Responsive ── */
+.modal-overlay {
+  padding: 16px !important;
+}
+
+.modal-box {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 20px;
+  padding: 24px;
+}
+
+@media (max-width: 480px) {
+  .modal-box {
+    padding: 18px 16px;
+    border-radius: 16px;
+  }
+  .modal-title,
+  .modal-box h3 {
+    font-size: 1.1rem !important;
+  }
+  .modal-footer {
+    flex-direction: column-reverse;
+  }
+  .modal-footer .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* ── Assign Employee Dropdown Modal ── */
+#assign-modal .modal-box,
+#remarks-modal .modal-box,
+#completion-modal .modal-box {
+  max-width: 480px;
+}
+
+/* ── Dashboard Content Padding ── */
+.dash-main {
+  padding-top: 90px;
+}
+
+@media (max-width: 768px) {
+  .dash-main {
+    padding-top: 78px !important;
+  }
+  .dash-content {
+    padding: 16px 14px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .dash-main {
+    padding-top: 72px !important;
+  }
+  .dash-content {
+    padding: 12px 12px !important;
+  }
+}
+
+/* ── Nav Island Responsive Overrides ── */
+@media (max-width: 768px) {
+  .nav-island {
+    height: 58px !important;
+    border-radius: 20px !important;
+    padding: 0 12px 0 16px !important;
+  }
+  .nav-island-container {
+    top: 10px !important;
+    padding: 0 10px !important;
+  }
+  .nav-island .logo span {
+    font-size: 1.05rem !important;
+  }
+  .nav-island .logo-icon {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-island {
+    height: 52px !important;
+    border-radius: 16px !important;
+    padding: 0 10px 0 14px !important;
+  }
+  .nav-actions .btn-ghost {
+    display: none;
+  }
+  .nav-username {
+    display: none;
+  }
+}
+
+/* ── Employee Role Badge ── */
+.emp-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 99px;
+  background: var(--primary-light);
+  border: 1.5px solid rgba(176, 0, 0, 0.18);
+  color: var(--primary);
+  font-weight: 700;
+  font-size: 0.82rem;
+  margin-top: 8px;
+}
+
+/* ── Review Cards ── */
+.review-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+@media (max-width: 480px) {
+  .review-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+}
+
+/* ── Analytics Grid Responsive ── */
+.analytics-grid-1,
+.analytics-grid-2 {
+  display: grid;
+  gap: 20px;
+}
+
+.analytics-grid-1 { grid-template-columns: 1fr; }
+.analytics-grid-2 { grid-template-columns: repeat(2, 1fr); }
+
+@media (max-width: 900px) {
+  .analytics-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Chart Cards ── */
+.chart-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 20px;
+}
+
+@media (max-width: 480px) {
+  .chart-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+}
+
+/* ── Verify Cards (Admin dashboard) ── */
+.verify-card {
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+@media (max-width: 640px) {
+  .verify-card {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .verify-actions {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .verify-actions .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ── Table Wrap Responsive ── */
+.table-wrap {
+  border-radius: 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    padding: 12px 10px !important;
+    font-size: 0.82rem !important;
+  }
+}
+
+/* ── Page Header ── */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .page-title {
+    font-size: 1.6rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    font-size: 1.35rem !important;
+  }
+  .page-subtitle {
+    font-size: 0.84rem !important;
+  }
+}
+
+/* ── Map Container ── */
+#dept-map, #emp-map, #col-map {
+  height: 500px;
+  border-radius: 20px;
+  overflow: hidden;
+}
+
+@media (max-width: 768px) {
+  #dept-map, #emp-map, #col-map {
+    height: 350px;
+    border-radius: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  #dept-map, #emp-map, #col-map {
+    height: 280px;
+    border-radius: 10px;
+  }
+}
+
+/* ── Issue Row Mobile ── */
+@media (max-width: 600px) {
+  .issue-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 10px !important;
+    padding: 14px 16px !important;
+    border-radius: 16px !important;
+  }
+  .issue-row > div:first-child {
+    display: none !important;
+  }
+  .issue-row > div:last-child {
+    width: 100%;
+    flex-direction: row !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .issue-row-title {
+    white-space: normal !important;
+    font-size: 0.92rem !important;
+  }
+}
+
+/* ── Profile Settings Tab ── */
+.profile-section {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+}
+
+@media (max-width: 640px) {
+  .profile-section {
+    padding: 18px 16px;
+    border-radius: 18px;
+  }
+}
+
+/* ── Completion Requests Grid ── */
+#completion-requests-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+@media (max-width: 640px) {
+  #completion-requests-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* ── Toast on Mobile ── */
+@media (max-width: 480px) {
+  .toast-container {
+    bottom: 16px !important;
+    right: 12px !important;
+    left: 12px !important;
+  }
+  .toast {
+    min-width: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+/* ── nav-username responsive ── */
+#nav-username {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+@media (max-width: 640px) {
+  #nav-username {
+    display: none;
+  }
+}
+
+/* ── Btn-ghost text hide on small screens ── */
+@media (max-width: 480px) {
+  .nav-actions .btn-ghost span {
+    display: none;
+  }
+  .nav-actions .btn-ghost {
+    padding: 6px 8px !important;
+  }
 }
