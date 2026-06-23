@@ -20,18 +20,31 @@ function requireEmployee(req, res, next) {
 // ─────────────────────────────────────────────────────────────────
 router.get('/issues', verifyToken, requireApproved, requireEmployee, async (req, res) => {
     try {
-        console.log(`[Employee API] Fetching issues for employee ${req.userId}`);
+        const employeeUserId = req.userId;
+        console.log(`[Employee API] /issues — user.id=${employeeUserId}, user.role=${req.user.role}, user.dept=${req.user.department}`);
+
         const { data, error } = await supabaseAdmin
             .from('issues')
             .select('*')
-            .eq('assigned_employee_id', req.userId)
-            .order('assigned_date', { ascending: false, nullsFirst: false });
+            .eq('assigned_employee_id', employeeUserId)
+            .order('created_at', { ascending: false });
 
-        if (error) throw error;
+        if (error) {
+            console.error('[Employee API] DB error fetching issues:', JSON.stringify(error));
+            throw error;
+        }
+
+        console.log(`[Employee API] Found ${(data || []).length} issues assigned to employee ${employeeUserId}`);
+        if (data && data.length > 0) {
+            console.log('[Employee API] Sample issue ids:', data.slice(0, 3).map(i => `${i.id} (assigned_to: ${i.assigned_employee_id})`));
+        } else {
+            console.warn('[Employee API] No issues found. Verify assigned_employee_id column matches user UUID.');
+        }
+
         return res.json({ issues: data || [] });
     } catch (err) {
-        console.error('GET /employee/issues error:', err);
-        return res.status(500).json({ error: 'Failed to fetch assigned issues.' });
+        console.error('[Employee API] GET /employee/issues error:', err.message, err);
+        return res.status(500).json({ error: 'Failed to fetch assigned issues.', detail: err.message });
     }
 });
 
@@ -41,28 +54,31 @@ router.get('/issues', verifyToken, requireApproved, requireEmployee, async (req,
 // ─────────────────────────────────────────────────────────────────
 router.get('/stats', verifyToken, requireApproved, requireEmployee, async (req, res) => {
     try {
-        console.log(`[Employee API] Fetching stats for employee ${req.userId}`);
+        const employeeUserId = req.userId;
+        console.log(`[Employee API] /stats — employee user.id=${employeeUserId}`);
+
         const { data, error } = await supabaseAdmin
             .from('issues')
-            .select('status')
-            .eq('assigned_employee_id', req.userId);
+            .select('id, status')
+            .eq('assigned_employee_id', employeeUserId);
 
-        if (error) throw error;
+        if (error) {
+            console.error('[Employee API] DB error fetching stats:', JSON.stringify(error));
+            throw error;
+        }
 
-        const total = (data || []).length;
-        const pending = (data || []).filter(i => i.status === 'PENDING').length;
-        const inProgress = (data || []).filter(i => i.status === 'IN_PROGRESS').length;
-        const completed = (data || []).filter(i => i.status === 'COMPLETED').length;
+        const issues = data || [];
+        const total = issues.length;
+        const pending = issues.filter(i => i.status === 'PENDING').length;
+        const inProgress = issues.filter(i => i.status === 'IN_PROGRESS').length;
+        const completed = issues.filter(i => i.status === 'COMPLETED').length;
 
-        return res.json({
-            total,
-            pending,
-            inProgress,
-            completed
-        });
+        console.log(`[Employee API] Stats for ${employeeUserId}: total=${total}, pending=${pending}, inProgress=${inProgress}, completed=${completed}`);
+
+        return res.json({ total, pending, inProgress, completed });
     } catch (err) {
-        console.error('GET /employee/stats error:', err);
-        return res.status(500).json({ error: 'Failed to fetch employee stats.' });
+        console.error('[Employee API] GET /employee/stats error:', err.message, err);
+        return res.status(500).json({ error: 'Failed to fetch employee stats.', detail: err.message });
     }
 });
 
@@ -117,6 +133,47 @@ router.get('/map', verifyToken, requireApproved, requireEmployee, async (req, re
     } catch (err) {
         console.error('GET /employee/map error:', err);
         return res.status(500).json({ error: 'Failed to fetch map locations.' });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────
+// PUT /api/employee/remarks/:id
+// Employee updates work remarks on their own assigned issue.
+// ─────────────────────────────────────────────────────────────────
+router.put('/remarks/:id', verifyToken, requireApproved, requireEmployee, async (req, res) => {
+    const { id } = req.params;
+    const { workRemarks } = req.body;
+    try {
+        const employeeUserId = req.userId;
+        console.log(`[Employee API] /remarks/${id} — employee ${employeeUserId}`);
+
+        // Verify this issue is actually assigned to this employee
+        const { data: issue, error: fetchErr } = await supabaseAdmin
+            .from('issues')
+            .select('id, assigned_employee_id')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !issue) {
+            return res.status(404).json({ error: 'Issue not found.' });
+        }
+        if (issue.assigned_employee_id !== employeeUserId) {
+            return res.status(403).json({ error: 'This issue is not assigned to you.' });
+        }
+
+        const { data, error } = await supabaseAdmin
+            .from('issues')
+            .update({ work_remarks: workRemarks || null, updated_at: new Date().toISOString() })
+            .eq('id', id)
+            .select()
+            .single();
+
+        if (error) throw error;
+        console.log(`[Employee API] Remarks saved for issue ${id}`);
+        return res.json({ message: 'Work remarks updated.', issue: data });
+    } catch (err) {
+        console.error('[Employee API] PUT /employee/remarks error:', err.message, err);
+        return res.status(500).json({ error: 'Failed to update remarks.', detail: err.message });
     }
 });
 

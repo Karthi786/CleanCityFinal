@@ -1074,6 +1074,12 @@
                             </a>
                         </li>
                         <li>
+                            <a class="nav-link-item" href="#" id="nav-employees"
+                                onclick="event.preventDefault(); switchTab('employees');">
+                                👥 Employees
+                            </a>
+                        </li>
+                        <li>
                             <a class="nav-link-item" href="#" id="nav-analytics"
                                 onclick="event.preventDefault(); switchTab('analytics');">
                                 Analytics
@@ -1162,6 +1168,9 @@
                             </a>
                             <a href="#" class="mobile-drawer-link" id="drawer-reviews">
                                 <span class="drawer-icon">⭐</span> Reviews
+                            </a>
+                            <a href="#" class="mobile-drawer-link" id="drawer-employees">
+                                <span class="drawer-icon">👥</span> Employees
                             </a>
                             <a href="#" class="mobile-drawer-link" id="drawer-analytics">
                                 <span class="drawer-icon">📊</span> Analytics
@@ -1305,6 +1314,29 @@
                     </div>
                 </div>
 
+                <!-- Employees Tab -->
+                <div id="tab-employees" class="tab-pane">
+                    <!-- Stats row -->
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:14px;margin-bottom:24px;">
+                        <div class="stat-card">
+                            <div><div class="stat-label">👥 Total</div><div class="stat-value" id="emp-s-total">—</div></div>
+                        </div>
+                        <div class="stat-card" style="border-color:rgba(251,191,36,0.25);">
+                            <div><div class="stat-label" style="color:#d97706;">⏳ Pending</div><div class="stat-value" id="emp-s-pending" style="color:#d97706;">—</div></div>
+                        </div>
+                        <div class="stat-card" style="border-color:rgba(34,197,94,0.25);">
+                            <div><div class="stat-label" style="color:#16a34a;">✅ Approved</div><div class="stat-value" id="emp-s-approved" style="color:#16a34a;">—</div></div>
+                        </div>
+                        <div class="stat-card" style="border-color:rgba(220,38,38,0.25);">
+                            <div><div class="stat-label" style="color:#dc2626;">❌ Rejected</div><div class="stat-value" id="emp-s-rejected" style="color:#dc2626;">—</div></div>
+                        </div>
+                    </div>
+                    <!-- Employee list content dynamically rendered here -->
+                    <div id="emp-tab-content">
+                        <div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
                 <!-- Map View Tab -->
                 <div id="tab-map" class="tab-pane">
                     <!-- Department Scope Badge -->
@@ -1358,6 +1390,30 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- Assign Employee Modal -->
+    <div class="modal-overlay" id="assign-modal">
+        <div class="modal" style="max-width:480px;">
+            <div class="modal-header">
+                <div class="modal-title">👤 Assign Employee</div>
+                <button class="modal-close" id="assign-modal-close">✕</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:16px;">Assign this issue to an approved field employee in your department.</p>
+                <div style="font-weight:700;font-size:0.9rem;color:var(--text);margin-bottom:12px;" id="assign-issue-title">—</div>
+                <div class="form-group">
+                    <label class="label">Select Employee</label>
+                    <select class="select" id="assign-emp-select" style="width:100%;">
+                        <option value="">Loading…</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-ghost" id="assign-cancel">Cancel</button>
+                <button class="btn btn-primary" id="assign-confirm">✅ Assign</button>
+            </div>
+        </div>
     </div>
 
     <!-- Update Status Modal -->
@@ -1510,7 +1566,7 @@
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI, analyticsAPI, notificationsAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, analyticsAPI, notificationsAPI, employeesAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t } from './js/i18n.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
@@ -1654,11 +1710,12 @@
 
         // Tab switching
         let analyticsLoaded = false;
+        let employeesLoaded = false;
         let mapInitialized = false;
-        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', analytics: 'drawer-analytics', map: 'drawer-map' };
+        const drawerByTab = { issues: 'drawer-issues', reviews: 'drawer-reviews', employees: 'drawer-employees', analytics: 'drawer-analytics', map: 'drawer-map' };
         window.switchTab = (name) => {
             sessionStorage.setItem('departmentDashboardTab', name);
-            ['issues', 'reviews', 'analytics', 'map'].forEach(t => {
+            ['issues', 'reviews', 'employees', 'analytics', 'map'].forEach(t => {
                 const pane = document.getElementById('tab-' + t);
                 if (pane) pane.style.display = t === name ? 'block' : 'none';
 
@@ -1669,6 +1726,10 @@
             document.getElementById('issues-filter-wrap').style.display = name === 'issues' ? 'flex' : 'none';
             syncDrawerActive(drawerByTab[name]);
             if (name === 'reviews') loadReviews();
+            if (name === 'employees' && !employeesLoaded) {
+                employeesLoaded = true;
+                loadEmployees();
+            }
             if (name === 'analytics' && !analyticsLoaded) {
                 analyticsLoaded = true;
                 loadAnalytics();
@@ -1760,6 +1821,7 @@
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex-shrink:0;">
             <span class="badge badge-${issue.status}" style="font-size:0.75rem; padding:3px 10px; border-radius:99px;">${t(statusLabelKey)}</span>
             <button class="btn btn-outline btn-sm" style="border-radius:99px; font-size:0.8rem; padding:4px 12px;" onclick="event.stopPropagation();openUpdate('${issue.id}')">✏️ ${t('btn_update')}</button>
+            ${issue.assigned_employee_name ? `<span style="font-size:0.72rem;background:#dcfce7;color:#16a34a;padding:2px 8px;border-radius:99px;font-weight:700;">👤 ${issue.assigned_employee_name}</span>` : `<button class="btn btn-sm" style="border-radius:99px;font-size:0.78rem;padding:3px 10px;background:rgba(176,0,0,0.06);color:var(--primary);border:1px solid rgba(176,0,0,0.15);" onclick="event.stopPropagation();openAssign('${issue.id}')">+ Assign</button>`}
           </div>
         </div>
       `;
@@ -2240,10 +2302,136 @@
             }
         });
 
+        // ── Employees Tab Logic ──
+        let allEmployees = [];
+
+        async function loadEmployees() {
+            try {
+                const data = await employeesAPI.getAll();
+                allEmployees = data.employees || [];
+                renderEmployeesTab();
+            } catch (err) {
+                document.getElementById('emp-tab-content').innerHTML = `<div class="loading-page" style="min-height:120px;"><p style="color:var(--text-muted);">${err.message}</p></div>`;
+            }
+        }
+
+        function renderEmployeesTab() {
+            const pending = allEmployees.filter(e => e.verification_status === 'pending_verification');
+            const approved = allEmployees.filter(e => e.verification_status === 'approved');
+            const rejected = allEmployees.filter(e => e.verification_status === 'rejected');
+
+            // Update stats
+            document.getElementById('emp-s-total').textContent = allEmployees.length;
+            document.getElementById('emp-s-pending').textContent = pending.length;
+            document.getElementById('emp-s-approved').textContent = approved.length;
+            document.getElementById('emp-s-rejected').textContent = rejected.length;
+
+            const container = document.getElementById('emp-tab-content');
+            if (!allEmployees.length) {
+                container.innerHTML = `<div style="padding:40px;text-align:center;background:var(--bg-card);border-radius:20px;border:1.5px dashed var(--border);color:var(--text-muted);">No employees registered for your department yet.</div>`;
+                return;
+            }
+            container.innerHTML = [
+                pending.length ? renderEmpSection('⏳ Pending Verification', pending, true) : '',
+                approved.length ? renderEmpSection('✅ Approved Employees', approved, false) : '',
+                rejected.length ? renderEmpSection('❌ Rejected', rejected, false) : '',
+            ].join('');
+        }
+
+        function renderEmpSection(title, employees, showActions) {
+            return `
+            <div style="margin-bottom:28px;">
+                <div style="font-family:var(--font-display);font-weight:700;font-size:1rem;color:var(--text);margin-bottom:14px;">${title}</div>
+                <div style="display:flex;flex-direction:column;gap:10px;">
+                    ${employees.map(emp => renderEmpRow(emp, showActions)).join('')}
+                </div>
+            </div>`;
+        }
+
+        function renderEmpRow(emp, showActions) {
+            const stats = emp.stats || {};
+            const statusColor = emp.verification_status === 'approved' ? '#16a34a' : emp.verification_status === 'rejected' ? '#dc2626' : '#d97706';
+            const statusBg   = emp.verification_status === 'approved' ? '#dcfce7' : emp.verification_status === 'rejected' ? '#fee2e2' : '#fef3c7';
+            const statusLabel = emp.verification_status === 'approved' ? '✅ Approved' : emp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending';
+            return `
+            <div style="background:var(--bg-card);border:1.5px solid var(--border);border-radius:18px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div style="width:44px;height:44px;border-radius:50%;background:var(--primary);color:white;display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:1rem;flex-shrink:0;">${(emp.name||'?')[0].toUpperCase()}</div>
+                <div style="flex:1;min-width:0;">
+                    <div style="font-family:var(--font-display);font-weight:700;font-size:0.95rem;color:var(--text);">${emp.name}</div>
+                    <div style="font-size:0.78rem;color:var(--text-muted);margin-top:2px;">${emp.email} · ${emp.phone_number || '—'}</div>
+                    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;">
+                        <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:${statusBg};color:${statusColor};">${statusLabel}</span>
+                        <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:rgba(15,23,42,0.05);color:var(--text-muted);">📋 ${stats.total||0} assigned</span>
+                        <span style="font-size:0.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:#dcfce7;color:#16a34a;">✅ ${stats.completed||0} done</span>
+                    </div>
+                </div>
+                ${showActions ? `
+                <div style="display:flex;gap:8px;flex-shrink:0;">
+                    <button onclick="verifyEmployee('${emp.id}','approved')" style="padding:7px 16px;border-radius:99px;background:var(--primary);color:white;border:none;cursor:pointer;font-weight:700;font-size:0.8rem;">✅ Approve</button>
+                    <button onclick="verifyEmployee('${emp.id}','rejected')" style="padding:7px 16px;border-radius:99px;background:#fee2e2;color:#dc2626;border:none;cursor:pointer;font-weight:700;font-size:0.8rem;">❌ Reject</button>
+                </div>` : ''}
+            </div>`;
+        }
+
+        window.verifyEmployee = async (id, status) => {
+            try {
+                await employeesAPI.verify(id, status);
+                toast.success('Done', `Employee ${status}.`);
+                await loadEmployees();
+            } catch (err) {
+                toast.error('Error', err.message);
+            }
+        };
+
+        // ── Assign Employee Modal ──
+        let assignIssueId = null;
+        const assignModal = document.getElementById('assign-modal');
+
+        window.openAssign = async (id) => {
+            assignIssueId = id;
+            const issue = allIssues.find(i => i.id === id);
+            document.getElementById('assign-issue-title').textContent = issue?.title || 'Issue';
+
+            const sel = document.getElementById('assign-emp-select');
+            sel.innerHTML = '<option value="">Loading employees…</option>';
+            assignModal.classList.add('open');
+
+            try {
+                const data = await employeesAPI.getAll();
+                const approved = (data.employees || []).filter(e => e.verification_status === 'approved');
+                if (!approved.length) {
+                    sel.innerHTML = '<option value="">No approved employees in your department</option>';
+                } else {
+                    sel.innerHTML = '<option value="">— Select Employee —</option>' +
+                        approved.map(e => `<option value="${e.id}" ${issue?.assigned_employee_id===e.id?'selected':''}>${e.name} (${e.stats?.total||0} assigned, ${e.stats?.completed||0} done)</option>`).join('');
+                }
+            } catch (err) {
+                sel.innerHTML = '<option value="">Failed to load employees</option>';
+            }
+        };
+
+        document.getElementById('assign-modal-close').addEventListener('click', () => assignModal.classList.remove('open'));
+        document.getElementById('assign-cancel').addEventListener('click', () => assignModal.classList.remove('open'));
+        assignModal.addEventListener('click', e => { if (e.target === assignModal) assignModal.classList.remove('open'); });
+
+        document.getElementById('assign-confirm').addEventListener('click', async () => {
+            const empId = document.getElementById('assign-emp-select').value;
+            if (!empId) { toast.error('Select Employee', 'Please select an employee to assign.'); return; }
+            try {
+                await issuesAPI.assign(assignIssueId, empId);
+                toast.success('Assigned!', 'Issue has been assigned to the selected employee.');
+                assignModal.classList.remove('open');
+                await loadData();
+            } catch (err) {
+                toast.error('Assignment Failed', err.message);
+            }
+        });
+
         initDashboardDrawer({
             linkMap: {
                 'drawer-issues': 'nav-issues',
                 'drawer-reviews': 'nav-reviews',
+                'drawer-employees': 'nav-employees',
                 'drawer-analytics': 'nav-analytics',
                 'drawer-map': 'nav-map'
             },
@@ -2251,7 +2439,7 @@
         });
 
         // Init: restore the last selected tab when the page is refreshed.
-        const departmentTabs = ['issues', 'reviews', 'analytics', 'map'];
+        const departmentTabs = ['issues', 'reviews', 'employees', 'analytics', 'map'];
         const savedDepartmentTab = sessionStorage.getItem('departmentDashboardTab');
         switchTab(departmentTabs.includes(savedDepartmentTab) ? savedDepartmentTab : 'issues');
         loadData();

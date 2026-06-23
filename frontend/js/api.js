@@ -84,6 +84,11 @@ export const issuesAPI = {
         body: JSON.stringify({ status, completionImageUrl }),
     }),
 
+    assign: (id, employeeId) => apiFetch(`/issues/${id}/assign`, {
+        method: 'PUT',
+        body: JSON.stringify({ employeeId }),
+    }),
+
     support: (id) => apiFetch(`/issues/${id}/support`, { method: 'POST' }),
 
     mySupports: () => apiFetch('/issues/my-supports'),
@@ -215,4 +220,32 @@ export const imageAPI = {
         method: 'POST',
         body: JSON.stringify(payload),
     }),
+};
+
+/* ── Employees Endpoints ── */
+export const employeesAPI = {
+    getAll: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/employees${q ? '?' + q : ''}`);
+    },
+    getPending: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/employees/pending${q ? '?' + q : ''}`);
+    },
+    verify: (id, status) => apiFetch(`/employees/${id}/verify`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+    }),
+    myIssues: () => apiFetch('/employee/issues'),
+    myStats: () => apiFetch('/employee/stats'),
+    myReviews: () => apiFetch('/employee/reviews'),
+    myMap: () => apiFetch('/employee/map'),
+    saveRemarks: (issueId, remarks) => apiFetch(`/employee/remarks/${issueId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ workRemarks: remarks }),
+    }),
+    performance: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/employees/performance${q ? '?' + q : ''}`);
+    },
 };

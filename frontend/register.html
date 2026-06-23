@@ -350,6 +350,29 @@
                             </select>
                         </div>
 
+                        <!-- Dept Role sub-selector (shown after department is chosen) -->
+                        <div class="form-group" id="dept-role-group" style="display:none;">
+                            <label class="label">Your Role in Department</label>
+                            <div style="display:flex;flex-direction:column;gap:10px;">
+                                <label class="role-option selected" id="drole-head" data-drole="HEAD">
+                                    <input type="radio" name="dept_role" value="HEAD" checked />
+                                    <span class="role-icon">👔</span>
+                                    <div>
+                                        <div class="role-label">Department Head</div>
+                                        <div class="role-desc">Manage issues, verify employees and assign tasks</div>
+                                    </div>
+                                </label>
+                                <label class="role-option" id="drole-employee" data-drole="EMPLOYEE">
+                                    <input type="radio" name="dept_role" value="EMPLOYEE" />
+                                    <span class="role-icon">🧑‍🔧</span>
+                                    <div>
+                                        <div class="role-label">Field Employee</div>
+                                        <div class="role-desc">Receive and resolve assigned civic issues</div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
                         <!-- MLA description field (shown only for MLA role) -->
                         <div class="form-group" id="description-group" style="display:none;">
                             <label class="label" for="description">MLA Description</label>
@@ -491,6 +514,7 @@
         // Populate constituency based on district choice
         districtSelect.addEventListener('change', () => {
             const district = districtSelect.value;
+            const constituencySelect = document.getElementById('constituency');
             constituencySelect.innerHTML = '<option value="">— Choose constituency —</option>';
             
             if (district && districtsData[district]) {
@@ -506,13 +530,32 @@
         // ══════════════════════════════════════════════
         // Role Selector — Show/hide role-specific fields
         // ══════════════════════════════════════════════
-        const roleOptions = document.querySelectorAll('.role-option');
+        const roleOptions = document.querySelectorAll('.role-option[data-role]');
         const deptGroup = document.getElementById('dept-group');
+        const deptRoleGroup = document.getElementById('dept-role-group');
         const citizenFields = document.getElementById('citizen-fields');
         const constGroup = document.getElementById('constituency-group');
         const descGroup = document.getElementById('description-group');
         const profilePhotoGroup = document.getElementById('profile-photo-group');
         let selectedRole = 'USER';
+        let selectedDeptRole = 'HEAD'; // HEAD or EMPLOYEE
+
+        // Dept role sub-selector
+        const deptRoleOptions = document.querySelectorAll('.role-option[data-drole]');
+        deptRoleOptions.forEach(opt => {
+            opt.addEventListener('click', () => {
+                deptRoleOptions.forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                opt.querySelector('input').checked = true;
+                selectedDeptRole = opt.dataset.drole;
+            });
+        });
+
+        // Show dept-role-group when a department is selected
+        document.getElementById('department').addEventListener('change', () => {
+            const val = document.getElementById('department').value;
+            deptRoleGroup.style.display = val ? 'flex' : 'none';
+        });
 
         roleOptions.forEach(opt => {
             opt.addEventListener('click', () => {
@@ -523,6 +566,7 @@
                 
                 // Department dropdown — only for DEPT role
                 deptGroup.style.display = selectedRole === 'DEPT' ? 'flex' : 'none';
+                deptRoleGroup.style.display = (selectedRole === 'DEPT' && document.getElementById('department').value) ? 'flex' : 'none';
                 
                 // Citizen-specific fields (DOB) — only for USER role
                 citizenFields.style.display = selectedRole === 'USER' ? 'flex' : 'none';
@@ -705,7 +749,10 @@
                 }
 
                 let finalRole = selectedRole;
-                if (selectedRole === 'DEPT') finalRole = dept;
+                if (selectedRole === 'DEPT') finalRole = selectedDeptRole === 'EMPLOYEE' ? 'EMPLOYEE' : dept;
+
+                // For employees, pass department separately
+                const payloadDept = (selectedRole === 'DEPT' && selectedDeptRole === 'EMPLOYEE') ? dept : (dept || null);
 
                 // Read profile photo as base64
                 let profile_photo = null;
@@ -720,7 +767,7 @@
                 setLoading(true);
                 try {
                     const payload = { 
-                        name, email, password, role: finalRole, department: dept || null,
+                        name, email, password, role: finalRole, department: payloadDept,
                         phone_number, district, constituency, profile_photo, description
                     };
                     const data = await register(payload);

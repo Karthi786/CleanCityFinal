@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Employee Dashboard — MakkalKural</title>
+    <meta name="description" content="MakkalKural employee dashboard — manage assigned civic issues and track resolution progress." />
+    <link rel="stylesheet" href="css/styles.css" />
+    <!-- Leaflet Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.5.3/dist/MarkerCluster.Default.css" />
+    <script src="https://unpkg.com/leaflet.markercluster@1.5.3/dist/leaflet.markercluster.js"></script>
+    <style>
+        body { background-color: #F8F9FB; }
+        :root { --sidebar-width: 0px; }
+        .dash-main { margin-left: 0 !important; padding-top: 90px; }
+
+        /* ── Floating Nav Bar (matches department-dashboard) ── */
+        .nav-island-container {
+            position: fixed; top: 20px; left: 0; right: 0; z-index: 1000;
+            display: flex; justify-content: center; padding: 0 20px; pointer-events: none;
+        }
+        .nav-island {
+            pointer-events: auto; display: flex; align-items: center;
+            justify-content: space-between; width: 100%; max-width: 1300px;
+            height: 68px; padding: 0 16px 0 24px; border-radius: 99px;
+            background: rgba(255,255,255,0.75); backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.4); box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+        }
+        .nav-island.scrolled {
+            height: 60px; max-width: 1100px;
+            background: rgba(255,255,255,0.85); box-shadow: var(--shadow-lg);
+        }
+        .nav-island .logo {
+            display: flex; align-items: center; gap: 8px;
+            font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--primary);
+        }
+        .nav-links { display: flex; align-items: center; gap: 4px; list-style: none; }
+        .nav-link-item {
+            padding: 8px 18px; font-size: 0.92rem; font-weight: 600; color: var(--text-muted);
+            border-radius: 99px; position: relative; cursor: pointer; transition: all var(--transition);
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+        }
+        .nav-link-item:hover { color: var(--primary); }
+        .nav-link-item.active { background: rgba(176,0,0,0.05); color: var(--primary); }
+        .nav-link-item.active::after {
+            content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
+            width: 12px; height: 3px; background: var(--primary); border-radius: 99px;
+            box-shadow: 0 2px 6px var(--primary-glow);
+        }
+        .nav-actions { display: flex; align-items: center; gap: 12px; }
+
+        /* ── Notification Bell ── */
+        .notification-wrapper { position: relative; }
+        .header-bell {
+            position: relative; cursor: pointer; color: var(--text-muted);
+            display: flex; align-items: center; justify-content: center;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: rgba(15,23,42,0.04); transition: all 0.2s;
+        }
+        .header-bell:hover { background: rgba(15,23,42,0.08); color: var(--text); }
+
+        /* ── Page Layout ── */
+        .dash-content {
+            padding: 32px 40px !important; max-width: 1300px; margin: 0 auto;
+        }
+        .page-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 32px !important;
+        }
+        .page-title {
+            font-family: var(--font-display); font-size: 2.2rem; font-weight: 800;
+            letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px;
+        }
+        .page-subtitle { font-size: 0.95rem; color: var(--text-muted); }
+
+        /* ── Employee Role Badge ── */
+        .emp-role-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 8px 18px; border-radius: 99px;
+            background: var(--primary-light); border: 1.5px solid rgba(176,0,0,0.18);
+            color: var(--primary); font-family: var(--font-display); font-weight: 700;
+            font-size: 0.85rem; margin-top: 8px;
+        }
+        .emp-role-badge .dept-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+            animation: pulseDot 1.8s ease-in-out infinite;
+        }
+        @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(.75);} }
+
+        /* ── Tab Pane ── */
+        .tab-pane { display: none; }
+        .tab-pane.active { display: block; }
+
+        /* ── KPI Stat Cards (matches dept dashboard) ── */
+        .kpi-grid {
+            display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px;
+        }
+        .kpi-card {
+            background: #fff; border: 1px solid rgba(15,23,42,0.06);
+            border-radius: 20px; padding: 20px; box-shadow: var(--shadow-sm);
+            display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden;
+        }
+        .kpi-card::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0;
+            height: 3px; border-radius: 20px 20px 0 0;
+        }
+        .kpi-card.kpi-blue::before  { background: linear-gradient(90deg,#2563EB,#8B5CF6); }
+        .kpi-card.kpi-yellow::before { background: linear-gradient(90deg,#F59E0B,#EF4444); }
+        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg,#6366f1,#2563EB); }
+        .kpi-card.kpi-green::before  { background: linear-gradient(90deg,#10B981,#06B6D4); }
+        .kpi-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
+        .kpi-value { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text); line-height: 1; }
+        .kpi-icon { position: absolute; top: 16px; right: 16px; font-size: 1.8rem; opacity: 0.15; }
+
+        /* ── Issue Cards ── */
+        .issues-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(360px,1fr)); gap: 20px; }
+        .issue-card {
+            background: var(--bg-card); border: 1px solid rgba(15,23,42,0.06);
+            border-radius: 24px; overflow: hidden; transition: all 0.25s;
+            display: flex; flex-direction: column; box-shadow: var(--shadow-sm);
+        }
+        .issue-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(176,0,0,0.12); }
+        .issue-card-img { height: 160px; object-fit: cover; width: 100%; background: #F1F3F5; display: block; }
+        .issue-card-img-placeholder {
+            height: 160px; display: flex; align-items: center; justify-content: center;
+            font-size: 3rem; background: linear-gradient(135deg,rgba(176,0,0,0.06),rgba(176,0,0,0.02));
+        }
+        .issue-card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+        .issue-card-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+        .badge {
+            padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
+        }
+        .badge.pending   { background: #fef3c7; color: #d97706; }
+        .badge.in-progress { background: #dbeafe; color: #2563eb; }
+        .badge.completed { background: #dcfce7; color: #16a34a; }
+        .badge.priority  { background: #fce7f3; color: #be185d; }
+        .badge.dept      { background: rgba(176,0,0,0.08); color: var(--primary); }
+        .issue-card-title { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text); }
+        .issue-card-desc  { font-size: 0.83rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .issue-card-meta  { font-size: 0.78rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
+        .issue-card-meta span { display: flex; align-items: center; gap: 5px; }
+        .issue-remarks-box { font-size: 0.8rem; padding: 8px 12px; background: var(--primary-light); border-radius: 10px; color: var(--primary); font-weight: 600; }
+        .issue-card-footer {
+            padding: 14px 20px; border-top: 1px solid var(--border);
+            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+        }
+        .status-select {
+            flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 12px;
+            font-size: 0.85rem; font-weight: 600; color: var(--text); background: var(--bg); cursor: pointer;
+        }
+        .status-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .btn-update {
+            padding: 8px 16px; border-radius: 12px; background: var(--primary); color: white;
+            font-size: 0.82rem; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-update:hover { background: var(--primary-dark); transform: translateY(-1px); }
+        .btn-remarks {
+            padding: 8px 16px; border-radius: 12px;
+            background: var(--bg); color: var(--primary); border: 1.5px solid var(--primary);
+            font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+        }
+        .btn-remarks:hover { background: var(--primary-light); }
+
+        /* ── Review Cards ── */
+        .reviews-list { display: flex; flex-direction: column; gap: 16px; }
+        .review-card {
+            background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid rgba(15,23,42,0.06);
+            border-radius: 20px; padding: 20px 24px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+        }
+        .review-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: rgba(176,0,0,0.12); }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+        .stars { color: #f59e0b; font-size: 1.15rem; letter-spacing: 2px; }
+        .review-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
+        .review-issue-title { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
+        .review-comment { background: rgba(15,23,42,0.02); padding: 12px 16px; border-radius: 12px; color: var(--text); font-size: 0.9rem; line-height: 1.5; margin-top: 10px; }
+
+        /* ── Section Title ── */
+        .section-title {
+            font-family: var(--font-display); font-size: 1.15rem; font-weight: 800;
+            color: var(--text); margin-bottom: 16px; border-bottom: 1.5px solid var(--border); padding-bottom: 8px;
+        }
+
+        /* ── Map ── */
+        #emp-map {
+            width: 100%; height: 520px; border-radius: 24px;
+            border: 1px solid rgba(15,23,42,0.08); box-shadow: var(--shadow-md);
+            overflow: hidden; background: #f1f5f9; position: relative; z-index: 1;
+        }
+        @media (max-width: 768px) { #emp-map { height: 360px; } }
+        .map-filter-toolbar {
+            display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; align-items: flex-start;
+        }
+        .map-filter-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+        .map-filter-label {
+            font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--text-muted); white-space: nowrap; margin-right: 2px;
+        }
+        .map-pill {
+            display: inline-flex; align-items: center; gap: 4px; padding: 5px 14px;
+            border-radius: 99px; font-size: 0.8rem; font-weight: 600;
+            border: 1.5px solid rgba(15,23,42,0.1); background: rgba(255,255,255,0.8);
+            color: var(--text-muted); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+        }
+        .map-pill:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
+        .map-pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 12px rgba(176,0,0,0.2); }
+        .map-stats-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+        .map-stat-chip {
+            display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px;
+            border-radius: 99px; font-size: 0.8rem; font-weight: 700;
+            background: rgba(255,255,255,0.85); border: 1px solid rgba(15,23,42,0.08);
+            box-shadow: var(--shadow-sm); color: var(--text);
+        }
+        .emp-scope-badge {
+            display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px;
+            border-radius: 99px; background: var(--primary-light); border: 1.5px solid rgba(176,0,0,0.18);
+            color: var(--primary); font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; margin-bottom: 16px;
+        }
+        .emp-scope-badge .scope-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulseDot 1.8s ease-in-out infinite; }
+
+        /* Leaflet overrides */
+        .leaflet-popup-content-wrapper { border-radius: 20px !important; box-shadow: 0 12px 40px rgba(15,23,42,0.18) !important; padding: 0 !important; overflow: hidden !important; border: 1px solid rgba(15,23,42,0.06) !important; }
+        .leaflet-popup-content { margin: 0 !important; width: 290px !important; }
+        .leaflet-popup-tip-container { margin-top: -1px; }
+        .map-popup-card { font-family: 'Inter', sans-serif; overflow: hidden; }
+        .map-popup-image { width: 100%; height: 130px; object-fit: cover; display: block; background: #f1f5f9; }
+        .map-popup-image-placeholder { width: 100%; height: 90px; background: linear-gradient(135deg,#f1f5f9,#e2e8f0); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
+        .map-popup-body { padding: 14px 16px 8px; }
+        .map-popup-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.93rem; color: #0f172a; margin-bottom: 5px; line-height: 1.3; }
+        .map-popup-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
+        .map-popup-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
+        .map-popup-badge.pending   { background: #fef3c7; color: #d97706; }
+        .map-popup-badge.in-progress { background: #dbeafe; color: #2563eb; }
+        .map-popup-badge.completed  { background: #dcfce7; color: #16a34a; }
+        .map-popup-info-row { display: flex; flex-direction: column; gap: 4px; font-size: 0.77rem; color: #475569; margin-bottom: 8px; }
+        .map-popup-footer { padding: 10px 16px 14px; border-top: 1px solid rgba(15,23,42,0.06); }
+        .map-popup-dir-btn {
+            display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
+            padding: 8px 14px; background: var(--primary); color: white; border: none; border-radius: 99px;
+            font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
+            transition: all 0.2s; text-decoration: none;
+        }
+        .map-popup-dir-btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(176,0,0,0.3); }
+        .custom-map-marker { width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.28); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
+        .cm-pending    { background: #d97706; }
+        .cm-inprogress { background: #2563eb; }
+        .cm-completed  { background: #16a34a; }
+
+        /* ── Empty state ── */
+        .empty-state {
+            padding: 48px; text-align: center; background: var(--bg-card); border-radius: 24px;
+            border: 1.5px dashed var(--border); color: var(--text-muted);
+        }
+        .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+
+        /* ── Remarks modal ── */
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
+            background: rgba(15,23,42,0.45); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity 0.25s;
+        }
+        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: var(--bg-card); border-radius: 24px; border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-lg); padding: 28px 32px; width: 92%; max-width: 500px; display: flex; flex-direction: column; gap: 16px;
+        }
+        .modal-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--text); }
+        .modal-box textarea {
+            width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 14px;
+            font-size: 0.9rem; resize: vertical; min-height: 100px; font-family: var(--font-body); color: var(--text); background: var(--bg);
+            box-sizing: border-box;
+        }
+        .modal-box textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+        .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+
+        /* ── Mobile hamburger ── */
+        .nav-hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 8px; border-radius: 12px; background: none; border: none; }
+        .nav-hamburger span { width: 22px; height: 2px; background: var(--text); border-radius: 2px; transition: all 0.3s; display: block; }
+        .mobile-drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 260px; background: var(--bg-card); border-left: 1px solid var(--border); z-index: 2000; transform: translateX(100%); transition: transform 0.3s ease; padding: 80px 24px 32px; display: flex; flex-direction: column; gap: 8px; }
+        .mobile-drawer.open { transform: translateX(0); }
+        .drawer-overlay { position: fixed; inset: 0; z-index: 1999; background: rgba(15,23,42,0.35); display: none; }
+        .drawer-overlay.open { display: block; }
+        .drawer-link { padding: 12px 16px; border-radius: 14px; font-size: 0.95rem; font-weight: 600; color: var(--text-muted); cursor: pointer; transition: all 0.2s; text-align: left; border: none; background: none; width: 100%; }
+        .drawer-link:hover, .drawer-link.active { background: var(--primary-light); color: var(--primary); }
+
+        @media (max-width: 1024px) { .kpi-grid { grid-template-columns: repeat(2,1fr); } }
+        @media (max-width: 768px) {
+            .nav-links { display: none !important; }
+            .nav-hamburger { display: flex; }
+            .dash-content { padding: 16px !important; }
+            .page-header { flex-direction: column; gap: 12px; }
+            .issues-grid { grid-template-columns: 1fr; }
+            .kpi-grid { grid-template-columns: repeat(2,1fr); }
+        }
+        @media (max-width: 480px) { .kpi-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+
+<body>
+    <!-- ── Floating Nav ── -->
+    <div class="nav-island-container">
+        <div class="nav-island" id="nav-island">
+            <a class="logo" href="#">
+                <span class="logo-icon">🌿</span>
+                <span>MakkalKural</span>
+            </a>
+            <ul class="nav-links" id="nav-links">
+                <li><a class="nav-link-item active" href="#" id="nav-issues" onclick="switchTab('issues');return false;">📋 My Issues</a></li>
+                <li><a class="nav-link-item" href="#" id="nav-reviews" onclick="switchTab('reviews');return false;">⭐ Reviews</a></li>
+                <li><a class="nav-link-item" href="#" id="nav-map" onclick="switchTab('map');return false;">🗺️ Map View</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;" id="nav-username">—</div>
+                <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
+                <button class="nav-hamburger" id="hamburger-btn" aria-label="Menu">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Drawer -->
+    <div class="drawer-overlay" id="drawer-overlay"></div>
+    <div class="mobile-drawer" id="mobile-drawer">
+        <button class="drawer-link active" id="drawer-issues" onclick="switchTab('issues');closeDrawer();">📋 My Issues</button>
+        <button class="drawer-link" id="drawer-reviews" onclick="switchTab('reviews');closeDrawer();">⭐ Reviews</button>
+        <button class="drawer-link" id="drawer-map" onclick="switchTab('map');closeDrawer();">🗺️ Map View</button>
+        <button class="drawer-link" id="mobile-logout-btn" style="margin-top:auto;color:var(--danger);">⬅️ Sign Out</button>
+    </div>
+
+    <main class="dash-main">
+        <div class="dash-content">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1 class="page-title" id="emp-page-title">Employee Dashboard</h1>
+                    <p class="page-subtitle">Welcome back, <strong id="emp-username">—</strong></p>
+                    <div class="emp-role-badge" style="margin-top:10px;">
+                        <span class="dept-dot"></span>
+                        <span id="emp-dept-label">Department Employee</span>
+                    </div>
+                </div>
+                <div id="page-header-actions"></div>
+            </div>
+
+            <!-- ── Issues Tab ── -->
+            <div id="tab-issues" class="tab-pane active">
+                <!-- KPI Stats (matches dept dashboard design) -->
+                <div class="kpi-grid">
+                    <div class="kpi-card kpi-blue">
+                        <div class="kpi-icon">📋</div>
+                        <div class="kpi-label">Total Assigned</div>
+                        <div class="kpi-value" id="s-total">—</div>
+                    </div>
+                    <div class="kpi-card kpi-yellow">
+                        <div class="kpi-icon">⏳</div>
+                        <div class="kpi-label">Pending</div>
+                        <div class="kpi-value" id="s-pending" style="color:#d97706;">—</div>
+                    </div>
+                    <div class="kpi-card kpi-indigo">
+                        <div class="kpi-icon">🔵</div>
+                        <div class="kpi-label">In Progress</div>
+                        <div class="kpi-value" id="s-inprogress" style="color:#2563eb;">—</div>
+                    </div>
+                    <div class="kpi-card kpi-green">
+                        <div class="kpi-icon">✅</div>
+                        <div class="kpi-label">Completed</div>
+                        <div class="kpi-value" id="s-completed" style="color:#16a34a;">—</div>
+                    </div>
+                </div>
+
+                <!-- Issues Grid -->
+                <div class="section-title">My Assigned Issues</div>
+                <div class="issues-grid" id="issues-grid">
+                    <div class="empty-state"><div class="empty-state-icon">📋</div><p>Loading your assigned issues…</p></div>
+                </div>
+            </div>
+
+            <!-- ── Reviews Tab ── -->
+            <div id="tab-reviews" class="tab-pane">
+                <div class="section-title">Citizen Reviews on My Completed Issues</div>
+                <div class="reviews-list" id="reviews-list">
+                    <div class="empty-state"><div class="empty-state-icon">⭐</div><p>Loading reviews…</p></div>
+                </div>
+            </div>
+
+            <!-- ── Map Tab ── -->
+            <div id="tab-map" class="tab-pane">
+                <div class="emp-scope-badge">
+                    <span class="scope-dot"></span>
+                    <span>Showing only <strong>your assigned</strong> issue locations</span>
+                </div>
+                <!-- Filter toolbar -->
+                <div class="map-filter-toolbar">
+                    <div class="map-filter-group">
+                        <span class="map-filter-label">Status:</span>
+                        <button class="map-pill active" data-ftype="status" data-fval="">All</button>
+                        <button class="map-pill" data-ftype="status" data-fval="PENDING">⏳ Pending</button>
+                        <button class="map-pill" data-ftype="status" data-fval="IN_PROGRESS">🔵 In Progress</button>
+                        <button class="map-pill" data-ftype="status" data-fval="COMPLETED">✅ Done</button>
+                    </div>
+                </div>
+                <!-- Stats chips -->
+                <div class="map-stats-row">
+                    <div class="map-stat-chip">📍 <span id="mc-total">0</span> on Map</div>
+                    <div class="map-stat-chip" style="color:#d97706;">⏳ <span id="mc-pending">0</span></div>
+                    <div class="map-stat-chip" style="color:#2563eb;">🔵 <span id="mc-inprogress">0</span></div>
+                    <div class="map-stat-chip" style="color:#16a34a;">✅ <span id="mc-completed">0</span></div>
+                </div>
+                <div id="emp-map"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Remarks Modal -->
+    <div class="modal-overlay" id="remarks-modal">
+        <div class="modal-box">
+            <div class="modal-title">✍️ Add Work Remarks</div>
+            <textarea id="remarks-text" placeholder="Describe the work done on this issue…"></textarea>
+            <div class="modal-footer">
+                <button class="btn btn-ghost btn-sm" onclick="closeRemarksModal()">Cancel</button>
+                <button class="btn btn-primary btn-sm" id="remarks-save-btn">Save Remarks</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { guardPage } from './js/router.js';
+        import { logout } from './js/auth.js';
+        import { employeesAPI, issuesAPI } from './js/api.js';
+        import { toast } from './js/toast.js';
+
+        // ── Auth Guard — Employee only ──
+        const user = guardPage(['EMPLOYEE']);
+        if (!user) throw new Error('Not authenticated');
+
+        // ── Debug: log current session user info ──
+        console.log('[Employee Dashboard] Session user:', {
+            id: user.id,
+            name: user.name,
+            role: user.role,
+            department: user.department,
+            dept_role: user.dept_role,
+            verification_status: user.verification_status,
+        });
+
+        // ── Labels ──
+        const DEPT_LABELS = {
+            TAMILNADU_CORPORATION: 'Tamilnadu Corporation',
+            TNEB: 'TNEB (Electrical)',
+            POLICE: 'Tamilnadu Police',
+        };
+        const deptLabel = (DEPT_LABELS[user.department] || user.department || 'Department') + ' — Employee';
+
+        // ── Populate UI ──
+        document.getElementById('emp-username').textContent = user.name;
+        document.getElementById('emp-dept-label').textContent = deptLabel;
+        document.getElementById('nav-username').textContent = user.name;
+        document.getElementById('emp-page-title').textContent = 'Employee Dashboard';
+
+        // ── Scroll handler for nav ──
+        window.addEventListener('scroll', () => {
+            const island = document.getElementById('nav-island');
+            if (island) island.classList.toggle('scrolled', window.scrollY > 40);
+        });
+
+        // ── Logout ──
+        const doLogout = () => logout();
+        document.getElementById('logout-btn').addEventListener('click', doLogout);
+        document.getElementById('mobile-logout-btn').addEventListener('click', doLogout);
+
+        // ── Mobile Drawer ──
+        const drawer = document.getElementById('mobile-drawer');
+        const drawerOverlay = document.getElementById('drawer-overlay');
+        document.getElementById('hamburger-btn').addEventListener('click', () => {
+            drawer.classList.add('open');
+            drawerOverlay.classList.add('open');
+        });
+        drawerOverlay.addEventListener('click', closeDrawer);
+        window.closeDrawer = () => { drawer.classList.remove('open'); drawerOverlay.classList.remove('open'); };
+
+        // ── State ──
+        let allIssues = [];
+        let mapLocations = [];
+        let mapInitialized = false;
+        let empMap = null;
+        let empMarkerGroup = null;
+        const mapFilters = { status: '' };
+        let reviewsLoaded = false;
+
+        // ── Tab Switching ──
+        const tabs = ['issues', 'reviews', 'map'];
+        window.switchTab = (name) => {
+            tabs.forEach(t => {
+                const p = document.getElementById('tab-' + t);
+                if (p) { p.classList.toggle('active', t === name); p.style.display = ''; }
+                const n = document.getElementById('nav-' + t);
+                if (n) n.classList.toggle('active', t === name);
+                const d = document.getElementById('drawer-' + t);
+                if (d) d.classList.toggle('active', t === name);
+            });
+            if (name === 'reviews' && !reviewsLoaded) { reviewsLoaded = true; loadReviews(); }
+            if (name === 'map') {
+                if (!mapInitialized) { mapInitialized = true; initEmpMap(); }
+                loadMapData();
+                if (empMap) setTimeout(() => empMap.invalidateSize(), 150);
+            }
+        };
+
+        // ── Load Stats ──
+        async function loadStats() {
+            ['s-total','s-pending','s-inprogress','s-completed'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = '...';
+            });
+            try {
+                console.log('[Employee Dashboard] Fetching stats for user.id:', user.id);
+                const stats = await employeesAPI.myStats();
+                console.log('[Employee Dashboard] Stats received:', stats);
+                document.getElementById('s-total').textContent     = stats.total     ?? 0;
+                document.getElementById('s-pending').textContent   = stats.pending   ?? 0;
+                document.getElementById('s-inprogress').textContent = stats.inProgress ?? 0;
+                document.getElementById('s-completed').textContent = stats.completed ?? 0;
+            } catch (err) {
+                console.error('[Employee Dashboard] loadStats error:', err);
+                ['s-total','s-pending','s-inprogress','s-completed'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = '0';
+                });
+            }
+        }
+
+        // ── Load Assigned Issues ──
+        async function loadIssues() {
+            const grid = document.getElementById('issues-grid');
+            grid.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading your assigned issues…</p></div>`;
+
+            loadStats();
+
+            try {
+                console.log('[Employee Dashboard] Fetching issues for user.id:', user.id);
+                const data = await employeesAPI.myIssues();
+                console.log('[Employee Dashboard] Issues API response:', data);
+
+                allIssues = data.issues || [];
+                console.log(`[Employee Dashboard] Issues count: ${allIssues.length}`);
+
+                if (allIssues.length === 0) {
+                    console.warn('[Employee Dashboard] No issues returned. Possible causes:',
+                        '1) No issues assigned to this employee yet',
+                        '2) assigned_employee_id in DB does not match user.id=' + user.id,
+                        '3) Employee account not yet approved'
+                    );
+                }
+
+                renderIssues(allIssues);
+            } catch (err) {
+                console.error('[Employee Dashboard] loadIssues error:', err);
+                grid.innerHTML = `<div class="empty-state" style="border-color:rgba(176,0,0,0.3);">
+                    <div class="empty-state-icon">⚠️</div>
+                    <p>Failed to load assigned issues: ${err.message}</p>
+                    <p style="font-size:0.8rem;margin-top:8px;color:var(--text-muted);">
+                        Check browser console for details. Make sure you are logged in as an approved Employee.
+                    </p>
+                </div>`;
+                toast.error('Failed to load issues', err.message);
+            }
+        }
+
+        function statusBadgeClass(status) {
+            if (status === 'COMPLETED') return 'completed';
+            if (status === 'IN_PROGRESS') return 'in-progress';
+            return 'pending';
+        }
+        function statusBadgeLabel(status) {
+            if (status === 'COMPLETED') return '✅ Completed';
+            if (status === 'IN_PROGRESS') return '🔵 In Progress';
+            return '⏳ Pending';
+        }
+
+        function renderIssues(issues) {
+            const grid = document.getElementById('issues-grid');
+            if (!issues.length) {
+                grid.innerHTML = `<div class="empty-state">
+                    <div class="empty-state-icon">📋</div>
+                    <p>No issues assigned to you yet.</p>
+                    <p style="font-size:0.8rem;margin-top:8px;color:var(--text-muted);">
+                        Issues assigned to your account (ID: ${user.id.slice(0,8)}…) will appear here.
+                    </p>
+                </div>`;
+                return;
+            }
+            grid.innerHTML = issues.map(issue => {
+                const imgHtml = issue.image_url
+                    ? `<img class="issue-card-img" src="${issue.image_url}" alt="Issue" onerror="this.style.display='none'">`
+                    : `<div class="issue-card-img-placeholder">📍</div>`;
+                const assignedDate = issue.assigned_date
+                    ? new Date(issue.assigned_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+                    : '—';
+                const reportedDate = issue.created_at
+                    ? new Date(issue.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+                    : '—';
+                const isHigh = (issue.supports_count || 0) >= 3;
+                const sCls = statusBadgeClass(issue.status);
+                const sLbl = statusBadgeLabel(issue.status);
+                return `
+                <div class="issue-card">
+                    ${imgHtml}
+                    <div class="issue-card-body">
+                        <div class="issue-card-badges">
+                            <span class="badge ${sCls}">${sLbl}</span>
+                            <span class="badge dept">${issue.department || ''}</span>
+                            ${isHigh ? '<span class="badge priority">🔥 High Priority</span>' : ''}
+                        </div>
+                        <div class="issue-card-title">${issue.title}</div>
+                        <div class="issue-card-desc">${issue.description || ''}</div>
+                        <div class="issue-card-meta">
+                            <span>📍 ${issue.location_name || 'Location not specified'}</span>
+                            <span>📅 Reported: ${reportedDate}</span>
+                            <span>🗓️ Assigned: ${assignedDate}</span>
+                            <span>👍 ${issue.supports_count || 0} community supports</span>
+                        </div>
+                        ${issue.work_remarks ? `<div class="issue-remarks-box">📝 ${issue.work_remarks}</div>` : ''}
+                    </div>
+                    <div class="issue-card-footer">
+                        <select class="status-select" id="sel-${issue.id}">
+                            <option value="PENDING"      ${issue.status==='PENDING'     ?'selected':''}>⏳ Pending</option>
+                            <option value="IN_PROGRESS"  ${issue.status==='IN_PROGRESS' ?'selected':''}>🔵 In Progress</option>
+                            <option value="COMPLETED"    ${issue.status==='COMPLETED'   ?'selected':''}>✅ Completed</option>
+                        </select>
+                        <button class="btn-update" onclick="updateStatus('${issue.id}')">Update</button>
+                        <button class="btn-remarks" onclick="openRemarks('${issue.id}')">📝 Remarks</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // ── Update Status ──
+        window.updateStatus = async (id) => {
+            const sel = document.getElementById('sel-' + id);
+            if (!sel) return;
+            const status = sel.value;
+            console.log(`[Employee Dashboard] Updating issue ${id} status to ${status}`);
+            try {
+                await issuesAPI.updateStatus(id, status);
+                toast.success('Status Updated', `Issue marked as ${status.replace('_',' ').toLowerCase()}.`);
+                await loadIssues();
+            } catch (err) {
+                console.error('[Employee Dashboard] updateStatus error:', err);
+                toast.error('Update Failed', err.message);
+            }
+        };
+
+        // ── Remarks ──
+        let remarksIssueId = null;
+        window.openRemarks = (id) => {
+            remarksIssueId = id;
+            const issue = allIssues.find(i => i.id === id);
+            document.getElementById('remarks-text').value = issue?.work_remarks || '';
+            document.getElementById('remarks-modal').classList.add('open');
+        };
+        window.closeRemarksModal = () => {
+            document.getElementById('remarks-modal').classList.remove('open');
+            remarksIssueId = null;
+        };
+        document.getElementById('remarks-save-btn').addEventListener('click', async () => {
+            if (!remarksIssueId) return;
+            const text = document.getElementById('remarks-text').value.trim();
+            console.log(`[Employee Dashboard] Saving remarks for issue ${remarksIssueId}`);
+            try {
+                // Use dedicated employee remarks endpoint (not /assign which requires HEAD role)
+                await employeesAPI.saveRemarks(remarksIssueId, text);
+                toast.success('Remarks Saved', 'Work remarks have been updated.');
+                closeRemarksModal();
+                await loadIssues();
+            } catch (err) {
+                console.error('[Employee Dashboard] saveRemarks error:', err);
+                toast.error('Failed to save remarks', err.message);
+            }
+        });
+
+        // ── Reviews ──
+        async function loadReviews() {
+            const list = document.getElementById('reviews-list');
+            list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⏳</div><p>Loading reviews…</p></div>`;
+            try {
+                console.log('[Employee Dashboard] Fetching reviews…');
+                const data = await employeesAPI.myReviews();
+                const reviews = data.reviews || [];
+                console.log(`[Employee Dashboard] Reviews count: ${reviews.length}`);
+                if (!reviews.length) {
+                    list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">⭐</div><p>No citizen reviews yet. Complete assigned issues to receive feedback.</p></div>`;
+                    return;
+                }
+                list.innerHTML = reviews.map(r => {
+                    const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
+                    const date = new Date(r.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+                    return `
+                    <div class="review-card">
+                        <div class="review-header">
+                            <div>
+                                <div class="review-issue-title">📋 ${r.issues?.title || 'Issue'}</div>
+                                <div class="stars">${stars}</div>
+                            </div>
+                            <div class="review-meta">${date}</div>
+                        </div>
+                        <div class="review-comment">"${r.comment || 'No comment provided.'}"</div>
+                        <div class="review-meta" style="margin-top:8px;">— ${r.user_name || 'Citizen'}</div>
+                    </div>`;
+                }).join('');
+            } catch (err) {
+                console.error('[Employee Dashboard] loadReviews error:', err);
+                list.innerHTML = `<div class="empty-state" style="border-color:rgba(176,0,0,0.3);"><div class="empty-state-icon">⚠️</div><p>Failed to load reviews: ${err.message}</p></div>`;
+            }
+        }
+
+        // ── Map ──
+        function getFilteredMapLocations() {
+            return mapLocations.filter(i => {
+                if (mapFilters.status && i.status !== mapFilters.status) return false;
+                return true;
+            });
+        }
+
+        async function loadMapData() {
+            try {
+                console.log('[Employee Dashboard] Fetching map data…');
+                const data = await employeesAPI.myMap();
+                mapLocations = data.locations || [];
+                console.log(`[Employee Dashboard] Map locations: ${mapLocations.length}`);
+                renderMapMarkers(getFilteredMapLocations());
+            } catch (err) {
+                console.error('[Employee Dashboard] loadMapData error:', err);
+                toast.error('Failed to load map locations', err.message);
+            }
+        }
+
+        function initEmpMap() {
+            if (empMap) return;
+            empMap = L.map('emp-map', { center: [11.1271, 78.6569], zoom: 7, attributionControl: false });
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(empMap);
+            empMarkerGroup = L.markerClusterGroup({
+                maxClusterRadius: 50, spiderfyOnMaxZoom: true, showCoverageOnHover: false,
+                iconCreateFunction: (cluster) => L.divIcon({
+                    html: `<div style="background:var(--primary);color:white;width:34px;height:34px;border-radius:50%;border:3px solid white;box-shadow:0 3px 10px rgba(176,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;">${cluster.getChildCount()}</div>`,
+                    iconSize: [34,34], iconAnchor: [17,34], className: '',
+                }),
+            });
+            empMap.addLayer(empMarkerGroup);
+
+            // Filter pills
+            document.querySelectorAll('.map-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll(`.map-pill[data-ftype="${pill.dataset.ftype}"]`).forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    mapFilters[pill.dataset.ftype] = pill.dataset.fval;
+                    renderMapMarkers(getFilteredMapLocations());
+                });
+            });
+        }
+
+        function renderMapMarkers(issues) {
+            if (!empMap || !empMarkerGroup) return;
+            empMarkerGroup.clearLayers();
+            const mappable = issues.filter(i => i.latitude && i.longitude);
+
+            document.getElementById('mc-total').textContent     = mappable.length;
+            document.getElementById('mc-pending').textContent   = mappable.filter(i => i.status === 'PENDING').length;
+            document.getElementById('mc-inprogress').textContent = mappable.filter(i => i.status === 'IN_PROGRESS').length;
+            document.getElementById('mc-completed').textContent = mappable.filter(i => i.status === 'COMPLETED').length;
+
+            if (!mappable.length) return;
+            const bounds = [];
+
+            mappable.forEach(issue => {
+                const lat = parseFloat(issue.latitude);
+                const lng = parseFloat(issue.longitude);
+                if (isNaN(lat) || isNaN(lng)) return;
+
+                const markerCls = issue.status === 'COMPLETED' ? 'cm-completed' : issue.status === 'IN_PROGRESS' ? 'cm-inprogress' : 'cm-pending';
+                const badgeCls  = issue.status === 'COMPLETED' ? 'completed' : issue.status === 'IN_PROGRESS' ? 'in-progress' : 'pending';
+                const statusLabel = issue.status === 'COMPLETED' ? '✅ Completed' : issue.status === 'IN_PROGRESS' ? '🔵 In Progress' : '⏳ Pending';
+                const isHigh = (issue.supports_count || 0) >= 3;
+                const reportedDate = issue.created_at ? new Date(issue.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+                const imgHtml = issue.image_url
+                    ? `<img class="map-popup-image" src="${issue.image_url}" alt="Issue" onerror="this.style.display='none'">`
+                    : `<div class="map-popup-image-placeholder">📍</div>`;
+
+                const icon = L.divIcon({
+                    html: `<div class="custom-map-marker ${markerCls}">📍</div>`,
+                    iconSize: [30,30], iconAnchor: [15,30], popupAnchor: [0,-34], className: '',
+                });
+                const marker = L.marker([lat,lng], { icon });
+
+                marker.bindPopup(`
+                    <div class="map-popup-card">
+                        ${imgHtml}
+                        <div class="map-popup-body">
+                            <div class="map-popup-title">${issue.title}</div>
+                            <div class="map-popup-meta">
+                                <span class="map-popup-badge ${badgeCls}">${statusLabel}</span>
+                                ${isHigh ? '<span class="map-popup-badge" style="background:#fce7f3;color:#be185d;">🔥 High Priority</span>' : ''}
+                            </div>
+                            <div class="map-popup-info-row">
+                                <span>📍 ${issue.location_name || 'Location not specified'}</span>
+                                <span>📅 ${reportedDate}</span>
+                                <span>👍 ${issue.supports_count || 0} supports</span>
+                            </div>
+                        </div>
+                        <div class="map-popup-footer">
+                            <a class="map-popup-dir-btn" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}" target="_blank" rel="noopener">
+                                📍 Get Directions
+                            </a>
+                        </div>
+                    </div>`, { maxWidth: 300 });
+
+                empMarkerGroup.addLayer(marker);
+                bounds.push([lat, lng]);
+            });
+
+            if (bounds.length > 0) {
+                try { empMap.fitBounds(bounds, { padding: [40,40], maxZoom: 14 }); } catch (_) {}
+            }
+        }
+
+        // ── Boot ──
+        console.log('[Employee Dashboard] Booting — user.id:', user.id, 'role:', user.role);
+        loadIssues();
+    </script>
+</body>
+</html>
