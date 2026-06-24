@@ -1022,7 +1022,7 @@
                         <li>
                             <a class="nav-link-item active" href="#" id="nav-issues"
                                 onclick="event.preventDefault(); switchTab('issues');">
-                                My Issues
+                                Reports
                             </a>
                         </li>
                         <li>
@@ -1126,7 +1126,7 @@
                         </div>
                         <div class="mobile-drawer-nav">
                             <a href="#" class="mobile-drawer-link active" id="drawer-issues">
-                                <span class="drawer-icon">📋</span> My Issues
+                                <span class="drawer-icon">📋</span> Reports
                             </a>
                             <a href="#" class="mobile-drawer-link" id="drawer-reviews">
                                 <span class="drawer-icon">⭐</span> Reviews
@@ -1175,7 +1175,7 @@
                 <!-- Header Filters/Controls inside visual wrapper -->
                 <div class="page-header animate-in stagger-1" id="page-header">
                     <div id="page-header-text">
-                        <h2 class="page-title" id="page-title">Issues Management</h2>
+                        <h2 class="page-title" id="page-title">Reports Management</h2>
                         <p class="page-subtitle" id="dept-title">Review, update and resolve civic complaints in your
                             area.</p>
                     </div>
@@ -1202,7 +1202,7 @@
                     <div class="grid grid-3 mb-8">
                         <div class="stat-card">
                             <div>
-                                <div class="stat-label">Assigned Issues</div>
+                                <div class="stat-label">Assigned Reports</div>
                                 <div class="stat-value" id="s-total">—</div>
                             </div>
                             <div class="stat-icon blue" style="background: rgba(37, 99, 235, 0.08); color: #2563eb;">📋
@@ -1240,53 +1240,147 @@
                 <!-- Analytics Tab -->
                 <div id="tab-analytics" class="tab-pane animate-in stagger-2">
                     <div class="analytics-fadein">
-                        <!-- KPI Row -->
-                        <div class="analytics-grid-4">
-                            <div class="kpi-card kpi-blue">
-                                <span class="kpi-icon">📋</span>
-                                <div class="kpi-label" data-i18n="lbl_total_reports">Total Complaints</div>
-                                <div class="kpi-value" id="ak-total">—</div>
-                                <span class="kpi-badge green" id="ak-total-badge"
-                                    style="margin-top: 4px;">Loading…</span>
-                            </div>
-                            <div class="kpi-card kpi-green">
-                                <span class="kpi-icon">✅</span>
-                                <div class="kpi-label">Resolved</div>
-                                <div class="kpi-value" id="ak-resolved" style="color:#10B981;">—</div>
-                                <span class="kpi-badge green" id="ak-res-badge" style="margin-top: 4px;">Loading…</span>
-                            </div>
-                            <div class="kpi-card kpi-yellow">
-                                <span class="kpi-icon">⏳</span>
-                                <div class="kpi-label" data-i18n="lbl_pending_reports">Pending</div>
-                                <div class="kpi-value" id="ak-pending" style="color:#F59E0B;">—</div>
-                                <span class="kpi-badge red" id="ak-pend-badge" style="margin-top: 4px;">Loading…</span>
-                            </div>
-                            <div class="kpi-card kpi-purple">
-                                <span class="kpi-icon">🎯</span>
-                                <div class="kpi-label">Resolution Rate</div>
-                                <div class="kpi-value" id="ak-rate" style="color:#8B5CF6;">—</div>
-                                <span class="kpi-badge green" style="margin-top: 4px;">Efficiency</span>
-                            </div>
-                        </div>
-
-                        <!-- Charts Row 2 -->
-                        <div class="analytics-grid-1">
-                            <div class="chart-card">
-                                <div class="chart-card-title">Status Distribution</div>
-                                <div class="chart-card-subtitle">Pending · In Progress · Resolved</div>
-                                <div id="dept-status-chart"></div>
-                            </div>
-                        </div>
-
-                        <!-- Charts Row 3 -->
-                        <div class="analytics-grid-1">
-                            <div class="chart-card">
-                                <div class="chart-card-title">Monthly Complaint Trend</div>
-                                <div class="chart-card-subtitle">Total vs. Resolved complaints per month (last 6 months)
+                        
+                        <!-- Top Filters -->
+                        <div class="analytics-filters" style="background:#fff; padding:20px; border-radius:24px; border:1px solid var(--border); box-shadow:var(--shadow-sm); margin-bottom:24px;">
+                            <h3 style="font-family:var(--font-display); font-size:1.1rem; font-weight:800; margin-bottom:16px;">Analytics Filters</h3>
+                            <div style="display:flex; flex-wrap:wrap; gap:16px;">
+                                <div class="form-group" style="flex:1; min-width:150px;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Date Range</label>
+                                    <input type="date" id="filter-date" class="form-control" style="width:100%; border-radius:12px;">
                                 </div>
-                                <div id="dept-monthly-chart"></div>
+                                <div class="form-group" style="flex:1; min-width:150px;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Employee</label>
+                                    <select id="filter-employee" class="select" style="width:100%;"><option value="">All Employees</option></select>
+                                </div>
+                                <div class="form-group" style="flex:1; min-width:150px;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Category</label>
+                                    <select id="filter-category" class="select" style="width:100%;">
+                                        <option value="">All Categories</option>
+                                        <option value="Waste">Waste</option>
+                                        <option value="Water">Water</option>
+                                        <option value="Roads">Roads</option>
+                                        <option value="Electricity">Electricity</option>
+                                        <option value="Law & Order">Law & Order</option>
+                                    </select>
+                                </div>
+                                <div class="form-group" style="flex:1; min-width:150px;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Priority</label>
+                                    <select id="filter-priority" class="select" style="width:100%;"><option value="">All Priorities</option><option value="High">High</option><option value="Medium">Medium</option><option value="Low">Low</option></select>
+                                </div>
+                                <div class="form-group" style="flex:1; min-width:150px;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Status</label>
+                                    <select id="filter-status" class="select" style="width:100%;"><option value="">All Statuses</option><option value="COMPLETED">Completed</option><option value="IN_PROGRESS">In Progress</option><option value="PENDING">Pending</option></select>
+                                </div>
+                                <div class="form-group" style="flex:1; min-width:150px;">
+                                    <label style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Location</label>
+                                    <input type="text" id="filter-location" class="form-control" placeholder="Search location" style="width:100%; border-radius:12px;">
+                                </div>
                             </div>
                         </div>
+
+                        <div class="section-title">Total Employee Analytics</div>
+                        
+                        <!-- 7 Dashboard Cards -->
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:16px; margin-bottom:24px;">
+                            <div class="kpi-card" style="border-top:3px solid #64748b;">
+                                <div class="kpi-label">Total Employees</div>
+                                <div class="kpi-value" id="kpi-tot-emp">—</div>
+                            </div>
+                            <div class="kpi-card" style="border-top:3px solid #3b82f6;">
+                                <div class="kpi-label">Assigned Issues</div>
+                                <div class="kpi-value" id="kpi-tot-iss">—</div>
+                            </div>
+                            <div class="kpi-card" style="border-top:3px solid #10b981;">
+                                <div class="kpi-label">Completed</div>
+                                <div class="kpi-value" id="kpi-comp-iss" style="color:#10b981;">—</div>
+                            </div>
+                            <div class="kpi-card" style="border-top:3px solid #f59e0b;">
+                                <div class="kpi-label">Pending</div>
+                                <div class="kpi-value" id="kpi-pend-iss" style="color:#f59e0b;">—</div>
+                            </div>
+                            <div class="kpi-card" style="border-top:3px solid #8b5cf6;">
+                                <div class="kpi-label">In Progress</div>
+                                <div class="kpi-value" id="kpi-prog-iss" style="color:#8b5cf6;">—</div>
+                            </div>
+                            <div class="kpi-card" style="border-top:3px solid #ec4899;">
+                                <div class="kpi-label">Avg Completion Time</div>
+                                <div class="kpi-value" id="kpi-avg-time" style="font-size:1.6rem;">—</div>
+                            </div>
+                            <div class="kpi-card" style="border-top:3px solid #14b8a6;">
+                                <div class="kpi-label">Dept Efficiency</div>
+                                <div class="kpi-value" id="kpi-efficiency" style="color:#14b8a6;">—</div>
+                            </div>
+                        </div>
+
+                        <!-- Total Analytics Graphs -->
+                        <div class="analytics-grid-2">
+                            <div class="chart-card">
+                                <div class="chart-card-title">Employee Performance Comparison</div>
+                                <div class="chart-card-subtitle">Highest performers sorted by completed issues</div>
+                                <div id="chart-emp-perf"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-card-title">Issue Status Distribution</div>
+                                <div id="chart-issue-status"></div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-grid-1">
+                            <div class="chart-card">
+                                <div class="chart-card-title">Time Performance</div>
+                                <div class="chart-card-subtitle">Number of completed issues over time</div>
+                                <div id="chart-time-perf"></div>
+                            </div>
+                        </div>
+
+                        <div class="analytics-grid-2">
+                            <div class="chart-card">
+                                <div class="chart-card-title">Category Analytics</div>
+                                <div id="chart-category"></div>
+                            </div>
+                            <div class="chart-card">
+                                <div class="chart-card-title">Priority Handling</div>
+                                <div class="chart-card-subtitle">Resolution speed by priority</div>
+                                <div id="chart-priority"></div>
+                            </div>
+                        </div>
+
+                        <div class="section-title" style="margin-top:32px;">Map Analytics</div>
+                        
+                        <div class="chart-card" style="padding:0; overflow:hidden;">
+                            <div id="analytics-map" style="width:100%; height:450px; background:#e2e8f0; z-index:1;"></div>
+                            <div style="padding:12px 20px; background:#f8fafc; border-top:1px solid var(--border); display:flex; gap:16px;">
+                                <div style="font-size:0.8rem;"><span style="display:inline-block;width:12px;height:12px;background:#16a34a;border-radius:50%;margin-right:6px;"></span>Completed</div>
+                                <div style="font-size:0.8rem;"><span style="display:inline-block;width:12px;height:12px;background:#f59e0b;border-radius:50%;margin-right:6px;"></span>Pending</div>
+                                <div style="font-size:0.8rem;"><span style="display:inline-block;width:12px;height:12px;background:#dc2626;border-radius:50%;margin-right:6px;"></span>High Priority Active</div>
+                            </div>
+                        </div>
+
+
+                        <div class="section-title" style="margin-top:32px;">Employee Leaderboard</div>
+                        
+                        <div style="background:#fff; border:1px solid var(--border); border-radius:24px; overflow:hidden; box-shadow:var(--shadow-sm);">
+                            <div style="overflow-x:auto;">
+                                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                                    <thead>
+                                        <tr style="background:#f8fafc; border-bottom:1px solid var(--border);">
+                                            <th style="padding:16px 20px; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Rank</th>
+                                            <th style="padding:16px 20px; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Employee Name</th>
+                                            <th style="padding:16px 20px; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Completed Issues</th>
+                                            <th style="padding:16px 20px; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Assigned Issues</th>
+                                            <th style="padding:16px 20px; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Score</th>
+                                            <th style="padding:16px 20px; font-size:0.8rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Grade</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaderboard-tbody">
+                                        <!-- Rendered via JS -->
+                                        <tr><td colspan="6" style="padding:32px; text-align:center; color:var(--text-muted);">Loading Leaderboard...</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
 
@@ -1547,7 +1641,7 @@
         import { t } from './js/i18n.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
         import { downloadSingleIssuePDF } from './js/pdf-export.js';
-
+        import { initDepartmentAnalytics } from './js/department-analytics.js';
         const DEPT_ROLES = ['TAMILNADU_CORPORATION', 'TNEB', 'POLICE'];
         const user = guardPage(DEPT_ROLES);
         if (!user) throw new Error('Unauthorized');
@@ -1561,7 +1655,7 @@
         document.getElementById('sidebar-avatar-visible').textContent = user.name.charAt(0).toUpperCase();
         const deptTitleEl = document.getElementById('dept-title');
         if (deptTitleEl) deptTitleEl.textContent = `${deptLabel} Dashboard`;
-        document.getElementById('page-title').textContent = `${deptLabel} Issues`;
+        document.getElementById('page-title').textContent = `${deptLabel} Reports`;
 
         // Set the map department scope badge
         const mapDeptLabelEl = document.getElementById('map-dept-label');
@@ -1893,7 +1987,7 @@
             const filtered = status ? allIssues.filter(i => i.status === status) : allIssues;
             const container = document.getElementById('issues-list');
             if (filtered.length === 0) {
-                container.innerHTML = `<div class="empty-state" style="padding: 40px; text-align: center; border-radius:24px; border:1.5px dashed var(--border); background: var(--bg-card);"><div class="empty-state-icon" style="font-size: 2.5rem; margin-bottom:12px;">✅</div><h3 style="font-family: var(--font-display); font-weight:800; font-size:1.2rem; color:var(--text);">No issues found</h3><p style="color:var(--text-muted); font-size:0.9rem;">No ${status || ''} issues for your department.</p></div>`;
+                container.innerHTML = `<div class="empty-state" style="padding: 40px; text-align: center; border-radius:24px; border:1.5px dashed var(--border); background: var(--bg-card);"><div class="empty-state-icon" style="font-size: 2.5rem; margin-bottom:12px;">📁</div><h3 style="font-family: var(--font-display); font-weight:800; font-size:1.2rem; color:var(--text);">No reports found</h3><p style="color:var(--text-muted); font-size:0.9rem;">No ${status || ''} reports for your department.</p></div>`;
             } else {
                 container.innerHTML = filtered.map(renderIssueRow).join('');
             }
@@ -1985,6 +2079,7 @@
             try {
                 const data = await issuesAPI.getAll({ department: user.role });
                 allIssues = data.issues || [];
+                allIssues.sort((a, b) => (b.supports_count || 0) - (a.supports_count || 0));
                 document.getElementById('s-total').textContent = allIssues.length;
                 document.getElementById('s-pending').textContent = allIssues.filter(i => i.status === 'PENDING').length;
                 document.getElementById('s-resolved').textContent = allIssues.filter(i => i.status === 'COMPLETED').length;
@@ -2028,63 +2123,9 @@
         }
 
         /* ── Analytics ── */
-        let deptStatusChart, deptMonthlyChart;
-
         async function loadAnalytics() {
             analyticsLoaded = true;
-            const dept = user.role;
-            try {
-                const [stats, statusData, monthData] = await Promise.all([
-                    analyticsAPI.stats({ department: dept }),
-                    analyticsAPI.statusDistribution({ department: dept }),
-                    analyticsAPI.monthly({ department: dept, months: 6 }),
-                ]);
-
-                // KPI Cards
-                document.getElementById('ak-total').textContent = stats.total;
-                document.getElementById('ak-resolved').textContent = stats.completed;
-                document.getElementById('ak-pending').textContent = stats.pending;
-                document.getElementById('ak-rate').textContent = stats.resolutionRate + '%';
-                document.getElementById('ak-total-badge').textContent = stats.inProgress + ' In Progress';
-                document.getElementById('ak-res-badge').textContent = stats.resolutionRate + '% Rate';
-                document.getElementById('ak-pend-badge').textContent = stats.pending + ' Open';
-
-                // Chart: Status Distribution (Donut)
-                if (deptStatusChart) deptStatusChart.destroy();
-                deptStatusChart = new ApexCharts(document.getElementById('dept-status-chart'), {
-                    series: statusData.values,
-                    chart: { type: 'donut', height: 260, toolbar: { show: false }, animations: { enabled: true, speed: 600 } },
-                    labels: statusData.labels,
-                    colors: ['#F59E0B', '#06B6D4', '#10B981'],
-                    legend: { position: 'bottom', fontSize: '13px' },
-                    plotOptions: { pie: { donut: { size: '68%', labels: { show: true, total: { show: true, label: 'Total', color: '#64748b', fontSize: '13px', fontWeight: 700 } } } } },
-                    dataLabels: { enabled: true, formatter: (val) => Math.round(val) + '%' },
-                    tooltip: { theme: 'light' },
-                });
-                deptStatusChart.render();
-
-                // Chart: Monthly Trend (Line)
-                if (deptMonthlyChart) deptMonthlyChart.destroy();
-                deptMonthlyChart = new ApexCharts(document.getElementById('dept-monthly-chart'), {
-                    series: [
-                        { name: t('lbl_total_reports'), data: monthData.totals },
-                        { name: t('lbl_completed_reports'), data: monthData.resolved }
-                    ],
-                    chart: { type: 'area', height: 260, toolbar: { show: false }, animations: { enabled: true, easing: 'easeinout', speed: 800 } },
-                    colors: ['#3b82f6', '#10b981'],
-                    fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0, stops: [0, 90, 100] } },
-                    dataLabels: { enabled: false },
-                    stroke: { curve: 'smooth', width: 2 },
-                    xaxis: { categories: monthData.labels, labels: { style: { colors: '#64748b', fontSize: '13px' } }, axisBorder: { show: false }, axisTicks: { show: false } },
-                    yaxis: { labels: { style: { colors: '#64748b' } } },
-                    grid: { borderColor: '#f1f5f9', strokeDashArray: 4, yaxis: { lines: { show: true } } },
-                    tooltip: { theme: 'light' }
-                });
-                deptMonthlyChart.render();
-            } catch (err) {
-                console.error('Analytics error:', err);
-                toast.error('Failed to load analytics', err.message);
-            }
+            await initDepartmentAnalytics(user.role);
         }
 
         window.addEventListener('languageChanged', () => {

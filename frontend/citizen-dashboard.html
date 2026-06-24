@@ -1649,7 +1649,7 @@
                 <div class="ms-item">
                     <div class="ms-num">${idx + 1}</div>
                     <div class="ms-content">
-                        <div class="ms-title">${issue.category.toLowerCase()}</div>
+                        <div class="ms-title">${issue.title}</div>
                         <div class="ms-meta">
                             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
                             ${issue.supports_count || 0} Supports • ${issue.category}
@@ -2351,7 +2351,7 @@
                     <span class="vm-status-badge" style="background:${bgColors[status]};color:${statusColors[status]};">${statusEmojis[status]} ${status}</span>
                     ${isCreator ? `
                     <span class="vm-status-badge" style="top:44px; background:${camp.verification_status === 'approved' ? '#dcfce7' : camp.verification_status === 'rejected' ? '#fee2e2' : '#fef3c7'}; color:${camp.verification_status === 'approved' ? '#16a34a' : camp.verification_status === 'rejected' ? '#991b1b' : '#92400e'};">
-                        ${camp.verification_status === 'approved' ? '✅ Approved' : camp.verification_status === 'rejected' ? '❌ Rejected' : camp.verification_status === 'pending_mla' ? '⏳ Pending MLA Approval' : '⏳ Pending Collector Approval'}
+                        ${camp.verification_status === 'approved' ? '✅ Approved' : camp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending Verifications'}
                     </span>` : ''}
                     ${!camp.image_url ? statusEmojis[status] : ''}
                 </div>

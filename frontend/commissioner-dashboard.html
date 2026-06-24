@@ -109,7 +109,7 @@
         }
 
         .nav-links {
-            display: flex;
+            display: none !important;
             align-items: center;
             gap: 2px;
             list-style: none;
@@ -172,7 +172,7 @@
         }
 
         .mobile-burger {
-            display: none;
+            display: block;
             background: none;
             border: none;
             cursor: pointer;
@@ -800,8 +800,6 @@
 
         /* ── Responsive ── */
         @media(max-width: 900px) {
-            .nav-links { display: none; }
-            .mobile-burger { display: block; }
             .dash-content { padding: 20px 16px; }
         }
 
@@ -839,6 +837,7 @@
                         <li><button class="nav-link-item" data-tab="analytics" id="nav-analytics">📈 Analytics</button></li>
                         <li><button class="nav-link-item" data-tab="heatmap" id="nav-heatmap">🗺️ Heatmap</button></li>
                         <li><button class="nav-link-item" data-tab="reports" id="nav-reports">📥 Reports</button></li>
+                        <li><button class="nav-link-item" data-tab="campaigns" id="nav-campaigns">🤝 Campaigns</button></li>
                     </ul>
 
                     <div class="nav-actions">
@@ -874,6 +873,7 @@
                             <button class="mobile-drawer-link" data-tab="analytics">📈 Analytics</button>
                             <button class="mobile-drawer-link" data-tab="heatmap">🗺️ Heatmap</button>
                             <button class="mobile-drawer-link" data-tab="reports">📥 Reports</button>
+                            <button class="mobile-drawer-link" data-tab="campaigns">🤝 Campaigns</button>
                         </div>
                         <div class="mobile-drawer-footer">
                             <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
@@ -1342,6 +1342,20 @@
                     </div>
                 </div>
 
+                <!-- TAB: CAMPAIGNS -->
+                <div class="tab-pane" id="tab-campaigns">
+                    <div class="section-hdr animate-in">
+                        <div>
+                            <div class="section-title">Campaign Verification</div>
+                            <div class="section-subtitle">Review and approve pending citizen campaigns in your district</div>
+                        </div>
+                    </div>
+                    
+                    <div id="comm-campaigns-list" class="space-y-4">
+                        <div class="loading-page" style="min-height:200px;"><div class="spinner"></div></div>
+                    </div>
+                </div>
+
             </div><!-- /dash-content -->
         </main>
     </div>
@@ -1368,6 +1382,7 @@
         import { logout } from './js/auth.js';
         import { toast } from './js/toast.js';
         import { downloadSingleIssuePDF } from './js/pdf-export.js';
+        import { campaignsAPI } from './js/api.js';
 
         // ── Guard: Only COMMISSIONER role ──
         const user = guardPage(['COMMISSIONER']);
@@ -1427,7 +1442,6 @@
             document.getElementById('nav-' + tab)?.classList.add('active');
             document.querySelectorAll(`.mobile-drawer-link[data-tab="${tab}"]`).forEach(b => b.classList.add('active'));
             activeTab = tab;
-            // Lazy init
             if (!tabInitialized[tab]) {
                 tabInitialized[tab] = true;
                 if (tab === 'departments') loadDepartments();
@@ -1435,6 +1449,7 @@
                 if (tab === 'heatmap')     loadHeatmap();
                 if (tab === 'issues')      loadIssues();
                 if (tab === 'reports')     loadIssues(); // preload data for reports
+                if (tab === 'campaigns')   loadCampaigns();
             }
             // Re-init heatmap on tab switch (leaflet needs visible container)
             if (tab === 'heatmap') setTimeout(refreshMap, 100);

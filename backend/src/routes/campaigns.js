@@ -12,8 +12,8 @@ const router = express.Router();
  */
 router.get('/', verifyToken, requireApproved, async (req, res) => {
     try {
-        // Enforce filters for COLLECTOR and MLA
-        if (req.user.role === 'COLLECTOR' && req.user.district) {
+        // Enforce filters for COLLECTOR, MLA, COMMISSIONER
+        if ((req.user.role === 'COLLECTOR' || req.user.role === 'COMMISSIONER') && req.user.district) {
             req.query.district = req.user.district;
         } else if (req.user.role === 'MLA' && req.user.constituency) {
             req.query.constituency = req.user.constituency;
@@ -106,7 +106,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
     const hoursDifference = (startDT - now) / (1000 * 60 * 60);
     
     if (hoursDifference < 48) {
-        return res.status(400).json({ error: 'Campaign must be scheduled at least 48 hours in advance to allow time for Collector and MLA approvals.' });
+        return res.status(400).json({ error: 'Campaign must be scheduled at least 48 hours in advance to allow time for Collector and Commissioner approvals.' });
     }
 
     try {
@@ -126,38 +126,42 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
                 registered_count: 0,
                 image_url: imageUrl || null,
                 status: 'UPCOMING',
-                verification_status: 'pending_collector',
+                verification_status: 'pending',
                 created_by_id: req.userId,
                 created_by_name: req.user.name,
                 contact_number: contactNumber || null,
+                collector_approved: false,
+                commissioner_approved: false,
             })
             .select()
             .single();
 
         if (error) throw error;
 
-        // Notify Collector of the user's district
+        // Notify Collector and Commissioner of the user's district
         try {
             if (req.user.district) {
-                const { data: collectors } = await supabaseAdmin
+                const { data: officials } = await supabaseAdmin
                     .from('users')
-                    .select('id')
-                    .eq('role', 'COLLECTOR')
+                    .select('id, role')
+                    .in('role', ['COLLECTOR', 'COMMISSIONER'])
                     .eq('district', req.user.district)
-                    .limit(1);
+                    .limit(2);
 
-                if (collectors && collectors.length > 0) {
-                    await createNotification({
-                        userId: collectors[0].id,
-                        title: 'Campaign Verification Required',
-                        message: `A new campaign "${title}" in your district requires verification.`,
-                        type: 'campaign',
-                        relatedId: data.id
-                    });
+                if (officials && officials.length > 0) {
+                    for (const official of officials) {
+                        await createNotification({
+                            userId: official.id,
+                            title: 'Campaign Verification Required',
+                            message: `A new campaign "${title}" in your district requires verification.`,
+                            type: 'campaign',
+                            relatedId: data.id
+                        });
+                    }
                 }
             }
         } catch (nErr) {
-            console.error('Failed to notify collector:', nErr);
+            console.error('Failed to notify officials:', nErr);
         }
 
         return res.status(201).json({ message: 'Campaign created successfully.', campaign: data });
@@ -593,25 +597,25 @@ router.delete('/:id', verifyToken, requireApproved, async (req, res) => {
  * Returns campaigns waiting for admin approval
  */
 router.get('/pending', verifyToken, requireApproved, async (req, res) => {
-    if (!['COLLECTOR', 'MLA'].includes(req.user.role)) {
+    if (!['COLLECTOR', 'COMMISSIONER'].includes(req.user.role)) {
         return res.status(403).json({ error: 'Access denied.' });
     }
 
     try {
-        const queryStatusList = req.user.role === 'COLLECTOR' ? ['pending_collector', 'pending'] : ['pending_mla'];
-        
         let { data, error } = await supabaseAdmin
             .from('campaigns')
             .select('*, creator:users!campaigns_created_by_id_fkey(district, constituency)')
-            .in('verification_status', queryStatusList)
+            .eq('verification_status', 'pending')
             .order('created_at', { ascending: false });
 
         if (error) throw error;
 
-        if (data && req.user.role === 'COLLECTOR' && req.user.district) {
-            data = data.filter(camp => camp.creator && camp.creator.district === req.user.district);
-        } else if (data && req.user.role === 'MLA' && req.user.constituency) {
-            data = data.filter(camp => camp.creator && camp.creator.constituency === req.user.constituency);
+        if (data && req.user.role === 'COLLECTOR') {
+            data = data.filter(c => !c.collector_approved);
+            if (req.user.district) data = data.filter(camp => camp.creator && camp.creator.district === req.user.district);
+        } else if (data && req.user.role === 'COMMISSIONER') {
+            data = data.filter(c => !c.commissioner_approved);
+            if (req.user.district) data = data.filter(camp => camp.creator && camp.creator.district === req.user.district);
         }
 
         // Clean up creator data for client
@@ -634,7 +638,7 @@ router.get('/pending', verifyToken, requireApproved, async (req, res) => {
  * Approve or reject a campaign
  */
 router.put('/:id/verify', verifyToken, requireApproved, async (req, res) => {
-    if (!['COLLECTOR', 'MLA'].includes(req.user.role)) {
+    if (!['COLLECTOR', 'COMMISSIONER'].includes(req.user.role)) {
         return res.status(403).json({ error: 'Access denied.' });
     }
 
@@ -654,48 +658,41 @@ router.put('/:id/verify', verifyToken, requireApproved, async (req, res) => {
 
         if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
 
-        let nextStatus = status;
-        if (status === 'approved' && req.user.role === 'COLLECTOR') {
-            nextStatus = 'pending_mla';
+        let updates = {};
+        let finalStatus = 'pending';
+
+        if (status === 'rejected') {
+            finalStatus = 'rejected';
+            updates.verification_status = 'rejected';
+        } else {
+            if (req.user.role === 'COLLECTOR') updates.collector_approved = true;
+            if (req.user.role === 'COMMISSIONER') updates.commissioner_approved = true;
+            
+            const willBeCollectorApproved = updates.collector_approved || campaign.collector_approved;
+            const willBeCommissionerApproved = updates.commissioner_approved || campaign.commissioner_approved;
+            
+            if (willBeCollectorApproved && willBeCommissionerApproved) {
+                finalStatus = 'approved';
+                updates.verification_status = 'approved';
+            }
         }
 
         const { error } = await supabaseAdmin
             .from('campaigns')
-            .update({ verification_status: nextStatus })
+            .update(updates)
             .eq('id', id);
 
         if (error) throw error;
 
-        // Notify Creator or MLA
+        // Notify Creator
         try {
-            if (nextStatus === 'pending_mla') {
-                // Notify MLA
-                if (campaign.creator && campaign.creator.constituency) {
-                    const { data: mlas } = await supabaseAdmin
-                        .from('users')
-                        .select('id')
-                        .eq('role', 'MLA')
-                        .eq('constituency', campaign.creator.constituency)
-                        .limit(1);
-
-                    if (mlas && mlas.length > 0) {
-                        await createNotification({
-                            userId: mlas[0].id,
-                            title: 'Campaign Verification Required',
-                            message: `A new campaign "${campaign.title}" in your constituency requires verification.`,
-                            type: 'campaign',
-                            relatedId: id
-                        });
-                    }
-                }
-            } else if (nextStatus === 'approved' || nextStatus === 'rejected') {
-                // Notify Creator
-                const isApproved = nextStatus === 'approved';
+            if (finalStatus === 'approved' || finalStatus === 'rejected') {
+                const isApproved = finalStatus === 'approved';
                 await createNotification({
                     userId: campaign.created_by_id,
                     title: isApproved ? 'Campaign Approved' : 'Campaign Rejected',
                     message: isApproved 
-                        ? `Your campaign "${campaign.title}" has been fully verified and approved.`
+                        ? `Your campaign "${campaign.title}" has been fully verified by both the Collector and Commissioner and is now approved.`
                         : `Your campaign "${campaign.title}" has been declined by the ${req.user.role}.`,
                     type: 'campaign',
                     relatedId: id

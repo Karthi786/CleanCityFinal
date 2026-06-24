@@ -541,4 +541,35 @@ router.get('/my-supports', verifyToken, requireApproved, async (req, res) => {
     }
 });
 
+/**
+ * DELETE /api/issues/:id
+ * Delete an issue (only allowed for COLLECTOR, ADMIN roles)
+ */
+router.delete('/:id', verifyToken, requireApproved, async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        // Ensure user has permission
+        if (!['COLLECTOR', 'ADMIN'].includes(req.user.role)) {
+            return res.status(403).json({ error: 'You do not have permission to delete issues.' });
+        }
+
+        // Delete from database
+        const { error } = await supabaseAdmin
+            .from('issues')
+            .delete()
+            .eq('id', id);
+
+        if (error) {
+            console.error('Delete issue DB error:', error);
+            return res.status(500).json({ error: 'Failed to delete issue.' });
+        }
+
+        return res.json({ message: 'Issue deleted successfully.' });
+    } catch (err) {
+        console.error('Delete issue error:', err);
+        return res.status(500).json({ error: 'Failed to delete issue.' });
+    }
+});
+
 module.exports = router;

@@ -210,4 +210,146 @@ router.get('/status-distribution', verifyToken, requireApproved, async (req, res
     }
 });
 
+/**
+ * GET /api/analytics/department-comprehensive
+ * Comprehensive analytics for the department dashboard including Employee Leaderboard logic
+ */
+router.get('/department-comprehensive', verifyToken, requireApproved, async (req, res) => {
+    try {
+        const isAdmin = req.user.role === 'ADMIN';
+        const dept = isAdmin ? (req.query.department || null) : req.user.department;
+
+        if (!dept && !isAdmin) {
+            return res.status(403).json({ error: 'Department context required.' });
+        }
+
+        // 1. Fetch Employees
+        let empQuery = supabaseAdmin
+            .from('users')
+            .select('id, name, department, role, profile_image_url')
+            .eq('role', 'EMPLOYEE');
+            
+        if (dept) empQuery = empQuery.eq('department', dept);
+
+        const { data: employees, error: empErr } = await empQuery;
+        if (empErr) throw empErr;
+
+        const empIds = (employees || []).map(e => e.id);
+
+        // 2. Fetch Issues
+        let issuesQuery = supabaseAdmin
+            .from('issues')
+            .select('id, title, description, category, priority_score, status, assigned_employee_id, created_at, assigned_date, updated_at, latitude, longitude')
+            .in('assigned_employee_id', empIds);
+
+        const { data: issuesData, error: issErr } = await issuesQuery;
+        if (issErr) throw issErr;
+
+        const issues = issuesData || [];
+
+        // 3. Process Issues to requested format and map fields
+        const processedIssues = issues.map(iss => {
+            const assigned_at = iss.assigned_date || iss.created_at; 
+            const completed_at = iss.status === 'COMPLETED' ? iss.updated_at : null;
+            
+            // Derive priority
+            let priority = 'Low';
+            if (iss.priority_score >= 70) priority = 'High';
+            else if (iss.priority_score >= 40) priority = 'Medium';
+
+            let completionDurationHrs = null;
+            if (completed_at && assigned_at) {
+                completionDurationHrs = (new Date(completed_at) - new Date(assigned_at)) / (1000 * 60 * 60);
+            }
+
+            return {
+                id: iss.id,
+                title: iss.title,
+                description: iss.description,
+                category: iss.category,
+                priority,
+                status: iss.status,
+                assigned_employee_id: iss.assigned_employee_id,
+                created_at: iss.created_at,
+                assigned_at,
+                completed_at,
+                completion_duration_hrs: completionDurationHrs,
+                latitude: iss.latitude,
+                longitude: iss.longitude
+            };
+        });
+
+        // 4. Calculate Employee Stats and Leaderboard Score
+        const employeeStats = employees.map(emp => {
+            const empIssues = processedIssues.filter(i => i.assigned_employee_id === emp.id);
+            const total = empIssues.length;
+            const completed = empIssues.filter(i => i.status === 'COMPLETED').length;
+            const pending = empIssues.filter(i => i.status === 'PENDING').length;
+            const inProgress = empIssues.filter(i => i.status === 'IN_PROGRESS').length;
+            
+            let totalCompletionHrs = 0;
+            let completedWithDuration = 0;
+            
+            let onTimeCompleted = 0;
+
+            empIssues.forEach(i => {
+                if (i.status === 'COMPLETED') {
+                    if (i.completion_duration_hrs !== null) {
+                        totalCompletionHrs += i.completion_duration_hrs;
+                        completedWithDuration++;
+                        
+                        // Deadline logic: SLA = 48 hours
+                        if (i.completion_duration_hrs <= 48) {
+                            onTimeCompleted++;
+                        }
+                    }
+                }
+            });
+            
+            let score = 0;
+            if (total > 0) {
+                const completionScore = (completed / total) * 60;
+                const onTimeScore = completed > 0 ? (onTimeCompleted / completed) * 40 : 0;
+                score = Math.round(completionScore + onTimeScore);
+            }
+
+            const avgCompletionTime = completedWithDuration > 0 ? (totalCompletionHrs / completedWithDuration).toFixed(1) : null;
+            const successRate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            // Grade based on score
+            let grade = 'D';
+            if (score >= 90) grade = 'O';
+            else if (score >= 80) grade = 'A';
+            else if (score >= 70) grade = 'B';
+            else if (score >= 60) grade = 'C';
+
+            return {
+                ...emp,
+                stats: {
+                    total,
+                    completed,
+                    pending,
+                    inProgress,
+                    avgCompletionTime,
+                    successRate,
+                    score,
+                    grade
+                }
+            };
+        });
+
+        // Sort employees by score descending for leaderboard
+        employeeStats.sort((a, b) => b.stats.score - a.stats.score);
+
+        return res.json({
+            employees: employeeStats,
+            issues: processedIssues
+        });
+
+    } catch (err) {
+        console.error('Analytics department-comprehensive error:', err);
+        return res.status(500).json({ error: 'Failed to fetch comprehensive analytics.' });
+    }
+});
+
 module.exports = router;

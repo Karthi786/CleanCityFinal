@@ -109,7 +109,7 @@
         }
 
         .nav-links {
-            display: flex;
+            display: none !important;
             align-items: center;
             gap: 2px;
             list-style: none;
@@ -172,7 +172,7 @@
         }
 
         .mobile-burger {
-            display: none;
+            display: block;
             background: none;
             border: none;
             cursor: pointer;
@@ -800,8 +800,6 @@
 
         /* ── Responsive ── */
         @media(max-width: 900px) {
-            .nav-links { display: none; }
-            .mobile-burger { display: block; }
             .dash-content { padding: 20px 16px; }
         }
 
@@ -1361,6 +1359,7 @@
             </div>
             <div class="modal-footer" style="border-top: 1px solid rgba(15, 23, 42, 0.06); padding: 16px 20px; display: flex; justify-content: flex-end; gap: 12px; background: #fff; border-radius: 0 0 24px 24px;">
                 <button class="btn btn-outline" onclick="document.getElementById('issue-details-modal').classList.remove('open')" style="padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(15,23,42,0.12); background: transparent; color: var(--text);">Close</button>
+                <button class="btn btn-danger" id="delete-issue-btn" style="background: #dc2626; color: white; border: none; display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">🗑️ Delete Report</button>
                 <button class="btn btn-primary" id="download-details-pdf-btn" style="background: var(--comm-primary); color: white; border: none; display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">📄 Download PDF</button>
             </div>
         </div>
@@ -1513,6 +1512,12 @@
             currentDetailIssueId = id;
 
             const body = document.getElementById('issue-details-body');
+            
+            // Set delete button onclick
+            const delBtn = document.getElementById('delete-issue-btn');
+            if (delBtn) {
+                delBtn.onclick = () => window.deleteIssue(id);
+            }
             const createdDate = new Date(issue.created_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             const updatedDate = issue.updated_at ? new Date(issue.updated_at).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'N/A';
 
@@ -1583,6 +1588,30 @@
                 </div>
             `;
             document.getElementById('issue-details-modal').classList.add('open');
+        };
+
+        window.deleteIssue = async (id) => {
+            if (!confirm('Are you sure you want to permanently delete this report? This action cannot be undone.')) {
+                return;
+            }
+            try {
+                await issuesAPI.delete(id);
+                toast.success('Report Deleted', 'The issue has been removed successfully.');
+                document.getElementById('issue-details-modal').classList.remove('open');
+                
+                // Refresh list
+                const res = await issuesAPI.getAll();
+                globalIssues = res.issues || [];
+                renderIssuesTab();
+                
+                // Also update stats if function exists
+                if (typeof updateDashboardStats === 'function') {
+                    updateDashboardStats();
+                }
+            } catch (err) {
+                console.error('Failed to delete issue:', err);
+                toast.error('Failed to delete', err.message);
+            }
         };
 
         document.getElementById('download-details-pdf-btn').addEventListener('click', async () => {

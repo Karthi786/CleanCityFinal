@@ -158,6 +158,10 @@ export const analyticsAPI = {
         const q = new URLSearchParams(params).toString();
         return apiFetch(`/analytics/status-distribution${q ? '?' + q : ''}`);
     },
+    departmentComprehensive: (params = {}) => {
+        const q = new URLSearchParams(params).toString();
+        return apiFetch(`/analytics/department-comprehensive${q ? '?' + q : ''}`);
+    },
 };
 
 /* ── Campaigns Endpoints ── */
