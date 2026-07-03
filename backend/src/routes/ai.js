@@ -85,7 +85,7 @@ router.post('/', verifyToken, async (req, res) => {
 // ── Voice Transcription Polish Endpoint ──
 // Receives raw speech-to-text from browser, polishes it into a formal complaint
 // No audio is sent — only already-transcribed plain text
-const TRANSCRIBE_MODEL = "openai/gpt-oss-120b:free";
+const TRANSCRIBE_MODEL = "openai/gpt-oss-20b:free";
 
 router.post('/transcribe', verifyToken, async (req, res) => {
     const { rawText } = req.body;

@@ -1,15 +1,18 @@
 /**
  * ══════════════════════════════════════════════════════════════
  * Kural AI — Full Website Control Agent
- * Version 3.0 | MakkalKural Platform
+ * Version 4.1 | MakkalKural Platform
  *
  * Features:
  *  - Floating mic button (bottom-left)
- *  - Wake word detection: "Hey Kural"
- *  - Trilingual: English (en-IN) + Tamil (ta-IN) + Tanglish
+ *  - Wake word detection: "Hey Kural" (English) + "வணக்கம் குரல்" / "Vanakkam Kural" (Tamil)
+ *  - Bilingual: English (en-IN) + Tamil (ta-IN)
+ *  - Manual language toggle: EN | தமிழ்
+ *  - Tamil-mode: greet in Tamil, recognize Tamil, respond in Tamil
  *  - Gemma via /api/nayagan-ai/command
  *  - Full action execution: navigate, filter, fill forms, download,
  *    scroll, open notifications, assign issues, submit forms
+ *  - Voice Issue Workflow (multi-turn guided conversation)
  *  - Text input for typed commands
  *  - Role-based permission guard (client-side JWT decode)
  *  - Web Speech Synthesis for voice responses
@@ -30,15 +33,56 @@
         ? 'http://localhost:5001/api'
         : 'https://cleancityfinal.onrender.com/api';
 
-    const WAKE_WORDS = ['hey kural', 'kural', 'ஹே குரல்', 'குரல்'];
+    // English wake words
+    const WAKE_WORDS_EN = ['hey kural', 'hey kurral', 'kural', 'hay kural'];
+    // Tamil wake words (script + romanized)
+    const WAKE_WORDS_TA_SCRIPT = ['வணக்கம் குரல்', 'வணக்கம் கூரல்'];
+    const WAKE_WORDS_TA_ROMAN  = ['vanakkam kural', 'vanakam kural', 'vanakkam kuralai', 'vanakkam'];
+    // Combined for checks
+    const WAKE_WORDS_TA = [...WAKE_WORDS_TA_SCRIPT, ...WAKE_WORDS_TA_ROMAN];
 
-    const GREETING_EN = 'Hi, I am Kural AI. How can I help you?';
-    const GREETING_WAKE = 'How can I help you?';
+    const GREETING_EN      = 'Hi, I am Kural AI. How can I help you?';
+    const GREETING_WAKE_EN = 'How can I help you?';
+    const GREETING_TA      = 'வணக்கம்! நான் குரல் AI. உங்களுக்கு என்ன உதவி வேண்டும்?';
+    const GREETING_WAKE_TA = 'உங்களுக்கு என்ன உதவி வேண்டும்?';
+
     const LANG_EN = 'en-IN';
     const LANG_TA = 'ta-IN';
 
     /* ─────────────────────────────────────────────────────────
-       LANGUAGE DETECTOR
+       LANGUAGE STATE  (persisted across page loads within session)
+    ───────────────────────────────────────────────────────── */
+    let activeLang = sessionStorage.getItem('kural_lang') || 'en'; // 'en' | 'ta'
+
+    function setActiveLang(lang) {
+        activeLang = lang;
+        sessionStorage.setItem('kural_lang', lang);
+        _updateLangToggleUI();
+        _updateWakeHintUI();
+    }
+
+    function _updateLangToggleUI() {
+        const btnEn = document.getElementById('kural-lang-en');
+        const btnTa = document.getElementById('kural-lang-ta');
+        if (btnEn) btnEn.classList.toggle('active', activeLang === 'en');
+        if (btnTa) btnTa.classList.toggle('active', activeLang === 'ta');
+    }
+
+    function _updateWakeHintUI() {
+        const hintChip = document.querySelector('.kural-hint .kural-hint-chip');
+        const hint     = document.querySelector('.kural-hint');
+        if (hintChip) {
+            hintChip.textContent = activeLang === 'ta'
+                ? 'வணக்கம் குரல்'
+                : 'Hey Kural';
+        }
+        if (hint) {
+            hint.classList.toggle('ta-mode', activeLang === 'ta');
+        }
+    }
+
+    /* ─────────────────────────────────────────────────────────
+       LANGUAGE DETECTOR (for auto-detecting from AI response text)
        Detects Tamil by Unicode range U+0B80–U+0BFF
     ───────────────────────────────────────────────────────── */
     function detectLanguage(text) {
@@ -46,8 +90,14 @@
         return tamilCharCount >= 2 ? LANG_TA : LANG_EN;
     }
 
+    function getSpeechLang() {
+        return activeLang === 'ta' ? LANG_TA : LANG_EN;
+    }
+
     /* ─────────────────────────────────────────────────────────
        SPEECH SYNTHESIS HELPER
+       FIX: Guards isSpeaking via a local instance ref to avoid
+            window.KuralAI being undefined during early boot.
     ───────────────────────────────────────────────────────── */
     function speak(text, lang, onEndCallback) {
         if (!window.speechSynthesis) {
@@ -62,27 +112,42 @@
         utter.pitch = 1.0;
         utter.volume = 1.0;
 
-        // Prefer a Tamil/Indian voice if available
+        // Prefer Tamil/Indian voice if available
         const voices = window.speechSynthesis.getVoices();
-        const preferred = voices.find(v =>
-            v.lang === utter.lang ||
-            v.lang.startsWith('ta') ||
-            v.name.toLowerCase().includes('india')
-        );
-        if (preferred) utter.voice = preferred;
-
-        // State management for speaking
-        if (window.KuralAI) {
-            utter.onstart = () => window.KuralAI.setSpeakingState(true);
-            utter.onend = () => {
-                window.KuralAI.setSpeakingState(false, !!onEndCallback);
-                if (onEndCallback) onEndCallback();
-            };
-            utter.onerror = () => {
-                window.KuralAI.setSpeakingState(false, !!onEndCallback);
-                if (onEndCallback) onEndCallback();
-            };
+        if (utter.lang === LANG_TA) {
+            const tamilVoice = voices.find(v =>
+                v.lang === 'ta-IN' || v.lang.startsWith('ta') ||
+                v.name.toLowerCase().includes('tamil')
+            );
+            if (tamilVoice) utter.voice = tamilVoice;
+        } else {
+            const indianVoice = voices.find(v =>
+                v.lang === 'en-IN' ||
+                v.name.toLowerCase().includes('india') ||
+                v.name.toLowerCase().includes('ravi') ||
+                v.name.toLowerCase().includes('heera')
+            );
+            if (indianVoice) utter.voice = indianVoice;
         }
+
+        // FIX: Use a getter fn so we always reference the live instance,
+        //      even if window.KuralAI is assigned after speak() is called.
+        const getAI = () => window.KuralAI;
+
+        utter.onstart = () => {
+            const ai = getAI();
+            if (ai) ai._setSpeakingState(true);
+        };
+        utter.onend = () => {
+            const ai = getAI();
+            if (ai) ai._setSpeakingState(false, !!onEndCallback);
+            if (onEndCallback) onEndCallback();
+        };
+        utter.onerror = () => {
+            const ai = getAI();
+            if (ai) ai._setSpeakingState(false, !!onEndCallback);
+            if (onEndCallback) onEndCallback();
+        };
 
         window.speechSynthesis.speak(utter);
     }
@@ -111,7 +176,7 @@
        ROLE-BASED PERMISSION CHECK (client-side guard)
     ───────────────────────────────────────────────────────── */
     const ROLE_ALLOWED_ACTIONS = {
-        USER:     ['NAVIGATE', 'SHOW_TAB', 'OPEN_MAP', 'FILTER_ISSUES', 'OPEN_RAISE_ISSUE', 'FILL_ISSUE_FORM', 'SUBMIT_FORM', 'SCROLL_TO', 'OPEN_NOTIFICATIONS', 'SPEAK_ONLY'],
+        USER:     ['NAVIGATE', 'SHOW_TAB', 'OPEN_MAP', 'FILTER_ISSUES', 'OPEN_RAISE_ISSUE', 'VOICE_ISSUE_FLOW', 'FILL_ISSUE_FORM', 'SUBMIT_FORM', 'SCROLL_TO', 'OPEN_NOTIFICATIONS', 'SPEAK_ONLY'],
         EMPLOYEE: ['NAVIGATE', 'SHOW_TAB', 'OPEN_MAP', 'FILTER_ISSUES', 'SCROLL_TO', 'OPEN_NOTIFICATIONS', 'SPEAK_ONLY'],
         DEFAULT:  ['ALL'] // admin, dept, collector, mla, cm, commissioner
     };
@@ -123,6 +188,305 @@
     }
 
     /* ─────────────────────────────────────────────────────────
+       VOICE ISSUE FLOW — Multi-turn guided conversation
+       Collects: title → description → category → location → photo → confirm → submit
+    ───────────────────────────────────────────────────────── */
+    const VoiceIssueFlow = {
+        active: false,
+        step: 0,
+        data: {},
+
+        steps: [
+            {
+                key: 'title',
+                prompt_en: 'What is the title or main issue? For example: broken road, street light not working.',
+                prompt_ta: 'பிரச்சினையின் தலைப்பு என்ன? உதாரணம்: சாலை உடைந்துள்ளது, தெரு விளக்கு வேலை செய்யவில்லை.',
+                type: 'speech'
+            },
+            {
+                key: 'description',
+                prompt_en: 'Please describe the issue in more detail.',
+                prompt_ta: 'பிரச்சினையை விரிவாக விவரிக்கவும்.',
+                type: 'speech'
+            },
+            {
+                key: 'category',
+                prompt_en: 'Which department is this for? Say: Roads, Sanitation, Electricity, Water, or Law and Order.',
+                prompt_ta: 'எந்த துறைக்கு தொடர்புடையது? சொல்லுங்கள்: சாலைகள், சுகாதாரம், மின்சாரம், தண்ணீர், அல்லது சட்டம் மற்றும் ஒழுங்கு.',
+                type: 'speech'
+            },
+            {
+                key: 'location',
+                prompt_en: 'What is the location? Say the address, or say "current location" to use GPS.',
+                prompt_ta: 'இடம் என்ன? முகவரியை சொல்லுங்கள், அல்லது GPS பயன்படுத்த "தற்போதைய இடம்" சொல்லுங்கள்.',
+                type: 'speech'
+            },
+            {
+                key: 'photo',
+                prompt_en: 'Please upload a photo of the issue by clicking the camera button below. Then say "done" when ready.',
+                prompt_ta: 'கீழே உள்ள கேமரா பொத்தானை கிளிக் செய்து புகைப்படம் பதிவேற்றவும். தயாரானதும் "முடிந்தது" என்று சொல்லுங்கள்.',
+                type: 'confirm_upload'
+            },
+            {
+                key: 'confirm',
+                prompt_en: null,
+                prompt_ta: null,
+                type: 'confirm'
+            }
+        ],
+
+        categoryMap: {
+            'road': 'Roads', 'roads': 'Roads', 'pothole': 'Roads', 'pavement': 'Roads', 'சாலை': 'Roads', 'சாலைகள்': 'Roads',
+            'sanitation': 'Sanitation', 'garbage': 'Sanitation', 'waste': 'Sanitation', 'trash': 'Sanitation', 'சுகாதாரம்': 'Sanitation', 'குப்பை': 'Sanitation',
+            'electricity': 'Electricity', 'electric': 'Electricity', 'light': 'Electricity', 'power': 'Electricity', 'மின்சாரம்': 'Electricity', 'விளக்கு': 'Electricity',
+            'water': 'Water', 'pipe': 'Water', 'leak': 'Water', 'borewell': 'Water', 'தண்ணீர்': 'Water', 'குழாய்': 'Water',
+            'law': 'Law & Order', 'police': 'Law & Order', 'crime': 'Law & Order', 'சட்டம்': 'Law & Order', 'காவல்': 'Law & Order',
+        },
+
+        start(kuralInstance) {
+            this.active = true;
+            this.step = 0;
+            this.data = {};
+            this._kural = kuralInstance;
+            this._renderFlowUI();
+            this._askCurrentStep();
+        },
+
+        cancel() {
+            this.active = false;
+            this.step = 0;
+            this.data = {};
+            this._kural = null;
+            this._hideFlowUI();
+        },
+
+        _getStep() {
+            return this.steps[this.step];
+        },
+
+        _askCurrentStep() {
+            if (!this.active) return;
+            const s = this._getStep();
+            if (!s) { this._doSubmit(); return; }
+
+            let prompt;
+            if (s.key === 'confirm') {
+                prompt = this._buildConfirmPrompt();
+            } else {
+                prompt = activeLang === 'ta' ? s.prompt_ta : s.prompt_en;
+            }
+
+            this._renderFlowProgress();
+            this._kural._addLog('ai', prompt, null);
+            const lang = getSpeechLang();
+            speak(prompt, lang, () => {
+                if (s.type === 'confirm_upload') {
+                    this._highlightUploadButton();
+                    this._kural.startListening();
+                } else {
+                    this._kural.startListening();
+                }
+            });
+        },
+
+        handleFlowInput(text) {
+            if (!this.active) return false;
+            const s = this._getStep();
+            if (!s) return false;
+
+            const lower = text.toLowerCase().trim();
+
+            if (['cancel', 'stop', 'quit', 'நிறுத்து', 'ரத்து'].some(w => lower.includes(w))) {
+                const msg = activeLang === 'ta'
+                    ? 'பிரச்சினை பதிவு ரத்து செய்யப்பட்டது.'
+                    : 'Issue reporting cancelled.';
+                this._kural._addLog('ai', msg, null);
+                speak(msg, getSpeechLang());
+                this.cancel();
+                return true;
+            }
+
+            if (s.key === 'confirm') {
+                const isYes = ['yes', 'ஆம்', 'சரி', 'confirm', 'submit', 'proceed', 'ஆமாம்', 'okay', 'ok'].some(w => lower.includes(w));
+                const isNo  = ['no', 'இல்லை', 'cancel', 'ரத்து', 'nope'].some(w => lower.includes(w));
+                if (isYes) { this._doSubmit(); return true; }
+                if (isNo) {
+                    const msg = activeLang === 'ta'
+                        ? 'பிரச்சினை பதிவு ரத்து செய்யப்பட்டது.'
+                        : 'Issue reporting cancelled.';
+                    this._kural._addLog('ai', msg, null);
+                    speak(msg, getSpeechLang());
+                    this.cancel();
+                    return true;
+                }
+                this._askCurrentStep();
+                return true;
+            }
+
+            if (s.key === 'photo') {
+                const isDone = ['done', 'முடிந்தது', 'ready', 'uploaded', 'yes', 'ஆம்', 'ok', 'okay'].some(w => lower.includes(w));
+                if (isDone) { this.step++; this._askCurrentStep(); return true; }
+                this._askCurrentStep();
+                return true;
+            }
+
+            if (s.key === 'location') {
+                const isCurrentLoc = ['current location', 'my location', 'gps', 'current', 'தற்போதைய இடம்', 'என் இடம்'].some(w => lower.includes(w));
+                if (isCurrentLoc) {
+                    this._getGPSLocation((locStr) => {
+                        this.data.location = locStr;
+                        this._updateFlowFieldUI('location', locStr);
+                        this.step++;
+                        this._askCurrentStep();
+                    });
+                    return true;
+                }
+            }
+
+            if (s.key === 'category') {
+                const mapped = this._mapCategory(lower);
+                this.data.category = mapped;
+                this._updateFlowFieldUI('category', mapped);
+            } else if (s.key !== 'photo') {
+                this.data[s.key] = text.trim();
+                this._updateFlowFieldUI(s.key, text.trim());
+            }
+
+            this.step++;
+            this._askCurrentStep();
+            return true;
+        },
+
+        _mapCategory(text) {
+            for (const [key, val] of Object.entries(this.categoryMap)) {
+                if (text.includes(key)) return val;
+            }
+            return 'General';
+        },
+
+        _buildConfirmPrompt() {
+            const d = this.data;
+            if (activeLang === 'ta') {
+                return `சரி, விவரங்களை உறுதிப்படுத்துகிறேன்: ` +
+                    `தலைப்பு: ${d.title || '-'}. ` +
+                    `விவரம்: ${d.description || '-'}. ` +
+                    `வகை: ${d.category || 'பொது'}. ` +
+                    `இடம்: ${d.location || '-'}. ` +
+                    `சமர்ப்பிக்கவா? "ஆம்" அல்லது "இல்லை" சொல்லுங்கள்.`;
+            }
+            return `Confirming: Title: ${d.title || '-'}. ` +
+                `Description: ${d.description || '-'}. ` +
+                `Category: ${d.category || 'General'}. ` +
+                `Location: ${d.location || '-'}. ` +
+                `Shall I submit? Say yes or no.`;
+        },
+
+        _doSubmit() {
+            const d = this.data;
+            KuralActionHandler._openRaiseIssue({
+                title: d.title,
+                category: d.category,
+                description: d.description,
+                location: d.location
+            });
+            setTimeout(() => {
+                KuralActionHandler._prefillIssueForm({
+                    title: d.title,
+                    category: d.category,
+                    description: d.description,
+                    location: d.location
+                });
+            }, 800);
+            const msg = activeLang === 'ta'
+                ? 'படிவம் நிரப்பப்பட்டது. சமர்ப்பிக்க சமர்ப்பிக்கவும் பொத்தானை கிளிக் செய்யவும்.'
+                : 'Form filled. Please click Submit to complete your report.';
+            this._kural._addLog('ai', msg, 'SUBMIT_FORM');
+            speak(msg, getSpeechLang());
+            this.cancel();
+        },
+
+        _getGPSLocation(callback) {
+            const loadingMsg = activeLang === 'ta'
+                ? 'GPS இடம் கண்டுபிடிக்கிறேன்...'
+                : 'Getting your GPS location...';
+            this._kural._addLog('ai', loadingMsg, null);
+            if (!navigator.geolocation) {
+                callback(activeLang === 'ta' ? 'இடம் கண்டுபிடிக்க முடியவில்லை' : 'Location unavailable');
+                return;
+            }
+            navigator.geolocation.getCurrentPosition(
+                (pos) => callback(`${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`),
+                () => callback(activeLang === 'ta' ? 'இடம் கண்டுபிடிக்க முடியவில்லை' : 'Location unavailable'),
+                { timeout: 6000 }
+            );
+        },
+
+        _highlightUploadButton() {
+            const uploadEl = document.getElementById('issue-image')
+                || document.getElementById('report-image')
+                || document.getElementById('image-upload')
+                || document.querySelector('input[type="file"]');
+            if (uploadEl) {
+                uploadEl.style.outline = '3px solid #f59e0b';
+                uploadEl.style.outlineOffset = '4px';
+                setTimeout(() => { uploadEl.style.outline = ''; uploadEl.style.outlineOffset = ''; }, 6000);
+            }
+        },
+
+        _renderFlowUI() {
+            const panel = document.getElementById('kural-flow-steps');
+            if (!panel) return;
+            panel.classList.add('active');
+            const title = panel.querySelector('.kural-flow-title');
+            if (title) title.textContent = activeLang === 'ta' ? '🚨 பிரச்சினை பதிவு' : '🚨 Issue Reporting';
+            const collected = panel.querySelector('.kural-flow-collected');
+            if (collected) collected.innerHTML = '';
+            this._renderFlowProgress();
+        },
+
+        _hideFlowUI() {
+            const panel = document.getElementById('kural-flow-steps');
+            if (panel) panel.classList.remove('active');
+        },
+
+        _renderFlowProgress() {
+            const prog = document.getElementById('kural-flow-progress');
+            if (!prog) return;
+            prog.innerHTML = '';
+            this.steps.forEach((s, i) => {
+                const dot = document.createElement('div');
+                dot.className = 'kural-flow-dot';
+                if (i < this.step) dot.classList.add('done');
+                if (i === this.step) dot.classList.add('current');
+                prog.appendChild(dot);
+            });
+            const label = document.getElementById('kural-flow-label');
+            if (label && this.steps[this.step]) {
+                const en = ['Title', 'Description', 'Category', 'Location', 'Photo', 'Confirm'];
+                const ta = ['தலைப்பு', 'விவரம்', 'வகை', 'இடம்', 'புகைப்படம்', 'உறுதிப்படுத்தல்'];
+                const labels = activeLang === 'ta' ? ta : en;
+                label.textContent = `${this.step + 1}/${this.steps.length}: ${labels[this.step] || ''}`;
+            }
+        },
+
+        _updateFlowFieldUI(key, value) {
+            const collected = document.querySelector('.kural-flow-collected');
+            if (!collected) return;
+            const en = { title: 'Title', description: 'Desc', category: 'Category', location: 'Location' };
+            const ta = { title: 'தலைப்பு', description: 'விவரம்', category: 'வகை', location: 'இடம்' };
+            const labels = activeLang === 'ta' ? ta : en;
+            let el = collected.querySelector(`[data-field="${key}"]`);
+            if (!el) {
+                el = document.createElement('div');
+                el.className = 'kural-flow-field';
+                el.setAttribute('data-field', key);
+                collected.appendChild(el);
+            }
+            el.innerHTML = `<strong>${labels[key] || key}:</strong> <span>${value}</span>`;
+        }
+    };
+
+    /* ─────────────────────────────────────────────────────────
        ACTION HANDLER
        Executes actions returned by the AI backend.
        Only calls existing page functions / DOM APIs.
@@ -131,160 +495,75 @@
 
         execute(action, voiceMessage) {
             const role = getCurrentUserRole() || 'USER';
-
-            // Client-side permission guard
             if (!isActionAllowed(action.action, role)) {
-                console.warn('[Kural AI] Action blocked by client-side role guard:', action.action, 'role:', role);
+                console.warn('[Kural AI] Action blocked by role guard:', action.action, 'role:', role);
                 return;
             }
-
             switch (action.action) {
-
-                case 'NAVIGATE':
-                    this._navigate(action.page);
+                case 'NAVIGATE':           this._navigate(action.page); break;
+                case 'SHOW_TAB':           this._showTab(action.tabName); break;
+                case 'OPEN_MAP':           this._openMap(action.payload); break;
+                case 'OPEN_ANALYTICS':     this._openAnalytics(action.payload); break;
+                case 'FILTER_ISSUES':      this._filterIssues(action); break;
+                case 'TRIGGER_DOWNLOAD':   this._triggerDownload(action); break;
+                case 'OPEN_RAISE_ISSUE':   this._openRaiseIssue(action); break;
+                case 'VOICE_ISSUE_FLOW':
+                    if (window.KuralAI) setTimeout(() => VoiceIssueFlow.start(window.KuralAI), 600);
                     break;
-
-                case 'SHOW_TAB':
-                    this._showTab(action.tabName);
-                    break;
-
-                case 'OPEN_MAP':
-                    this._openMap(action.payload);
-                    break;
-
-                case 'OPEN_ANALYTICS':
-                    this._openAnalytics(action.payload);
-                    break;
-
-                case 'FILTER_ISSUES':
-                    this._filterIssues(action);
-                    break;
-
-                case 'TRIGGER_DOWNLOAD':
-                    this._triggerDownload(action);
-                    break;
-
-                case 'OPEN_RAISE_ISSUE':
-                    this._openRaiseIssue(action);
-                    break;
-
-                case 'FILL_ISSUE_FORM':
-                    this._fillIssueForm(action);
-                    break;
-
-                case 'SUBMIT_FORM':
-                    this._submitForm(action);
-                    break;
-
-                case 'SCROLL_TO':
-                    this._scrollTo(action.target);
-                    break;
-
-                case 'OPEN_NOTIFICATIONS':
-                    this._openNotifications();
-                    break;
-
-                case 'ASSIGN_ISSUE':
-                    this._assignIssue(action);
-                    break;
-
-                case 'SPEAK_ONLY':
-                    // Just speak — handled externally
-                    break;
-
+                case 'FILL_ISSUE_FORM':    this._fillIssueForm(action); break;
+                case 'SUBMIT_FORM':        this._submitForm(action); break;
+                case 'SCROLL_TO':          this._scrollTo(action.target); break;
+                case 'OPEN_NOTIFICATIONS': this._openNotifications(); break;
+                case 'ASSIGN_ISSUE':       this._assignIssue(action); break;
+                case 'SPEAK_ONLY':         break;
                 default:
                     console.warn('[Kural AI] Unknown action:', action.action);
             }
         },
 
-        /* ── Navigate to a page ── */
         _navigate(page) {
             if (!page) return;
-
-            // Map friendly shorthand to actual filenames
             const pageMap = {
-                'dashboard': 'citizen-dashboard.html',
-                'citizen': 'citizen-dashboard.html',
-                'department': 'department-dashboard.html',
-                'employee': 'employee-dashboard.html',
-                'collector': 'collector-dashboard.html',
-                'admin': 'admin-dashboard.html',
-                'mla': 'mla-dashboard.html',
-                'cm': 'cm-dashboard.html',
+                'dashboard': 'citizen-dashboard.html', 'citizen': 'citizen-dashboard.html',
+                'department': 'department-dashboard.html', 'employee': 'employee-dashboard.html',
+                'collector': 'collector-dashboard.html', 'admin': 'admin-dashboard.html',
+                'mla': 'mla-dashboard.html', 'cm': 'cm-dashboard.html',
                 'commissioner': 'commissioner-dashboard.html',
             };
-
-            const resolved = pageMap[page.toLowerCase().replace(/-dashboard\.html$/, '').trim()]
-                || page;
-
+            const resolved = pageMap[page.toLowerCase().replace(/-dashboard\.html$/, '').trim()] || page;
             const base = window.location.pathname.replace(/[^/]*$/, '');
-            const target = base + resolved;
-
-            setTimeout(() => {
-                window.location.href = target;
-            }, 600);
+            setTimeout(() => { window.location.href = base + resolved; }, 600);
         },
 
-        /* ── Show / switch to a tab ── */
         _showTab(tabName) {
             if (!tabName) return;
             const name = tabName.toLowerCase().trim();
-
-            // 1. Try window.switchTab() — used by department/collector/mla/cm dashboards
             if (typeof window.switchTab === 'function') {
-                try {
-                    window.switchTab(name);
-                    return;
-                } catch (e) { /* continue to DOM fallback */ }
+                try { window.switchTab(name); return; } catch (e) {}
             }
-
-            // 2. Try hidden trigger buttons (department dashboard pattern)
-            const tabBtnPatterns = [
-                `tab-${name}-btn`,
-                `tab-${name}`,
-                `btn-${name}`,
-                `nav-${name}`,
-                `drawer-${name}`
-            ];
-            for (const id of tabBtnPatterns) {
+            for (const id of [`tab-${name}-btn`, `tab-${name}`, `btn-${name}`, `nav-${name}`, `drawer-${name}`]) {
                 const el = document.getElementById(id);
                 if (el) { el.click(); return; }
             }
-
-            // 3. Try nav links by ID
-            const navIds = [`nav-${name}`, `nav-${name}-link`, `drawer-${name}-link`];
-            for (const id of navIds) {
+            for (const id of [`nav-${name}`, `nav-${name}-link`, `drawer-${name}-link`]) {
                 const el = document.getElementById(id);
                 if (el) { el.click(); return; }
             }
-
-            // 4. Try data-tab attribute (citizen dashboard pattern)
             const dataTabEl = document.querySelector(`[data-tab="${name}"]`);
             if (dataTabEl) { dataTabEl.click(); return; }
-
-            // 5. Try data-section attribute
             const dataSectionEl = document.querySelector(`[data-section="${name}"]`);
             if (dataSectionEl) { dataSectionEl.click(); return; }
-
-            // 6. Try href="#name" pattern
             const hrefEl = document.querySelector(`[href="#${name}"]`);
             if (hrefEl) { hrefEl.click(); return; }
-
-            // 7. Fallback — find by text content
-            const allNavBtns = document.querySelectorAll(
+            const match = Array.from(document.querySelectorAll(
                 'button, a, li, [role="tab"], .nav-link-item, .sidebar-item, .tab-btn, .tab-item, .mobile-drawer-link'
-            );
-            const match = Array.from(allNavBtns).find(el => {
+            )).find(el => {
                 const text = el.textContent.trim().toLowerCase();
                 return text === name || text.startsWith(name) || name.includes(text.split(/\s+/)[0]);
             });
-            if (match) {
-                match.click();
-                match.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            }
+            if (match) { match.click(); match.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
         },
 
-        /* ── Open Map view ── */
         _openMap(payload) {
             if (typeof window.switchTab === 'function') {
                 try { window.switchTab('map'); return; } catch (e) {}
@@ -292,242 +571,125 @@
             this._showTab('map');
         },
 
-        /* ── Open Analytics section ── */
         _openAnalytics(payload) {
-            const section = payload?.section || 'overview';
             if (typeof window.switchTab === 'function') {
                 try { window.switchTab('analytics'); return; } catch (e) {}
             }
             this._showTab('analytics');
         },
 
-        /* ── Filter issues ── */
         _filterIssues(action) {
-            // Dispatch custom event for pages that listen to it
             const detail = {
-                priority: action.priority || null,
-                status: action.status || null,
-                dateRange: action.dateRange || null,
-                clearAll: action.clearAll || false
+                priority: action.priority || null, status: action.status || null,
+                dateRange: action.dateRange || null, clearAll: action.clearAll || false
             };
             window.dispatchEvent(new CustomEvent('kural:filterIssues', { detail }));
-            // Also fire the old event name for backward compatibility
             window.dispatchEvent(new CustomEvent('nayagan:filterIssues', { detail }));
-
-            // Also apply directly to known DOM elements
             this._applyFilterDirectly(detail);
         },
 
         _applyFilterDirectly(detail) {
             if (detail.clearAll) {
-                // Clear status filter
-                const statusSel = document.getElementById('status-filter')
-                    || document.querySelector('select[name="status"]');
-                if (statusSel) {
-                    statusSel.value = '';
-                    statusSel.dispatchEvent(new Event('change'));
-                }
-
-                // Clear priority filter
-                const prioritySel = document.getElementById('filter-priority')
-                    || document.querySelector('select[name="priority"]');
-                if (prioritySel) {
-                    prioritySel.value = '';
-                    prioritySel.dispatchEvent(new Event('change'));
-                }
-
-                // Click "All" map pills
-                document.querySelectorAll('.map-pill[data-filter-val=""]').forEach(btn => btn.click());
-
-                // Click data-filter="all" elements
-                document.querySelectorAll('[data-filter="all"]').forEach(el => el.click());
+                const ss = document.getElementById('status-filter') || document.querySelector('select[name="status"]');
+                if (ss) { ss.value = ''; ss.dispatchEvent(new Event('change')); }
+                const ps = document.getElementById('filter-priority') || document.querySelector('select[name="priority"]');
+                if (ps) { ps.value = ''; ps.dispatchEvent(new Event('change')); }
+                document.querySelectorAll('.map-pill[data-filter-val=""]').forEach(b => b.click());
+                document.querySelectorAll('[data-filter="all"]').forEach(e => e.click());
                 return;
             }
-
-            // ── Date Range Filter ──
-            if (detail.dateRange) {
-                this._setDateRange(detail.dateRange);
-            }
-
-            // ── Status Filter ──
+            if (detail.dateRange) this._setDateRange(detail.dateRange);
             if (detail.status) {
                 const s = detail.status.toUpperCase();
-                const statusSel = document.getElementById('status-filter')
-                    || document.querySelector('#filter-status, select[name="status"]');
+                const statusSel = document.getElementById('status-filter') || document.querySelector('#filter-status, select[name="status"]');
                 if (statusSel) {
-                    const opt = Array.from(statusSel.options).find(o =>
-                        o.value.toUpperCase() === s || o.text.toUpperCase().replace(/[\s_-]/g, '_') === s
-                    );
-                    if (opt) {
-                        statusSel.value = opt.value;
-                        statusSel.dispatchEvent(new Event('change'));
-                        statusSel.dispatchEvent(new Event('input'));
-                    }
+                    const opt = Array.from(statusSel.options).find(o => o.value.toUpperCase() === s || o.text.toUpperCase().replace(/[\s_-]/g, '_') === s);
+                    if (opt) { statusSel.value = opt.value; statusSel.dispatchEvent(new Event('change')); statusSel.dispatchEvent(new Event('input')); }
                 }
-
-                // Try data-status buttons
-                const statusBtn = document.querySelector(
-                    `[data-status="${s}"], [data-filter="status-${s}"], [data-value="${s}"]`
-                ) || this._findButtonByText(s.replace(/_/g, ' '));
+                const statusBtn = document.querySelector(`[data-status="${s}"], [data-filter="status-${s}"], [data-value="${s}"]`) || this._findButtonByText(s.replace(/_/g, ' '));
                 if (statusBtn) statusBtn.click();
             }
-
-            // ── Priority Filter ──
             if (detail.priority) {
                 const p = detail.priority;
                 const pLower = p.toLowerCase();
-                const pCapitalized = p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
-
-                const prioritySel = document.getElementById('filter-priority')
-                    || document.querySelector('select[name="priority"]');
+                const pCap = p.charAt(0).toUpperCase() + p.slice(1).toLowerCase();
+                const prioritySel = document.getElementById('filter-priority') || document.querySelector('select[name="priority"]');
                 if (prioritySel) {
-                    const opt = Array.from(prioritySel.options).find(o =>
-                        o.value.toUpperCase() === p.toUpperCase() || o.text.toLowerCase() === pLower
-                    );
-                    if (opt) {
-                        prioritySel.value = opt.value;
-                        prioritySel.dispatchEvent(new Event('change'));
-                        prioritySel.dispatchEvent(new Event('input'));
-                    }
+                    const opt = Array.from(prioritySel.options).find(o => o.value.toUpperCase() === p.toUpperCase() || o.text.toLowerCase() === pLower);
+                    if (opt) { prioritySel.value = opt.value; prioritySel.dispatchEvent(new Event('change')); prioritySel.dispatchEvent(new Event('input')); }
                 }
-
-                // Map pill buttons
-                const mapPill = document.querySelector(
-                    `.map-pill[data-filter-type="priority"][data-filter-val="${pLower}"]`
-                );
+                const mapPill = document.querySelector(`.map-pill[data-filter-type="priority"][data-filter-val="${pLower}"]`);
                 if (mapPill) mapPill.click();
-
-                // Generic data attribute buttons
-                const priorityBtn = document.querySelector(
-                    `[data-priority="${p.toUpperCase()}"], [data-priority="${pCapitalized}"], [data-filter="priority-${pLower}"]`
-                ) || this._findButtonByText(pCapitalized) || this._findButtonByText(pLower);
+                const priorityBtn = document.querySelector(`[data-priority="${p.toUpperCase()}"], [data-priority="${pCap}"], [data-filter="priority-${pLower}"]`)
+                    || this._findButtonByText(pCap) || this._findButtonByText(pLower);
                 if (priorityBtn && priorityBtn !== prioritySel) priorityBtn.click();
             }
         },
 
-        /* ── Trigger report download ── */
         _triggerDownload(action) {
             const format = (action.format || 'excel').toLowerCase();
             const dateRange = action.dateRange || null;
-
-            // Apply filters first if provided
             if (action.priority || action.status || dateRange) {
-                this._applyFilterDirectly({
-                    priority: action.priority || null,
-                    status: action.status || null,
-                    dateRange: dateRange,
-                    clearAll: false
-                });
-                // Small delay to let filters apply before download
+                this._applyFilterDirectly({ priority: action.priority || null, status: action.status || null, dateRange, clearAll: false });
             }
-
             if (dateRange) this._setDateRange(dateRange);
-
             setTimeout(() => {
-                // Excel download
                 if (format === 'excel' || format === 'xlsx') {
-                    const excelBtn = document.getElementById('download-excel-btn')
-                        || document.querySelector('[data-export="excel"], .export-excel, .btn-excel');
-                    if (excelBtn) { excelBtn.click(); return; }
-
-                    const dlModal = document.getElementById('download-reports-modal');
-                    if (dlModal) { dlModal.classList.add('open'); return; }
+                    const eb = document.getElementById('download-excel-btn') || document.querySelector('[data-export="excel"], .export-excel, .btn-excel');
+                    if (eb) { eb.click(); return; }
+                    const m = document.getElementById('download-reports-modal');
+                    if (m) { m.classList.add('open'); return; }
                 }
-
-                // PDF download
                 if (format === 'pdf') {
-                    const pdfBtn = document.getElementById('download-pdf-btn')
-                        || document.querySelector('#export-pdf, .export-pdf, [data-export="pdf"], .btn-pdf');
-                    if (pdfBtn) { pdfBtn.click(); return; }
+                    const pb = document.getElementById('download-pdf-btn') || document.querySelector('#export-pdf, .export-pdf, [data-export="pdf"], .btn-pdf');
+                    if (pb) { pb.click(); return; }
                 }
-
-                // Fallback — any download button
-                const anyDownload = document.querySelector(
-                    '.download-btn, #download-report, [data-action="download"], .report-download'
-                ) || this._findButtonByText('download') || this._findButtonByText('export');
-                if (anyDownload) anyDownload.click();
+                const any = document.querySelector('.download-btn, #download-report, [data-action="download"], .report-download')
+                    || this._findButtonByText('download') || this._findButtonByText('export');
+                if (any) any.click();
             }, action.priority || action.status ? 600 : 0);
         },
 
         _setDateRange(dateRange) {
             const today = new Date();
             let fromDate = today, toDate = today;
-
-            if (dateRange === 'this_week') {
-                fromDate = new Date(today);
-                fromDate.setDate(today.getDate() - today.getDay());
-            } else if (dateRange === 'last_week') {
-                fromDate = new Date(today);
-                fromDate.setDate(today.getDate() - today.getDay() - 7);
-                toDate = new Date(today);
-                toDate.setDate(today.getDate() - today.getDay() - 1);
-            } else if (dateRange === 'this_month') {
-                fromDate = new Date(today.getFullYear(), today.getMonth(), 1);
-            }
-
+            if (dateRange === 'this_week') { fromDate = new Date(today); fromDate.setDate(today.getDate() - today.getDay()); }
+            else if (dateRange === 'last_week') {
+                fromDate = new Date(today); fromDate.setDate(today.getDate() - today.getDay() - 7);
+                toDate = new Date(today); toDate.setDate(today.getDate() - today.getDay() - 1);
+            } else if (dateRange === 'this_month') { fromDate = new Date(today.getFullYear(), today.getMonth(), 1); }
             const fmt = d => d.toISOString().split('T')[0];
-
             const fromEl = document.querySelector('#date-from, #start-date, #from-date, input[name="from"]');
-            const toEl = document.querySelector('#date-to, #end-date, #to-date, input[name="to"]');
-
+            const toEl   = document.querySelector('#date-to, #end-date, #to-date, input[name="to"]');
             if (fromEl) { fromEl.value = fmt(fromDate); fromEl.dispatchEvent(new Event('change')); }
-            if (toEl) { toEl.value = fmt(toDate); toEl.dispatchEvent(new Event('change')); }
+            if (toEl)   { toEl.value   = fmt(toDate);   toEl.dispatchEvent(new Event('change')); }
         },
 
-        /* ── Open raise issue form ── */
         _openRaiseIssue(action) {
-            const raiseBtn = document.getElementById('report-btn')
-                || document.getElementById('raise-issue-btn')
-                || document.getElementById('btn-raise-issue')
-                || document.getElementById('new-issue-btn')
-                || document.querySelector('[data-action="raise-issue"]')
-                || this._findButtonByText('report issue')
-                || this._findButtonByText('raise issue')
-                || this._findButtonByText('new issue')
-                || this._findButtonByText('+ report')
-                || this._findButtonByText('report');
-
+            const raiseBtn = document.getElementById('report-btn') || document.getElementById('raise-issue-btn')
+                || document.getElementById('btn-raise-issue') || document.getElementById('new-issue-btn')
+                || document.querySelector('[data-action="raise-issue"]') || this._findButtonByText('report issue')
+                || this._findButtonByText('raise issue') || this._findButtonByText('new issue')
+                || this._findButtonByText('+ report') || this._findButtonByText('report');
             if (raiseBtn) {
                 raiseBtn.click();
-                if (action.title || action.category || action.description) {
-                    setTimeout(() => this._prefillIssueForm(action), 500);
-                }
-            } else {
-                this._navigate('citizen-dashboard.html');
-            }
+                if (action.title || action.category || action.description) setTimeout(() => this._prefillIssueForm(action), 500);
+            } else { this._navigate('citizen-dashboard.html'); }
         },
 
-        /* ── Fill issue form with extracted data ── */
         _fillIssueForm(action) {
             const modal = document.getElementById('report-modal');
-            const isModalOpen = modal && (
-                modal.classList.contains('open') ||
-                modal.style.display === 'flex' ||
-                modal.style.display === 'block'
-            );
-
-            if (!isModalOpen) {
-                const raiseBtn = document.getElementById('report-btn')
-                    || document.getElementById('raise-issue-btn')
-                    || this._findButtonByText('report')
-                    || this._findButtonByText('raise issue');
-
-                if (raiseBtn) {
-                    raiseBtn.click();
-                    setTimeout(() => this._prefillIssueForm(action), 600);
-                } else {
-                    sessionStorage.setItem('kural_pending_fill', JSON.stringify(action));
-                    this._navigate('citizen-dashboard.html');
-                }
-            } else {
-                this._prefillIssueForm(action);
-            }
+            const isOpen = modal && (modal.classList.contains('open') || modal.style.display === 'flex' || modal.style.display === 'block');
+            if (!isOpen) {
+                const btn = document.getElementById('report-btn') || document.getElementById('raise-issue-btn')
+                    || this._findButtonByText('report') || this._findButtonByText('raise issue');
+                if (btn) { btn.click(); setTimeout(() => this._prefillIssueForm(action), 600); }
+                else { sessionStorage.setItem('kural_pending_fill', JSON.stringify(action)); this._navigate('citizen-dashboard.html'); }
+            } else { this._prefillIssueForm(action); }
         },
 
         _prefillIssueForm(action) {
-            // Title — #issue-title
-            const titleEl = document.getElementById('issue-title')
-                || document.querySelector('input[name="title"], #complaint-title');
+            const titleEl = document.getElementById('issue-title') || document.querySelector('input[name="title"], #complaint-title');
             if (titleEl && action.title) {
                 titleEl.value = action.title;
                 titleEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -535,24 +697,14 @@
                 titleEl.style.borderColor = '#0f766e';
                 setTimeout(() => { titleEl.style.borderColor = ''; }, 2000);
             }
-
-            // Category — #issue-category select
-            const catEl = document.getElementById('issue-category')
-                || document.querySelector('select[name="category"], #category-select');
+            const catEl = document.getElementById('issue-category') || document.querySelector('select[name="category"], #category-select');
             if (catEl && action.category) {
                 const opt = Array.from(catEl.options).find(o =>
-                    o.value.toLowerCase().includes(action.category.toLowerCase()) ||
-                    o.text.toLowerCase().includes(action.category.toLowerCase())
+                    o.value.toLowerCase().includes(action.category.toLowerCase()) || o.text.toLowerCase().includes(action.category.toLowerCase())
                 );
-                if (opt) {
-                    catEl.value = opt.value;
-                    catEl.dispatchEvent(new Event('change', { bubbles: true }));
-                }
+                if (opt) { catEl.value = opt.value; catEl.dispatchEvent(new Event('change', { bubbles: true })); }
             }
-
-            // Description — #issue-desc textarea
-            const descEl = document.getElementById('issue-desc')
-                || document.querySelector('textarea[name="description"], #complaint-desc, #issue-description');
+            const descEl = document.getElementById('issue-desc') || document.querySelector('textarea[name="description"], #complaint-desc, #issue-description');
             if (descEl && action.description) {
                 descEl.value = action.description;
                 descEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -560,10 +712,7 @@
                 descEl.style.borderColor = '#0f766e';
                 setTimeout(() => { descEl.style.borderColor = ''; }, 2000);
             }
-
-            // Location — #issue-location
-            const locEl = document.getElementById('issue-location')
-                || document.querySelector('input[name="location"], #location-input');
+            const locEl = document.getElementById('issue-location') || document.querySelector('input[name="location"], #location-input');
             if (locEl && action.location) {
                 locEl.value = action.location;
                 locEl.dispatchEvent(new Event('input', { bubbles: true }));
@@ -571,171 +720,99 @@
                 locEl.style.borderColor = '#0f766e';
                 setTimeout(() => { locEl.style.borderColor = ''; }, 2000);
             }
-
-            // Switch to issue tab if campaign toggle exists
             const issueToggle = document.getElementById('toggle-issue');
             if (issueToggle) issueToggle.click();
         },
 
-        /* ── Submit open form ── */
         _submitForm(action) {
-            // Try to submit the report/issue form
-            const submitBtn = document.getElementById('submit-issue-btn')
-                || document.getElementById('submit-report-btn')
-                || document.getElementById('report-submit-btn')
-                || document.querySelector('form#report-form button[type="submit"]')
+            const submitBtn = document.getElementById('submit-issue-btn') || document.getElementById('submit-report-btn')
+                || document.getElementById('report-submit-btn') || document.querySelector('form#report-form button[type="submit"]')
                 || document.querySelector('#report-modal button[type="submit"]')
                 || document.querySelector('.submit-issue-btn, .report-submit, [data-action="submit-issue"]')
-                || this._findButtonByText('submit issue')
-                || this._findButtonByText('submit complaint')
-                || this._findButtonByText('submit');
-
-            if (submitBtn) {
-                submitBtn.click();
-            } else {
-                // Try dispatching submit event on open form
-                const openForm = document.querySelector('#report-modal form, form.issue-form, form#issue-form');
-                if (openForm) {
-                    openForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-                }
+                || this._findButtonByText('submit issue') || this._findButtonByText('submit complaint') || this._findButtonByText('submit');
+            if (submitBtn) { submitBtn.click(); }
+            else {
+                const form = document.querySelector('#report-modal form, form.issue-form, form#issue-form');
+                if (form) form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
             }
         },
 
-        /* ── Scroll to a section ── */
         _scrollTo(target) {
-            if (!target) {
-                window.scrollBy({ top: 300, behavior: 'smooth' });
-                return;
-            }
-
+            if (!target) { window.scrollBy({ top: 300, behavior: 'smooth' }); return; }
             const t = target.toLowerCase().trim();
-
-            if (t === 'top') {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                return;
-            }
-
-            if (t === 'bottom') {
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-                return;
-            }
-
-            // Try finding element by ID patterns
-            const idPatterns = [
-                t,
-                `${t}-section`,
-                `section-${t}`,
-                `${t}-container`,
-                `${t}-wrapper`,
-                `${t}-panel`,
-                `${t}-area`
-            ];
-
-            for (const id of idPatterns) {
+            if (t === 'top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+            if (t === 'bottom') { window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' }); return; }
+            for (const id of [t, `${t}-section`, `section-${t}`, `${t}-container`, `${t}-wrapper`, `${t}-panel`, `${t}-area`]) {
                 const el = document.getElementById(id);
                 if (el) {
                     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    // Briefly highlight the section
-                    el.style.outline = '2px solid #0f766e';
-                    el.style.outlineOffset = '4px';
+                    el.style.outline = '2px solid #0f766e'; el.style.outlineOffset = '4px';
                     setTimeout(() => { el.style.outline = ''; el.style.outlineOffset = ''; }, 2500);
                     return;
                 }
             }
-
-            // Try class-based selectors
-            const classEl = document.querySelector(
-                `.${t}-section, .${t}-container, [data-section="${t}"], [data-tab="${t}"]`
-            );
-            if (classEl) {
-                classEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                return;
-            }
-
-            // Try heading text match
-            const headings = document.querySelectorAll('h1, h2, h3, h4, .section-title, .card-title');
-            const matchHeading = Array.from(headings).find(h =>
-                h.textContent.trim().toLowerCase().includes(t)
-            );
-            if (matchHeading) {
-                matchHeading.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                return;
-            }
-
-            // Fallback: scroll down a page worth
+            const classEl = document.querySelector(`.${t}-section, .${t}-container, [data-section="${t}"], [data-tab="${t}"]`);
+            if (classEl) { classEl.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+            const matchH = Array.from(document.querySelectorAll('h1, h2, h3, h4, .section-title, .card-title'))
+                .find(h => h.textContent.trim().toLowerCase().includes(t));
+            if (matchH) { matchH.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
             window.scrollBy({ top: window.innerHeight * 0.8, behavior: 'smooth' });
         },
 
-        /* ── Open notification panel ── */
         _openNotifications() {
-            // Try notification bell / button by common IDs
-            const notifBtn = document.getElementById('notification-btn')
-                || document.getElementById('notif-btn')
-                || document.getElementById('notifications-btn')
-                || document.getElementById('bell-btn')
+            const btn = document.getElementById('notification-btn') || document.getElementById('notif-btn')
+                || document.getElementById('notifications-btn') || document.getElementById('bell-btn')
                 || document.querySelector('[data-action="notifications"], [data-panel="notifications"]')
                 || document.querySelector('.notification-bell, .notif-btn, .bell-icon, #notification-icon')
                 || document.querySelector('[aria-label="Notifications"], [aria-label="notifications"]')
-                || this._findButtonByText('notification')
-                || this._findButtonByText('notifications');
-
-            if (notifBtn) {
-                notifBtn.click();
-                return;
-            }
-
-            // Try SHOW_TAB fallback
+                || this._findButtonByText('notification') || this._findButtonByText('notifications');
+            if (btn) { btn.click(); return; }
             this._showTab('notifications');
         },
 
-        /* ── Open issue assignment workflow ── */
         _assignIssue(action) {
-            // Try assignment button
-            const assignBtn = document.getElementById('assign-btn')
-                || document.getElementById('assign-issue-btn')
+            const btn = document.getElementById('assign-btn') || document.getElementById('assign-issue-btn')
                 || document.getElementById('assignment-btn')
                 || document.querySelector('[data-action="assign"], .assign-btn, .btn-assign')
                 || this._findButtonByText('assign');
-
-            if (assignBtn) {
-                assignBtn.click();
-                return;
-            }
-
-            // Try to open assignment modal
-            const assignModal = document.getElementById('assign-modal')
-                || document.getElementById('assignment-modal');
-            if (assignModal) {
-                assignModal.classList.add('open');
-                assignModal.style.display = 'flex';
-            }
+            if (btn) { btn.click(); return; }
+            const modal = document.getElementById('assign-modal') || document.getElementById('assignment-modal');
+            if (modal) { modal.classList.add('open'); modal.style.display = 'flex'; }
         },
 
-        /* ── Utility: find button by text ── */
         _findButtonByText(text) {
-            const lowerText = text.toLowerCase().trim();
-            const buttons = document.querySelectorAll('button, .btn, [role="button"], a.btn');
-            return Array.from(buttons).find(btn =>
-                btn.textContent.trim().toLowerCase().includes(lowerText)
-            ) || null;
+            const low = text.toLowerCase().trim();
+            return Array.from(document.querySelectorAll('button, .btn, [role="button"], a.btn'))
+                .find(b => b.textContent.trim().toLowerCase().includes(low)) || null;
         }
     };
 
-    /* ─────────────────────────────────────────────────────────
+    /* ═══════════════════════════════════════════════════════
        MAIN KURAL AI CLASS
-    ───────────────────────────────────────────────────────── */
+       Root-cause fixes applied (see comments with FIX:)
+    ═══════════════════════════════════════════════════════ */
     class KuralVoiceAssistant {
         constructor() {
-            this.isOpen = false;
-            this.isListening = false;
-            this.isProcessing = false;
-            this.isSpeaking = false;
-            this.isExternallyPaused = false; // set by external features (e.g. voice recorder)
-            this.wakeRecognition = null;
+            this.isOpen          = false;
+            this.isListening     = false;
+            this.isProcessing    = false;
+            this.isSpeaking      = false;
+            this.isExternallyPaused = false;
+
+            // FIX: Single wake recognition instance (not two simultaneous).
+            //      Chrome allows only ONE SpeechRecognition per tab.
+            //      We alternate between en-IN / ta-IN based on activeLang,
+            //      and also scan romanized Tamil in the en-IN transcript.
+            this._wakeRecognition = null;
+            this._wakeActive      = false;   // true while .start() has been called
+            this._wakeRestarting  = false;   // debounce flag to prevent double-restart
+
+            // FIX: Wake word detected mutex — prevents double-trigger.
+            this._wakeDetectedLock = false;
+
             this.commandRecognition = null;
             this.voicesLoaded = false;
 
-            // Preload voices
             if (window.speechSynthesis) {
                 window.speechSynthesis.onvoiceschanged = () => { this.voicesLoaded = true; };
                 window.speechSynthesis.getVoices();
@@ -743,11 +820,19 @@
 
             this._injectHTML();
             this._bindEvents();
-            this._startWakeWordListener();
+
+            // FIX: Assign window.KuralAI BEFORE starting wake listeners so that
+            //      the speak() onstart/onend callbacks can reference it.
+            window.KuralAI  = this;
+            window.NayaganAI = this;
+
+            this._startWakeListen();
             this._checkPendingFill();
+
+            console.log('[Kural AI] v4.1 initialized. Wake listener started.');
         }
 
-        /* ── Check if we need to auto-fill a form after navigation ── */
+        /* ── Pending form fill after page navigation ── */
         _checkPendingFill() {
             const pending = sessionStorage.getItem('kural_pending_fill');
             if (pending) {
@@ -756,25 +841,25 @@
                     const action = JSON.parse(pending);
                     setTimeout(() => {
                         KuralActionHandler._fillIssueForm(action);
-                        speak('Form fill pannitaen. Photo upload pannunga.', LANG_EN);
+                        speak(
+                            activeLang === 'ta' ? 'படிவம் நிரப்பப்பட்டது. புகைப்படம் பதிவேற்றவும்.' : 'Form filled. Please upload a photo.',
+                            getSpeechLang()
+                        );
                     }, 1500);
-                } catch (e) { /* ignore */ }
+                } catch (e) {}
             }
         }
 
-        /* ── Inject HTML UI ── */
+        /* ──────────────────────────────────────────────────
+           INJECT HTML UI
+        ─────────────────────────────────────────────────── */
         _injectHTML() {
-            // Launcher button
             const launcher = document.createElement('button');
             launcher.className = 'kural-launcher';
             launcher.id = 'kural-launcher';
             launcher.setAttribute('aria-label', 'Kural AI Voice Assistant');
-            launcher.innerHTML = `
-                ${this._micSVG()}
-                <span class="kural-tooltip">Kural AI</span>
-            `;
+            launcher.innerHTML = `${this._micSVG()}<span class="kural-tooltip">Kural AI</span>`;
 
-            // Main panel
             const panel = document.createElement('div');
             panel.className = 'kural-panel';
             panel.id = 'kural-panel';
@@ -794,6 +879,10 @@
                             <p id="kural-role-label">Website Control Agent</p>
                         </div>
                     </div>
+                    <div class="kural-lang-toggle" id="kural-lang-toggle">
+                        <button class="kural-lang-btn ${activeLang === 'en' ? 'active' : ''}" id="kural-lang-en" title="English Mode">EN</button>
+                        <button class="kural-lang-btn ${activeLang === 'ta' ? 'active' : ''}" id="kural-lang-ta" title="Tamil Mode">தமிழ்</button>
+                    </div>
                     <button class="kural-close-btn" id="kural-close" aria-label="Close">✕</button>
                 </div>
 
@@ -810,14 +899,21 @@
                     Speak or type a command...
                 </div>
 
-                <div class="kural-hint">
-                    Wake word: <span class="kural-hint-chip">Hey Kural</span>
+                <div class="kural-hint" id="kural-hint">
+                    Wake word: <span class="kural-hint-chip">${activeLang === 'ta' ? 'வணக்கம் குரல்' : 'Hey Kural'}</span>
+                </div>
+
+                <div class="kural-flow-steps" id="kural-flow-steps">
+                    <div class="kural-flow-title">🚨 Issue Reporting</div>
+                    <div class="kural-flow-progress" id="kural-flow-progress"></div>
+                    <div class="kural-flow-label" id="kural-flow-label"></div>
+                    <div class="kural-flow-collected"></div>
                 </div>
 
                 <div class="kural-quick-chips" id="kural-quick-chips">
                     <button class="kural-chip" data-cmd="Open dashboard">🏠 Dashboard</button>
                     <button class="kural-chip" data-cmd="Show analytics">📊 Analytics</button>
-                    <button class="kural-chip" data-cmd="Raise issue">🚨 Raise Issue</button>
+                    <button class="kural-chip" data-cmd="Report an issue by voice">🚨 Voice Issue</button>
                     <button class="kural-chip" data-cmd="Show map">🗺️ Map</button>
                     <button class="kural-chip" data-cmd="Download report">⬇️ Download</button>
                     <button class="kural-chip" data-cmd="Show high priority issues">🔴 High Priority</button>
@@ -842,13 +938,8 @@
                 </div>
 
                 <div class="kural-text-input-row" id="kural-text-row">
-                    <input
-                        type="text"
-                        class="kural-text-input"
-                        id="kural-text-input"
-                        placeholder="Type a command..."
-                        autocomplete="off"
-                    />
+                    <input type="text" class="kural-text-input" id="kural-text-input"
+                        placeholder="Type a command..." autocomplete="off" />
                     <button class="kural-send-btn" id="kural-send-btn" title="Send command">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="22" y1="2" x2="11" y2="13"/>
@@ -858,7 +949,6 @@
                 </div>
             `;
 
-            // Toast notification
             const toast = document.createElement('div');
             toast.className = 'kural-toast';
             toast.id = 'kural-toast';
@@ -866,28 +956,20 @@
             document.body.appendChild(launcher);
             document.body.appendChild(panel);
             document.body.appendChild(toast);
-
             this._updateRoleLabel();
         }
 
         _updateRoleLabel() {
             const role = getCurrentUserRole();
-            const roleLabels = {
-                USER: 'Citizen Dashboard Agent',
-                EMPLOYEE: 'Employee Dashboard Agent',
-                TAMILNADU_CORPORATION: 'Department Control Agent',
-                TNEB: 'Department Control Agent',
-                POLICE: 'Department Control Agent',
-                COLLECTOR: 'Collector Control Agent',
-                ADMIN: 'Admin Control Agent',
-                MLA: 'MLA Control Agent',
-                CM: 'CM Control Agent',
-                COMMISSIONER: 'Commissioner Control Agent',
+            const map = {
+                USER: 'Citizen Dashboard Agent', EMPLOYEE: 'Employee Dashboard Agent',
+                TAMILNADU_CORPORATION: 'Department Control Agent', TNEB: 'Department Control Agent',
+                POLICE: 'Department Control Agent', COLLECTOR: 'Collector Control Agent',
+                ADMIN: 'Admin Control Agent', MLA: 'MLA Control Agent',
+                CM: 'CM Control Agent', COMMISSIONER: 'Commissioner Control Agent',
             };
-            const label = document.getElementById('kural-role-label');
-            if (label && role) {
-                label.textContent = roleLabels[role] || 'Website Control Agent';
-            }
+            const el = document.getElementById('kural-role-label');
+            if (el && role) el.textContent = map[role] || 'Website Control Agent';
         }
 
         _micSVG() {
@@ -906,27 +988,32 @@
             document.getElementById('kural-mic-btn').addEventListener('click', () => this.toggleListening());
             document.getElementById('kural-clear-btn').addEventListener('click', () => this.clearLog());
 
-            // Text input
-            const textInput = document.getElementById('kural-text-input');
-            const sendBtn = document.getElementById('kural-send-btn');
-
-            sendBtn.addEventListener('click', () => this._sendTextCommand());
-            textInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    this._sendTextCommand();
-                }
+            document.getElementById('kural-lang-en').addEventListener('click', () => {
+                setActiveLang('en');
+                const msg = 'Switched to English mode. How can I help you?';
+                this._addLog('ai', msg, null);
+                speak(msg, LANG_EN, () => this._scheduleWakeRestart());
             });
 
-            // Quick chips
-            document.getElementById('kural-quick-chips').addEventListener('click', (e) => {
+            document.getElementById('kural-lang-ta').addEventListener('click', () => {
+                setActiveLang('ta');
+                const msg = 'தமிழ் பயன்முறைக்கு மாறினோம். உங்களுக்கு என்ன உதவி வேண்டும்?';
+                this._addLog('ai', msg, null);
+                speak(msg, LANG_TA, () => this._scheduleWakeRestart());
+            });
+
+            const textInput = document.getElementById('kural-text-input');
+            const sendBtn   = document.getElementById('kural-send-btn');
+            sendBtn.addEventListener('click', () => this._sendTextCommand());
+            textInput.addEventListener('keydown', e => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); this._sendTextCommand(); }
+            });
+
+            document.getElementById('kural-quick-chips').addEventListener('click', e => {
                 const chip = e.target.closest('.kural-chip');
-                if (chip) {
-                    const cmd = chip.dataset.cmd;
-                    if (cmd) {
-                        if (!this.isOpen) this.openPanel();
-                        this._processCommand(cmd);
-                    }
+                if (chip?.dataset.cmd) {
+                    if (!this.isOpen) this.openPanel();
+                    this._processCommand(chip.dataset.cmd);
                 }
             });
         }
@@ -940,9 +1027,7 @@
         }
 
         /* ── Panel Controls ── */
-        togglePanel() {
-            this.isOpen ? this.closePanel() : this.openPanel();
-        }
+        togglePanel() { this.isOpen ? this.closePanel() : this.openPanel(); }
 
         openPanel() {
             this.isOpen = true;
@@ -950,13 +1035,14 @@
             panel.style.display = 'flex';
             setTimeout(() => panel.classList.add('open'), 10);
 
-            // Greet user on first open
             const hasGreeted = sessionStorage.getItem('kural_greeted');
             if (!hasGreeted) {
                 sessionStorage.setItem('kural_greeted', '1');
+                const greeting = activeLang === 'ta' ? GREETING_TA : GREETING_EN;
                 setTimeout(() => {
-                    this._addLog('ai', GREETING_EN, null);
-                    speak(GREETING_EN, LANG_EN, () => {
+                    this._addLog('ai', greeting, null);
+                    speak(greeting, getSpeechLang(), () => {
+                        // Auto-listen after greeting completes
                         this.startListening();
                     });
                 }, 300);
@@ -969,42 +1055,43 @@
             panel.classList.remove('open');
             setTimeout(() => { panel.style.display = 'none'; }, 300);
             this.stopListening();
+            if (VoiceIssueFlow.active) VoiceIssueFlow.cancel();
         }
 
-        /* ── Status UI Updates ── */
+        /* ── Status UI ── */
         _setStatus(state, text) {
-            const dot = document.getElementById('kural-status-dot');
-            const statusText = document.getElementById('kural-status-text');
+            const dot      = document.getElementById('kural-status-dot');
+            const statTxt  = document.getElementById('kural-status-text');
             const waveform = document.getElementById('kural-waveform');
             const launcher = document.getElementById('kural-launcher');
-            const micBtn = document.getElementById('kural-mic-btn');
+            const micBtn   = document.getElementById('kural-mic-btn');
             const micLabel = document.getElementById('kural-mic-label');
 
-            dot.className = `kural-status-dot ${state}`;
-            if (statusText) statusText.textContent = text;
+            if (dot)    dot.className = `kural-status-dot ${state}`;
+            if (statTxt) statTxt.textContent = text;
 
             if (state === 'listening') {
-                waveform.classList.add('active');
-                launcher.classList.add('listening');
-                launcher.classList.remove('processing');
-                micBtn.classList.add('active');
-                if (micLabel) micLabel.textContent = 'Stop Listening';
+                waveform?.classList.add('active');
+                launcher?.classList.add('listening');
+                launcher?.classList.remove('processing');
+                micBtn?.classList.add('active');
+                if (micLabel) micLabel.textContent = activeLang === 'ta' ? 'நிறுத்து' : 'Stop Listening';
             } else if (state === 'processing') {
-                waveform.classList.remove('active');
-                launcher.classList.remove('listening');
-                launcher.classList.add('processing');
-                micBtn.classList.remove('active');
-                if (micLabel) micLabel.textContent = 'Processing...';
+                waveform?.classList.remove('active');
+                launcher?.classList.remove('listening');
+                launcher?.classList.add('processing');
+                micBtn?.classList.remove('active');
+                if (micLabel) micLabel.textContent = activeLang === 'ta' ? 'செயல்படுகிறது...' : 'Processing...';
             } else if (state === 'speaking') {
-                waveform.classList.add('active');
-                launcher.classList.remove('listening', 'processing');
-                micBtn.classList.remove('active');
-                if (micLabel) micLabel.textContent = 'Speaking...';
+                waveform?.classList.add('active');
+                launcher?.classList.remove('listening', 'processing');
+                micBtn?.classList.remove('active');
+                if (micLabel) micLabel.textContent = activeLang === 'ta' ? 'பேசுகிறது...' : 'Speaking...';
             } else {
-                waveform.classList.remove('active');
-                launcher.classList.remove('listening', 'processing');
-                micBtn.classList.remove('active');
-                if (micLabel) micLabel.textContent = 'Start Listening';
+                waveform?.classList.remove('active');
+                launcher?.classList.remove('listening', 'processing');
+                micBtn?.classList.remove('active');
+                if (micLabel) micLabel.textContent = activeLang === 'ta' ? 'கேட்க தொடங்கு' : 'Start Listening';
             }
         }
 
@@ -1019,56 +1106,42 @@
         _addLog(type, text, actionType) {
             const log = document.getElementById('kural-log');
             if (!log) return;
-
-            const msg = document.createElement('div');
+            const msg    = document.createElement('div');
             msg.className = `kural-log-msg ${type === 'user' ? 'user-msg' : 'ai-msg'}`;
-
             const bubble = document.createElement('div');
             bubble.className = 'kural-log-bubble';
-
             if (actionType && actionType !== 'SPEAK_ONLY') {
                 const badge = document.createElement('span');
                 badge.className = 'kural-action-badge';
                 badge.textContent = this._getActionBadgeLabel(actionType);
                 bubble.appendChild(badge);
-                const br = document.createElement('br');
-                bubble.appendChild(br);
+                bubble.appendChild(document.createElement('br'));
             }
-
-            const textNode = document.createTextNode(text);
-            bubble.appendChild(textNode);
-
+            bubble.appendChild(document.createTextNode(text));
             msg.appendChild(bubble);
             log.appendChild(msg);
             log.scrollTop = log.scrollHeight;
         }
 
         _getActionBadgeLabel(action) {
-            const labels = {
-                'NAVIGATE': '🔀 Navigate',
-                'SHOW_TAB': '📂 Tab Switch',
-                'OPEN_MAP': '🗺️ Map',
-                'OPEN_ANALYTICS': '📊 Analytics',
-                'FILTER_ISSUES': '🔍 Filter',
-                'OPEN_RAISE_ISSUE': '🚨 Open Form',
-                'FILL_ISSUE_FORM': '✍️ Form Fill',
-                'SUBMIT_FORM': '✅ Submit',
-                'TRIGGER_DOWNLOAD': '⬇️ Download',
-                'SCROLL_TO': '📜 Scroll',
-                'OPEN_NOTIFICATIONS': '🔔 Notifications',
-                'ASSIGN_ISSUE': '👤 Assign',
-            };
-            return labels[action] || `⚡ ${action}`;
+            return ({
+                'NAVIGATE': '🔀 Navigate', 'SHOW_TAB': '📂 Tab Switch', 'OPEN_MAP': '🗺️ Map',
+                'OPEN_ANALYTICS': '📊 Analytics', 'FILTER_ISSUES': '🔍 Filter',
+                'OPEN_RAISE_ISSUE': '🚨 Open Form', 'VOICE_ISSUE_FLOW': '🎙️ Voice Flow',
+                'FILL_ISSUE_FORM': '✍️ Form Fill', 'SUBMIT_FORM': '✅ Submit',
+                'TRIGGER_DOWNLOAD': '⬇️ Download', 'SCROLL_TO': '📜 Scroll',
+                'OPEN_NOTIFICATIONS': '🔔 Notifications', 'ASSIGN_ISSUE': '👤 Assign',
+            })[action] || `⚡ ${action}`;
         }
 
         clearLog() {
             const log = document.getElementById('kural-log');
             if (log) log.innerHTML = '';
-            this._setTranscript('Speak or type a command...', true);
+            this._setTranscript(activeLang === 'ta' ? 'பேசுங்கள் அல்லது கட்டளை தட்டச்சு செய்யுங்கள்...' : 'Speak or type a command...', true);
             sessionStorage.removeItem('kural_greeted');
+            if (VoiceIssueFlow.active) VoiceIssueFlow.cancel();
         }
 
-        /* ── Toast Notification ── */
         _showToast(text) {
             const toast = document.getElementById('kural-toast');
             if (!toast) return;
@@ -1078,169 +1151,309 @@
             this._toastTimer = setTimeout(() => toast.classList.remove('show'), 3500);
         }
 
-        /* ─────────────────────────────────────────────────────
-           WAKE WORD LISTENER
-           Runs continuously in background (silent mode)
-        ───────────────────────────────────────────────────── */
-        _startWakeWordListener() {
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return;
+        /* ══════════════════════════════════════════════════
+           WAKE WORD DETECTION — Root-cause fixed version
+           
+           FIX 1: Single SpeechRecognition instance (not two).
+                  Chrome enforces one recognition per tab.
+           FIX 2: Uses en-IN lang (picks up both English AND
+                  romanized Vanakkam Kural naturally).
+                  The ta-IN recognizer is not parallel; we switch
+                  its lang dynamically when language mode changes.
+           FIX 3: _wakeDetectedLock mutex prevents double-fire.
+           FIX 4: Restart only from onend, not from stopListening().
+           FIX 5: _scheduleWakeRestart uses a flag to prevent
+                  concurrent restarts.
+        ══════════════════════════════════════════════════ */
+        _startWakeListen() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) {
+                console.warn('[Kural AI] SpeechRecognition not supported. Wake word disabled.');
+                return;
+            }
 
-            this.wakeRecognition = new SpeechRecognition();
-            this.wakeRecognition.continuous = true;
-            this.wakeRecognition.interimResults = false;
-            this.wakeRecognition.lang = LANG_EN;
+            // Abort any existing instance cleanly
+            if (this._wakeRecognition) {
+                try { this._wakeRecognition.abort(); } catch (e) {}
+                this._wakeRecognition = null;
+            }
 
-            this.wakeRecognition.onresult = (e) => {
-                const transcript = e.results[e.results.length - 1][0].transcript.toLowerCase().trim();
-                if (WAKE_WORDS.some(ww => transcript.includes(ww))) {
-                    this._onWakeWordDetected();
+            this._wakeActive = false;
+            this._wakeDetectedLock = false;
+
+            const rec = new SR();
+            rec.continuous       = true;
+            rec.interimResults   = false;
+            // FIX: Always use en-IN — Chrome en-IN recognizes "vanakkam kural" well.
+            //      If user is in Tamil mode and speaks Tamil script, the ta-IN switch
+            //      happens for command recognition (startListening), not here.
+            rec.lang             = LANG_EN;
+            rec.maxAlternatives  = 1;
+
+            rec.onstart = () => {
+                this._wakeActive = true;
+                this._wakeRestarting = false;
+                console.log('[Kural AI] Wake listener started (lang: en-IN, scanning EN + romanized TA).');
+            };
+
+            rec.onresult = (e) => {
+                // FIX: Guard against processing while already triggered
+                if (this._wakeDetectedLock) return;
+                if (this.isListening || this.isProcessing || this.isSpeaking) return;
+
+                const result    = e.results[e.results.length - 1];
+                const rawText   = result[0].transcript;
+                const transcript = rawText.toLowerCase()
+                    .replace(/[^\w\s\u0B80-\u0BFF]/g, '') // strip punctuation, keep Tamil chars
+                    .replace(/\s+/g, ' ')
+                    .trim();
+
+                console.log('[Kural AI] Wake scan transcript:', transcript);
+
+                // Check English wake words
+                const isEN = WAKE_WORDS_EN.some(ww => transcript.includes(ww));
+                // Check Tamil romanized wake words
+                const isTA_Roman = WAKE_WORDS_TA_ROMAN.some(ww => transcript.includes(ww));
+                // Check Tamil script wake words (en-IN recognition may still capture them)
+                const isTA_Script = WAKE_WORDS_TA_SCRIPT.some(ww => transcript.includes(ww));
+                const isTA = isTA_Roman || isTA_Script;
+
+                if (isEN || isTA) {
+                    const detectedLang = isTA ? 'ta' : 'en';
+                    console.log('[Kural AI] Wake word detected! detectedLang:', detectedLang, '| transcript:', transcript);
+                    this._onWakeWordDetected(detectedLang);
                 }
             };
 
-            this.wakeRecognition.onend = () => {
-                // Do NOT auto-restart if externally paused (e.g. voice recorder is active)
-                if (this.isExternallyPaused) return;
-                if (!this.isListening && !this.isProcessing && !this.isSpeaking) {
-                    try { this.wakeRecognition.start(); } catch (e) { /* ignore */ }
+            rec.onerror = (e) => {
+                this._wakeActive = false;
+                if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+                    console.warn('[Kural AI] Wake: microphone permission denied.');
+                    return; // Don't retry on permission error
+                }
+                if (e.error === 'no-speech') return; // Normal — just restart below
+                console.warn('[Kural AI] Wake recognition error:', e.error);
+            };
+
+            rec.onend = () => {
+                this._wakeActive = false;
+                console.log('[Kural AI] Wake listener ended. isListening:', this.isListening, 'isProcessing:', this.isProcessing, 'isSpeaking:', this.isSpeaking);
+                // FIX: Only restart wake listener when fully idle (not listening/processing/speaking)
+                if (!this.isExternallyPaused && !this.isListening && !this.isProcessing && !this.isSpeaking) {
+                    this._scheduleWakeRestart();
                 }
             };
 
-            try { this.wakeRecognition.start(); } catch (e) { /* browser may block until user interaction */ }
+            this._wakeRecognition = rec;
+            try {
+                rec.start();
+            } catch (err) {
+                console.warn('[Kural AI] Wake start error:', err.message);
+            }
         }
 
-        _onWakeWordDetected() {
-            if (this.isListening || this.isProcessing || this.isSpeaking) return;
-            if (!this.isOpen) this.openPanel();
-            this._showToast('🎙️ Hey Kural — listening!');
-            this._setTranscript('"Hey Kural" detected...', false);
+        // FIX: Debounced restart — prevents concurrent restart attempts
+        _scheduleWakeRestart(delayMs = 300) {
+            if (this._wakeRestarting) return;
+            this._wakeRestarting = true;
             setTimeout(() => {
-                this._addLog('ai', GREETING_WAKE, null);
-                speak(GREETING_WAKE, LANG_EN, () => {
+                this._wakeRestarting = false;
+                if (!this.isListening && !this.isProcessing && !this.isSpeaking && !this._wakeActive) {
+                    console.log('[Kural AI] Restarting wake listener...');
+                    this._startWakeListen();
+                }
+            }, delayMs);
+        }
+
+        _stopWakeListen() {
+            if (this._wakeRecognition && this._wakeActive) {
+                try { this._wakeRecognition.abort(); } catch (e) {}
+                this._wakeActive = false;
+                console.log('[Kural AI] Wake listener stopped.');
+            }
+        }
+
+        /* ── Wake Word Detected Handler ── */
+        _onWakeWordDetected(detectedLang) {
+            // FIX: Set lock immediately to prevent double-trigger before isSpeaking is set
+            if (this._wakeDetectedLock) return;
+            if (this.isListening || this.isProcessing || this.isSpeaking) return;
+            this._wakeDetectedLock = true;
+
+            // Stop the wake listener while we handle the wake event
+            this._stopWakeListen();
+
+            // Switch language mode if needed
+            if (detectedLang === 'ta' && activeLang !== 'ta') setActiveLang('ta');
+            if (detectedLang === 'en' && activeLang !== 'en') setActiveLang('en');
+
+            const wakeWord = detectedLang === 'ta' ? 'வணக்கம் குரல்' : 'Hey Kural';
+            const greeting = detectedLang === 'ta' ? GREETING_WAKE_TA : GREETING_WAKE_EN;
+            const lang     = detectedLang === 'ta' ? LANG_TA : LANG_EN;
+
+            console.log('[Kural AI] Opening panel and greeting. lang:', lang);
+
+            if (!this.isOpen) this.openPanel();
+            this._showToast(`🎙️ ${wakeWord} — ${detectedLang === 'ta' ? 'கேட்கிறேன்!' : 'Listening!'}`);
+            this._setTranscript(`"${wakeWord}" detected...`, false);
+
+            // FIX: Short delay so openPanel() finishes before speak() is called,
+            //      ensuring window.KuralAI reference is live for onstart/onend hooks.
+            setTimeout(() => {
+                console.log('[Kural AI] Speaking greeting:', greeting);
+                this._addLog('ai', greeting, null);
+                speak(greeting, lang, () => {
+                    // Greeting finished → auto-start command listening
+                    console.log('[Kural AI] Greeting complete. Starting command listening...');
+                    this._wakeDetectedLock = false; // Release lock
                     this.startListening();
                 });
-            }, 300);
+            }, 150);
         }
 
-        /* ─────────────────────────────────────────────────────
+        /* ══════════════════════════════════════════════════
            COMMAND LISTENING
-        ───────────────────────────────────────────────────── */
+        ══════════════════════════════════════════════════ */
         toggleListening() {
-            if (this.isListening) {
-                this.stopListening();
-            } else {
-                this.startListening();
-            }
+            if (this.isListening) { this.stopListening(); } else { this.startListening(); }
         }
 
         startListening() {
             if (this.isSpeaking) return;
+            if (this.isListening) return; // guard against double-start
 
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) {
-                this._addLog('ai', 'Speech recognition is not supported in this browser. Please use Chrome or Edge.', null);
-                speak('Speech recognition not supported. Please use Chrome.', LANG_EN);
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) {
+                const msg = 'Speech recognition is not supported. Please use Chrome or Edge.';
+                this._addLog('ai', msg, null);
+                speak(msg, LANG_EN);
                 return;
             }
 
-            try { if (this.wakeRecognition) this.wakeRecognition.stop(); } catch (e) { /* ignore */ }
+            // Stop wake listener before starting command recognition
+            this._stopWakeListen();
 
             this.isListening = true;
-            this._setStatus('listening', 'Listening...');
-            this._setTranscript('Listening... speak now', false);
+            const listeningText = activeLang === 'ta' ? 'கேட்கிறேன்... பேசுங்கள்' : 'Listening... speak now';
+            this._setStatus('listening', activeLang === 'ta' ? 'கேட்கிறேன்...' : 'Listening...');
+            this._setTranscript(listeningText, false);
+            console.log('[Kural AI] Command listening started. lang:', activeLang === 'ta' ? LANG_TA : LANG_EN);
 
-            this.commandRecognition = new SpeechRecognition();
-            this.commandRecognition.continuous = false;
-            this.commandRecognition.interimResults = true;
-            this.commandRecognition.lang = LANG_EN;
+            const cmd = new SR();
+            cmd.continuous     = false;
+            cmd.interimResults = true;
+            cmd.lang           = activeLang === 'ta' ? LANG_TA : LANG_EN;
+            this.commandRecognition = cmd;
 
             let finalTranscript = '';
 
-            this.commandRecognition.onresult = (e) => {
+            cmd.onresult = (e) => {
                 let interim = '';
                 for (let i = e.resultIndex; i < e.results.length; i++) {
                     const t = e.results[i][0].transcript;
-                    if (e.results[i].isFinal) {
-                        finalTranscript += t;
-                    } else {
-                        interim += t;
-                    }
+                    if (e.results[i].isFinal) { finalTranscript += t; }
+                    else { interim += t; }
                 }
                 this._setTranscript(finalTranscript || interim, false);
             };
 
-            this.commandRecognition.onend = () => {
+            cmd.onend = () => {
                 this.isListening = false;
+                console.log('[Kural AI] Command recognition ended. finalTranscript:', finalTranscript.trim());
                 if (finalTranscript.trim()) {
                     this._processCommand(finalTranscript.trim());
                 } else {
-                    this._setStatus('', 'Ready');
-                    this._setTranscript('No speech detected. Try again.', true);
-                    try { if (this.wakeRecognition) this.wakeRecognition.start(); } catch (e) { /* ignore */ }
+                    this._setStatus('', activeLang === 'ta' ? 'தயார்' : 'Ready');
+                    this._setTranscript(activeLang === 'ta' ? 'பேச்சு கண்டுபிடிக்கவில்லை. மீண்டும் முயற்சிக்கவும்.' : 'No speech detected. Try again.', true);
+                    // FIX: Resume wake listener after failed command attempt
+                    this._scheduleWakeRestart(500);
                 }
             };
 
-            this.commandRecognition.onerror = (e) => {
+            cmd.onerror = (e) => {
                 this.isListening = false;
-                this._setStatus('', 'Ready');
+                this._setStatus('', activeLang === 'ta' ? 'தயார்' : 'Ready');
                 const errMsg = e.error === 'no-speech'
-                    ? 'No speech detected.'
+                    ? (activeLang === 'ta' ? 'பேச்சு கண்டுபிடிக்கவில்லை.' : 'No speech detected.')
                     : e.error === 'not-allowed'
-                    ? 'Microphone access denied. Please allow microphone in browser settings.'
+                    ? (activeLang === 'ta' ? 'மைக்ரோஃபோன் அணுகல் மறுக்கப்பட்டது.' : 'Microphone access denied. Please allow microphone in browser settings.')
                     : `Error: ${e.error}`;
                 this._setTranscript(errMsg, true);
                 this._addLog('ai', errMsg, null);
-                try { if (this.wakeRecognition) this.wakeRecognition.start(); } catch (er) { /* ignore */ }
+                // FIX: Resume wake listener after error
+                this._scheduleWakeRestart(500);
             };
 
-            try {
-                this.commandRecognition.start();
-            } catch (err) {
+            try { cmd.start(); }
+            catch (err) {
                 this.isListening = false;
                 this._setStatus('', 'Ready');
                 this._setTranscript('Could not access microphone.', true);
+                this._scheduleWakeRestart(500);
             }
         }
 
         stopListening() {
             this.isListening = false;
-            try { if (this.commandRecognition) this.commandRecognition.stop(); } catch (e) { /* ignore */ }
-            
+            try { if (this.commandRecognition) this.commandRecognition.abort(); } catch (e) {}
+
+            // FIX: Only restart wake listener if not speaking or processing.
+            //      Do NOT call _startWakeListen from inside stopListening
+            //      because setSpeakingState(true) calls stopListening first —
+            //      which would create a race where wake restarts while speaking.
             if (!this.isSpeaking && !this.isProcessing) {
-                this._setStatus('', 'Ready');
-                setTimeout(() => {
-                    if (!this.isSpeaking && !this.isProcessing && !this.isListening) {
-                        try { if (this.wakeRecognition) this.wakeRecognition.start(); } catch (e) { /* ignore */ }
-                    }
-                }, 500);
+                this._setStatus('', activeLang === 'ta' ? 'தயார்' : 'Ready');
+                this._scheduleWakeRestart(500);
             }
         }
 
-        setSpeakingState(isSpeaking, skipWakeRestart = false) {
+        /* ── Speaking State (replaces public setSpeakingState) ── */
+        // FIX: Renamed to _setSpeakingState (internal). The old public name setSpeakingState
+        //      is aliased below for backward compatibility with any external callers.
+        _setSpeakingState(isSpeaking, skipWakeRestart = false) {
             this.isSpeaking = isSpeaking;
             if (isSpeaking) {
-                this._setStatus('speaking', 'Speaking...');
-                this.stopListening();
-                try { if (this.wakeRecognition) this.wakeRecognition.stop(); } catch (e) { /* ignore */ }
+                this._setStatus('speaking', activeLang === 'ta' ? 'பேசுகிறது...' : 'Speaking...');
+                // Stop command listening while speaking (prevent self-capture)
+                if (this.commandRecognition) {
+                    try { this.commandRecognition.abort(); } catch (e) {}
+                }
+                // Stop wake listener while speaking
+                this._stopWakeListen();
+                this.isListening = false;
+                console.log('[Kural AI] Speaking started. Mic disabled.');
             } else {
+                console.log('[Kural AI] Speaking ended. skipWakeRestart:', skipWakeRestart);
                 if (!this.isListening && !this.isProcessing && !skipWakeRestart) {
-                    this._setStatus('', 'Ready');
-                    try { if (this.wakeRecognition) this.wakeRecognition.start(); } catch (e) { /* ignore */ }
+                    this._setStatus('', activeLang === 'ta' ? 'தயார்' : 'Ready');
+                    // FIX: Only restart wake if no callback is about to start command listening
+                    this._scheduleWakeRestart(400);
                 }
             }
         }
 
-        /* ─────────────────────────────────────────────────────
+        // Backward-compat alias (speak() calls this via window.KuralAI.setSpeakingState)
+        setSpeakingState(isSpeaking, skipWakeRestart = false) {
+            this._setSpeakingState(isSpeaking, skipWakeRestart);
+        }
+
+        /* ══════════════════════════════════════════════════
            COMMAND PROCESSING
-        ───────────────────────────────────────────────────── */
+        ══════════════════════════════════════════════════ */
         async _processCommand(text) {
+            if (VoiceIssueFlow.active) {
+                const handled = VoiceIssueFlow.handleFlowInput(text);
+                if (handled) { this._addLog('user', text, null); return; }
+            }
+
             this.isProcessing = true;
-            this._setStatus('processing', 'Processing...');
+            this._setStatus('processing', activeLang === 'ta' ? 'செயல்படுகிறது...' : 'Processing...');
             this._addLog('user', text, null);
+            console.log('[Kural AI] Processing command:', text, '| lang:', activeLang);
 
             const token = localStorage.getItem('cm_token');
             if (!token) {
-                const msg = 'Please log in to use Kural AI.';
+                const msg = activeLang === 'ta' ? 'குரல் AI பயன்படுத்த உள்நுழைக.' : 'Please log in to use Kural AI.';
                 this._handleResponse({ action: 'SPEAK_ONLY', voiceMessage: msg });
                 return;
             }
@@ -1249,62 +1462,44 @@
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
                 const res = await fetch(`${API_BASE}/nayagan-ai/command`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ text, currentPage })
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ text, currentPage, lang: activeLang })
                 });
-
-                if (!res.ok) {
-                    throw new Error(`Server error: ${res.status}`);
-                }
-
+                if (!res.ok) throw new Error(`Server error: ${res.status}`);
                 const action = await res.json();
+                console.log('[Kural AI] Action received:', action.action, '|', action.voiceMessage);
                 this._handleResponse(action);
-
             } catch (err) {
                 console.error('[Kural AI] processCommand error:', err);
-                const errMsg = 'Kural AI is temporarily unavailable. Please try again.';
-                this._handleResponse({ action: 'SPEAK_ONLY', voiceMessage: errMsg });
+                const msg = activeLang === 'ta' ? 'குரல் AI தற்காலிகமாக இல்லை. மீண்டும் முயற்சிக்கவும்.' : 'Kural AI is temporarily unavailable. Please try again.';
+                this._handleResponse({ action: 'SPEAK_ONLY', voiceMessage: msg });
             }
         }
 
         _handleResponse(action) {
             this.isProcessing = false;
-            this._setStatus('', 'Ready');
+            this._setStatus('', activeLang === 'ta' ? 'தயார்' : 'Ready');
 
-            const voiceMsg = action.voiceMessage || 'Done.';
+            const voiceMsg  = action.voiceMessage || (activeLang === 'ta' ? 'செய்யப்பட்டது.' : 'Done.');
             const actionType = action.action || 'SPEAK_ONLY';
 
             this._addLog('ai', voiceMsg, actionType);
+            this._showToast(`${this._getActionEmoji(actionType)} ${voiceMsg}`);
 
-            const toastEmoji = this._getActionEmoji(actionType);
-            this._showToast(`${toastEmoji} ${voiceMsg}`);
-
-            const lang = detectLanguage(voiceMsg);
-            speak(voiceMsg, lang);
+            const speechLang = activeLang === 'ta' ? LANG_TA : detectLanguage(voiceMsg);
+            // After response is spoken, wake listener resumes automatically via setSpeakingState(false)
+            speak(voiceMsg, speechLang);
 
             KuralActionHandler.execute(action, voiceMsg);
         }
 
         _getActionEmoji(action) {
-            const emojis = {
-                'NAVIGATE': '🔀',
-                'SHOW_TAB': '📂',
-                'OPEN_MAP': '🗺️',
-                'OPEN_ANALYTICS': '📊',
-                'FILTER_ISSUES': '🔍',
-                'OPEN_RAISE_ISSUE': '🚨',
-                'FILL_ISSUE_FORM': '✍️',
-                'SUBMIT_FORM': '✅',
-                'TRIGGER_DOWNLOAD': '⬇️',
-                'SCROLL_TO': '📜',
-                'OPEN_NOTIFICATIONS': '🔔',
-                'ASSIGN_ISSUE': '👤',
-                'SPEAK_ONLY': '🤖',
-            };
-            return emojis[action] || '⚡';
+            return ({
+                'NAVIGATE': '🔀', 'SHOW_TAB': '📂', 'OPEN_MAP': '🗺️', 'OPEN_ANALYTICS': '📊',
+                'FILTER_ISSUES': '🔍', 'OPEN_RAISE_ISSUE': '🚨', 'VOICE_ISSUE_FLOW': '🎙️',
+                'FILL_ISSUE_FORM': '✍️', 'SUBMIT_FORM': '✅', 'TRIGGER_DOWNLOAD': '⬇️',
+                'SCROLL_TO': '📜', 'OPEN_NOTIFICATIONS': '🔔', 'ASSIGN_ISSUE': '👤', 'SPEAK_ONLY': '🤖',
+            })[action] || '⚡';
         }
     }
 
@@ -1314,10 +1509,9 @@
     function init() {
         const token = localStorage.getItem('cm_token');
         if (!token) return;
-
-        window.KuralAI = new KuralVoiceAssistant();
-        // Expose on old name too for any external references
-        window.NayaganAI = window.KuralAI;
+        // FIX: window.KuralAI is now set INSIDE the constructor before wake listener starts,
+        //      so speak() onstart/onend handlers always have a valid reference.
+        new KuralVoiceAssistant();
     }
 
     if (document.readyState === 'loading') {
