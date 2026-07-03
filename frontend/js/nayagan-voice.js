@@ -730,6 +730,7 @@
             this.isListening = false;
             this.isProcessing = false;
             this.isSpeaking = false;
+            this.isExternallyPaused = false; // set by external features (e.g. voice recorder)
             this.wakeRecognition = null;
             this.commandRecognition = null;
             this.voicesLoaded = false;
@@ -1098,6 +1099,8 @@
             };
 
             this.wakeRecognition.onend = () => {
+                // Do NOT auto-restart if externally paused (e.g. voice recorder is active)
+                if (this.isExternallyPaused) return;
                 if (!this.isListening && !this.isProcessing && !this.isSpeaking) {
                     try { this.wakeRecognition.start(); } catch (e) { /* ignore */ }
                 }

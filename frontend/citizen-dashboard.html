@@ -2983,30 +2983,39 @@
         `;
         document.head.appendChild(style);
 
-        // ═══════════════════════════════════════════════════
+        // ═══════════════════════════════════════════════════════════════════
         // VOICE TO TEXT — Citizen Complaint Recorder
-        // Uses Web Speech API (browser-native, no audio stored)
+        // Uses Web Speech API (browser-native, no audio stored or uploaded)
         // + OpenRouter AI to polish the transcribed text
-        // ═══════════════════════════════════════════════════
+        //
+        // FIX: Pauses Kural AI wake-word listener during recording to prevent
+        //      SpeechRecognition conflicts (only one instance allowed at a time).
+        // ═══════════════════════════════════════════════════════════════════
         (function initVoiceToText() {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-            const recordBtn    = document.getElementById('voice-record-btn');
-            const stopBtn      = document.getElementById('voice-stop-btn');
-            const statusEl     = document.getElementById('voice-status');
-            const pulseEl      = document.getElementById('voice-recording-pulse');
+            const recordBtn     = document.getElementById('voice-record-btn');
+            const stopBtn       = document.getElementById('voice-stop-btn');
+            const statusEl      = document.getElementById('voice-status');
+            const pulseEl       = document.getElementById('voice-recording-pulse');
             const transcriptBox = document.getElementById('voice-transcript-box');
             const transcriptEl  = document.getElementById('voice-transcript');
-            const polishBtn    = document.getElementById('voice-polish-btn');
-            const insertBtn    = document.getElementById('voice-insert-btn');
-            const clearBtn     = document.getElementById('voice-clear-btn');
+            const polishBtn     = document.getElementById('voice-polish-btn');
+            const insertBtn     = document.getElementById('voice-insert-btn');
+            const clearBtn      = document.getElementById('voice-clear-btn');
             const descTextarea  = document.getElementById('issue-desc');
+            const langSelect    = document.getElementById('voice-lang-select');
 
-            const langSelect   = document.getElementById('voice-lang-select');
-
+            // ── Browser support check ──
             if (!SpeechRecognition) {
-                // Browser doesn't support Web Speech API — hide panel gracefully
-                statusEl.textContent = '⚠️ Voice not supported in this browser. Use Chrome or Edge.';
+                statusEl.textContent = '⚠️ Voice recording not supported. Please use Chrome or Edge.';
+                recordBtn.disabled = true;
+                recordBtn.style.opacity = '0.5';
+                return;
+            }
+
+            if (!('mediaDevices' in navigator) || !navigator.mediaDevices.getUserMedia) {
+                statusEl.textContent = '⚠️ Microphone API not available in this browser.';
                 recordBtn.disabled = true;
                 recordBtn.style.opacity = '0.5';
                 return;
@@ -3017,37 +3026,93 @@
             let accumulatedTranscript = '';
             let interimTranscript = '';
 
+            // ── Kural AI Wake-Word Conflict Management ──
+            // Pause Kural AI's background wake-word listener before starting
+            // our recording so they don't conflict (only one SpeechRecognition
+            // instance can be active in Chrome/Edge at the same time).
+            function pauseKuralAI() {
+                try {
+                    if (window.KuralAI) {
+                        // Set the flag FIRST so the onend handler won't auto-restart
+                        window.KuralAI.isExternallyPaused = true;
+                        if (window.KuralAI.wakeRecognition) {
+                            window.KuralAI.wakeRecognition.stop();
+                        }
+                        if (window.KuralAI.commandRecognition) {
+                            window.KuralAI.commandRecognition.stop();
+                        }
+                    }
+                } catch (e) { /* ignore — already stopped */ }
+            }
+
+            function resumeKuralAI() {
+                try {
+                    if (window.KuralAI) {
+                        window.KuralAI.isExternallyPaused = false;
+                        if (window.KuralAI.wakeRecognition) {
+                            setTimeout(() => {
+                                try {
+                                    if (window.KuralAI && !window.KuralAI.isExternallyPaused) {
+                                        window.KuralAI.wakeRecognition.start();
+                                    }
+                                } catch (e) { /* ignore */ }
+                            }, 800);
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            // ── UI State Helper ──
             function setRecordingState(recording) {
                 isRecording = recording;
                 recordBtn.style.display = recording ? 'none' : 'flex';
                 stopBtn.style.display   = recording ? 'flex' : 'none';
                 pulseEl.style.display   = recording ? 'inline-block' : 'none';
-                statusEl.textContent    = recording ? '🔴 Recording... Speak now' : '';
+                if (!recording) statusEl.textContent = '';
             }
 
             function showTranscript(text) {
-                if (!text.trim()) return;
+                if (!text || !text.trim()) return;
                 transcriptEl.textContent = text;
                 transcriptBox.style.display = 'block';
             }
 
+            // ══════════════════════════
             // ── Start Recording ──
-            recordBtn.addEventListener('click', () => {
+            // ══════════════════════════
+            recordBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                // Request microphone permission first to give a clear error message
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // Permission granted — immediately release the stream (Web Speech API
+                    // manages its own mic access; we just needed the permission check)
+                    stream.getTracks().forEach(t => t.stop());
+                } catch (permErr) {
+                    statusEl.textContent = '❌ Microphone permission denied. Please allow microphone access in your browser.';
+                    return;
+                }
+
+                // Pause Kural AI wake listener to free the SpeechRecognition channel
+                pauseKuralAI();
+
                 accumulatedTranscript = '';
                 interimTranscript = '';
 
                 recognition = new SpeechRecognition();
                 recognition.continuous = true;
                 recognition.interimResults = true;
-
-                // Use the explicitly selected language from the dropdown
                 recognition.lang = langSelect ? langSelect.value : 'en-IN';
+                recognition.maxAlternatives = 1;
 
                 recognition.onstart = () => {
                     setRecordingState(true);
                     transcriptEl.textContent = '';
                     transcriptBox.style.display = 'none';
-                    statusEl.textContent = '🔴 Recording... Speak now (' + (recognition.lang === 'ta-IN' ? 'தமிழ்' : 'English') + ')';
+                    const langLabel = recognition.lang === 'ta-IN' ? 'தமிழ்' : 'English';
+                    statusEl.textContent = `🔴 Recording... Speak now (${langLabel})`;
                 };
 
                 recognition.onresult = (event) => {
@@ -3060,20 +3125,23 @@
                             interimTranscript += result[0].transcript;
                         }
                     }
-                    const displayText = accumulatedTranscript + interimTranscript;
-                    showTranscript(displayText);
+                    showTranscript(accumulatedTranscript + interimTranscript);
                 };
 
                 recognition.onerror = (event) => {
+                    console.warn('[VoiceRecorder] SpeechRecognition error:', event.error);
                     const errMap = {
-                        'not-allowed': '❌ Microphone permission denied. Please allow mic access.',
-                        'no-speech':   '⚠️ No speech detected. Try again.',
-                        'network':     '⚠️ Network error during recognition.',
-                        'aborted':     ''
+                        'not-allowed':       '❌ Microphone permission denied. Please allow mic access in browser settings.',
+                        'no-speech':         '⚠️ No speech detected. Please try again.',
+                        'network':           '⚠️ Network error. Please check your connection.',
+                        'audio-capture':     '❌ No microphone found. Please connect a microphone.',
+                        'service-not-allowed': '❌ Speech service not allowed. Try reloading the page.',
+                        'aborted':           ''
                     };
-                    const msg = errMap[event.error] || ('⚠️ Error: ' + event.error);
                     setRecordingState(false);
+                    const msg = errMap[event.error] !== undefined ? errMap[event.error] : ('⚠️ Error: ' + event.error);
                     if (msg) statusEl.textContent = msg;
+                    resumeKuralAI();
                 };
 
                 recognition.onend = () => {
@@ -3081,22 +3149,47 @@
                     const finalText = (accumulatedTranscript + interimTranscript).trim();
                     if (finalText) {
                         showTranscript(finalText);
-                        statusEl.textContent = '✅ Recording complete';
+                        statusEl.textContent = '✅ Recording complete. Review text below.';
                     } else {
-                        statusEl.textContent = '⚠️ No speech captured. Try again.';
+                        if (!statusEl.textContent) {
+                            statusEl.textContent = '⚠️ No speech captured. Please try again.';
+                        }
                     }
+                    resumeKuralAI();
                 };
 
-                recognition.start();
+                try {
+                    recognition.start();
+                } catch (startErr) {
+                    console.error('[VoiceRecorder] Failed to start SpeechRecognition:', startErr);
+                    setRecordingState(false);
+                    statusEl.textContent = '⚠️ Could not start recording. Please try again.';
+                    resumeKuralAI();
+                }
             });
 
             // ── Stop Recording ──
-            stopBtn.addEventListener('click', () => {
-                if (recognition) recognition.stop();
+            stopBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (recognition && isRecording) {
+                    recognition.stop();
+                }
             });
 
+            // ── Language switch resets status hint ──
+            if (langSelect) {
+                langSelect.addEventListener('change', () => {
+                    if (!isRecording) {
+                        statusEl.textContent = '';
+                    }
+                });
+            }
+
             // ── Clear ──
-            clearBtn.addEventListener('click', () => {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 accumulatedTranscript = '';
                 interimTranscript = '';
                 transcriptEl.textContent = '';
@@ -3105,20 +3198,33 @@
             });
 
             // ── Insert into Description ──
-            insertBtn.addEventListener('click', () => {
+            insertBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 const text = transcriptEl.textContent.trim();
-                if (!text) return;
+                if (!text) {
+                    statusEl.textContent = '⚠️ No transcribed text to insert.';
+                    setTimeout(() => { statusEl.textContent = ''; }, 2500);
+                    return;
+                }
                 const existing = descTextarea.value.trim();
                 descTextarea.value = existing ? existing + '\n' + text : text;
-                descTextarea.dispatchEvent(new Event('input'));
+                descTextarea.dispatchEvent(new Event('input', { bubbles: true }));
                 statusEl.textContent = '✅ Text inserted into description!';
                 setTimeout(() => { statusEl.textContent = ''; }, 3000);
             });
 
-            // ── Polish with AI ──
-            polishBtn.addEventListener('click', async () => {
+            // ── Polish with AI (language-aware) ──
+            polishBtn.addEventListener('click', async (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
                 const rawText = transcriptEl.textContent.trim();
-                if (!rawText) return;
+                if (!rawText) {
+                    statusEl.textContent = '⚠️ Nothing to polish. Please record first.';
+                    setTimeout(() => { statusEl.textContent = ''; }, 3000);
+                    return;
+                }
 
                 const originalLabel = polishBtn.textContent;
                 polishBtn.textContent = '⏳ Polishing...';
@@ -3130,24 +3236,34 @@
                         ? 'http://localhost:5001/api'
                         : 'https://cleancityfinal.onrender.com/api';
 
+                    const selectedLang = langSelect ? langSelect.value : 'en-IN';
+
                     const res = await fetch(`${API_BASE}/ezhil-ai/transcribe`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`
                         },
-                        body: JSON.stringify({ rawText })
+                        body: JSON.stringify({
+                            rawText,
+                            lang: selectedLang  // hint for backend language preservation
+                        })
                     });
 
-                    if (!res.ok) throw new Error('AI unavailable');
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData.error || 'AI polish service unavailable');
+                    }
                     const data = await res.json();
                     if (data.polished) {
                         transcriptEl.textContent = data.polished;
-                        statusEl.textContent = '✨ AI polished successfully!';
-                        setTimeout(() => { statusEl.textContent = ''; }, 3000);
+                        statusEl.textContent = '✨ AI polished! Review and edit if needed, then click Insert.';
+                        setTimeout(() => { statusEl.textContent = ''; }, 4000);
+                    } else {
+                        throw new Error('No polished text returned');
                     }
                 } catch (err) {
-                    console.error('Voice AI polish error:', err);
+                    console.error('[VoiceRecorder] AI polish error:', err);
                     statusEl.textContent = '⚠️ AI polish unavailable. You can still insert the raw text.';
                     setTimeout(() => { statusEl.textContent = ''; }, 4000);
                 } finally {

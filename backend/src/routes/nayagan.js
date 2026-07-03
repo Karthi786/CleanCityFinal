@@ -158,7 +158,7 @@ AVAILABLE ACTIONS (return ONLY one of these JSON structures):
 {"action":"TRIGGER_DOWNLOAD","format":"pdf","dateRange":"this_month","voiceMessage":"This month's report download pannukiren."}
 
 6. Speak only (no action, e.g. permission denied or unknown command):
-{"action":"SPEAK_ONLY","voiceMessage":"Indha feature ungalukkு access illai."}
+{"action":"SPEAK_ONLY","voiceMessage":"Indha feature ungalukk access illai."}
 {"action":"SPEAK_ONLY","voiceMessage":"I didn't understand that. Please try again."}
 
 LANGUAGE RULES:
