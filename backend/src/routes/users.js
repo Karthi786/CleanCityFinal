@@ -317,25 +317,39 @@ router.get('/district-authorities', verifyToken, requireApproved, requireRole('U
             MLA: 'Legislative Assembly',
         };
 
-        // Fetch all authority users in this district
-        let query = supabaseAdmin
+        // Fetch all non-MLA authority users in this district (district-wide roles)
+        const { data: districtUsers, error: districtErr } = await supabaseAdmin
             .from('users')
             .select('id, name, role, department, district, constituency, phone_number, email, created_at, verification_status')
             .eq('district', district)
             .eq('verification_status', 'approved')
-            .in('role', AUTHORITY_ROLES);
+            .in('role', ['COLLECTOR', 'TAMILNADU_CORPORATION', 'TNEB', 'POLICE']);
+        if (districtErr) throw districtErr;
 
-        const { data: authUsers, error: authErr } = await query;
-        if (authErr) throw authErr;
+        // Fetch MLA(s) filtered by the citizen's OWN constituency only
+        let mlaUsers = [];
+        if (constituency) {
+            const { data: mlaData, error: mlaErr } = await supabaseAdmin
+                .from('users')
+                .select('id, name, role, department, district, constituency, phone_number, email, created_at, verification_status')
+                .eq('district', district)
+                .eq('constituency', constituency)
+                .eq('role', 'MLA')
+                .eq('verification_status', 'approved');
+            if (mlaErr) throw mlaErr;
+            mlaUsers = mlaData || [];
+        }
 
-        if (!authUsers || authUsers.length === 0) {
+        const authUsers = [...(districtUsers || []), ...mlaUsers];
+
+        if (authUsers.length === 0) {
             return res.json({ authorities: [] });
         }
 
         // Fetch all issues in district to compute per-authority stats
         const { data: allIssues, error: issueErr } = await supabaseAdmin
             .from('issues')
-            .select('status, department, updated_at, reporter:users!issues_reported_by_id_fkey(district)')
+            .select('status, department, updated_at, reporter:users!issues_reported_by_id_fkey(district, constituency)')
             .order('updated_at', { ascending: false });
 
         if (issueErr) throw issueErr;
@@ -345,9 +359,14 @@ router.get('/district-authorities', verifyToken, requireApproved, requireRole('U
         // Build authority stats by department (role maps to department key)
         const authorities = authUsers.map(auth => {
             // Issues assigned to this authority's department
-            const deptIssues = auth.role !== 'COLLECTOR' && auth.role !== 'MLA'
-                ? districtIssues.filter(i => i.department === auth.role)
-                : districtIssues; // COLLECTOR and MLA oversee all
+            let deptIssues;
+            if (auth.role === 'MLA') {
+                deptIssues = districtIssues.filter(i => i.reporter && i.reporter.constituency === auth.constituency);
+            } else if (auth.role !== 'COLLECTOR') {
+                deptIssues = districtIssues.filter(i => i.department === auth.role);
+            } else {
+                deptIssues = districtIssues; // COLLECTOR oversees all
+            }
 
             const totalAssigned = deptIssues.length;
             const solved = deptIssues.filter(i => i.status === 'COMPLETED').length;

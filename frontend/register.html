@@ -390,10 +390,10 @@
                             <input id="profile-photo" type="file" class="input" accept="image/*" />
                         </div>
 
-                        <!-- District selector (shown for all roles) -->
-                        <div class="form-group">
+                        <!-- District selector (hidden for CM role) -->
+                        <div class="form-group" id="district-group">
                             <label class="label" for="district">District</label>
-                            <select id="district" class="select" required>
+                            <select id="district" class="select">
                                 <option value="">— Choose your district —</option>
                             </select>
                         </div>
@@ -571,14 +571,26 @@
 
                 // Profile photo — only for non-citizen roles
                 profilePhotoGroup.style.display = selectedRole !== 'USER' ? 'flex' : 'none';
-                
-                // Collectors, Departments, and CM do not need a constituency
-                if (selectedRole === 'COLLECTOR' || selectedRole === 'DEPT' || selectedRole === 'CM' || selectedRole === 'COMMISSIONER') {
+
+                // CM is state-wide — hide district & constituency entirely
+                const distGroup = document.getElementById('district-group');
+                if (selectedRole === 'CM') {
+                    distGroup.style.display = 'none';
+                    document.getElementById('district').required = false;
                     constGroup.style.display = 'none';
                     document.getElementById('constituency').required = false;
                 } else {
-                    constGroup.style.display = 'flex';
-                    document.getElementById('constituency').required = true;
+                    distGroup.style.display = 'flex';
+                    document.getElementById('district').required = true;
+
+                    // Collectors, Departments, and COMMISSIONER do not need a constituency
+                    if (selectedRole === 'COLLECTOR' || selectedRole === 'DEPT' || selectedRole === 'COMMISSIONER') {
+                        constGroup.style.display = 'none';
+                        document.getElementById('constituency').required = false;
+                    } else {
+                        constGroup.style.display = 'flex';
+                        document.getElementById('constituency').required = true;
+                    }
                 }
 
                 // Only MLAs need a description
@@ -719,8 +731,13 @@
             const photoInput = document.getElementById('profile-photo');
 
             // ── Basic validation for all roles ──
-            if (!name || !email || !password || !phone_number || !district) {
+            if (!name || !email || !password || !phone_number) {
                 toast.error('Missing Fields', 'Please fill in all required fields.');
+                return;
+            }
+            // District is required for all roles except CM (state-wide role)
+            if (selectedRole !== 'CM' && !district) {
+                toast.error('Missing Fields', 'Please select your district.');
                 return;
             }
             if (selectedRole !== 'COLLECTOR' && selectedRole !== 'DEPT' && selectedRole !== 'CM' && selectedRole !== 'COMMISSIONER' && !constituency) {
@@ -766,7 +783,10 @@
                 try {
                     const payload = { 
                         name, email, password, role: finalRole, department: payloadDept,
-                        phone_number, district, constituency, profile_photo, description
+                        phone_number,
+                        district: selectedRole === 'CM' ? null : district,
+                        constituency,
+                        profile_photo, description
                     };
                     const data = await register(payload);
                     const redirect = (data.redirect || '').replace(/^\//, '');
