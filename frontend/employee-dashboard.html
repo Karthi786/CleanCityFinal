@@ -592,7 +592,7 @@
                 if (currentProfilePhotoBase64) payload.profile_photo = currentProfilePhotoBase64;
                 
                 // Fetch to /api/users/me
-                const res = await fetch((window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://cleancityfinal.onrender.com/api') + '/users/me', {
+                const res = await fetch((window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://makkalkural-3528.onrender.com/api') + '/users/me', {
                     method: 'PUT',
                     headers: {
                         'Content-Type': 'application/json',
