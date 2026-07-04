@@ -30,8 +30,8 @@ console.log("==========================================");
 // ── Create reusable Nodemailer transporter ──
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // Use STARTTLS
+    port: 465,
+    secure: true, // Use SSL/TLS
     auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS
