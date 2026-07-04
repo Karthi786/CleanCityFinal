@@ -14,6 +14,8 @@ Allow requests from Netlify frontend + local dev
 */
 const allowedOrigins = [
     "https://cleancitymdu.netlify.app",
+    "https://makkalkural.vercel.app",
+    process.env.FRONTEND_URL,
     "http://localhost:3000",
     "http://localhost:3001",
     "http://localhost:5001",
