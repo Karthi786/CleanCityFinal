@@ -3,8 +3,8 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { supabaseAdmin } = require('../config/supabase');
 const districtsMapping = require('../config/districts');
-// ── Use Gmail SMTP email service instead of Resend ──
-const { sendEmail } = require('../utils/emailService');
+// ── Use Resend API (HTTP-based) instead of Gmail SMTP (blocked on Render free tier) ──
+const { sendEmail } = require('../utils/resend');
 require('dotenv').config();
 
 const router = express.Router();
