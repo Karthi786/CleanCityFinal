@@ -856,18 +856,13 @@
                     throw new Error(data.error || 'Request failed');
                 }
 
-                toast.success('Verification Required', 'OTP sent successfully to your email.');
-                otpEmailDisplay.textContent = email;
+                toast.success('Welcome!', 'Account created successfully.');
                 
-                // Switch from registration form → OTP verification section
-                registrationFields.style.display = 'none';
-                otpSection.style.display = 'flex';
-                
-                // Start 60-second resend cooldown timer
-                startResendTimer();
-
-                // Auto-focus the OTP input
-                setTimeout(() => otpInput.focus(), 300);
+                // Direct login and redirect (OTP bypassed)
+                saveSession(data.token, data.user);
+                setTimeout(() => {
+                    window.location.href = data.redirect || 'citizen-dashboard.html';
+                }, 1000);
             } catch (err) {
                 toast.error('Registration Request Failed', err.message);
             } finally {
