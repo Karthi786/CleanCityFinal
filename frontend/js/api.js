@@ -5,7 +5,7 @@
 
 const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
     ? 'http://localhost:5001/api'
-    : 'https://cleancityfinal.onrender.com/api';
+    : 'https://makkalkural-3528.onrender.com/api';
 
 /**
  * Core fetch wrapper — attaches JWT, handles 401 redirect
