@@ -32,6 +32,7 @@ const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
     secure: true, // Use SSL/TLS
+    family: 4,    // Force IPv4 — Render free tier cannot reach Gmail over IPv6
     auth: {
         user: EMAIL_USER,
         pass: EMAIL_PASS
@@ -41,9 +42,9 @@ const transporter = nodemailer.createTransport({
     maxConnections: 5,
     maxMessages: 100,
     // Timeout settings
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,
-    socketTimeout: 15000
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000
 });
 
 // ── Verify SMTP connection on startup ──
