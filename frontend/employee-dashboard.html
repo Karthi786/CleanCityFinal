@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employee Dashboard — MakkalKural</title>
-    <meta name="description" content="MakkalKural employee dashboard — manage assigned civic issues and track resolution progress." />
+    <meta name="description"
+        content="MakkalKural employee dashboard — manage assigned civic issues and track resolution progress." />
     <link rel="stylesheet" href="css/styles.css" />
     <!-- Leaflet Map -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,294 +17,965 @@
     <link rel="stylesheet" href="css/nayagan.css" />
     <script src="js/nayagan-voice.js"></script>
     <style>
-        body { background-color: #F8F9FB; }
-        :root { --sidebar-width: 0px; }
+        body {
+            background-color: #F8F9FB;
+        }
+
+        :root {
+            --sidebar-width: 0px;
+        }
 
         /* ── Logo Image ── */
         .nav-island .logo-icon {
-            width: 36px; height: 36px; border-radius: 10px; object-fit: contain;
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            object-fit: contain;
         }
-        .dash-main { margin-left: 0 !important; padding-top: 90px; }
+
+        .dash-main {
+            margin-left: 0 !important;
+            padding-top: 90px;
+        }
 
         /* ── Floating Nav Bar (matches department-dashboard) ── */
         .nav-island-container {
-            position: fixed; top: 20px; left: 0; right: 0; z-index: 1000;
-            display: flex; justify-content: center; padding: 0 20px; pointer-events: none;
+            position: fixed;
+            top: 20px;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: center;
+            padding: 0 20px;
+            pointer-events: none;
         }
+
         .nav-island {
-            pointer-events: auto; display: flex; align-items: center;
-            justify-content: space-between; width: 100%; max-width: 1300px;
-            height: 68px; padding: 0 16px 0 24px; border-radius: 99px;
-            background: rgba(255,255,255,0.75); backdrop-filter: blur(20px) saturate(180%);
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 1300px;
+            height: 68px;
+            padding: 0 16px 0 24px;
+            border-radius: 99px;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(20px) saturate(180%);
             -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255,255,255,0.4); box-shadow: var(--shadow-md);
-            transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-md);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
+
         .nav-island.scrolled {
-            height: 60px; max-width: 1100px;
-            background: rgba(255,255,255,0.85); box-shadow: var(--shadow-lg);
+            height: 60px;
+            max-width: 1100px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: var(--shadow-lg);
         }
+
         .nav-island .logo {
-            display: flex; align-items: center; gap: 8px;
-            font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary);
         }
+
         /* nav-links, nav-link-item — defined in styles.css */
-        .nav-actions { display: flex; align-items: center; gap: 12px; }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
         /* ── Notification Bell ── */
-        .notification-wrapper { position: relative; }
-        .header-bell {
-            position: relative; cursor: pointer; color: var(--text-muted);
-            display: flex; align-items: center; justify-content: center;
-            width: 40px; height: 40px; border-radius: 50%;
-            background: rgba(15,23,42,0.04); transition: all 0.2s;
+        .notification-wrapper {
+            position: relative;
         }
-        .header-bell:hover { background: rgba(15,23,42,0.08); color: var(--text); }
+
+        .header-bell {
+            position: relative;
+            cursor: pointer;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.04);
+            transition: all 0.2s;
+        }
+
+        .header-bell:hover {
+            background: rgba(15, 23, 42, 0.08);
+            color: var(--text);
+        }
 
         /* ── Page Layout ── */
         .dash-content {
-            padding: 32px 40px !important; max-width: 1300px; margin: 0 auto;
+            padding: 32px 40px !important;
+            max-width: 1300px;
+            margin: 0 auto;
         }
+
         .page-header {
-            display: flex; justify-content: space-between; align-items: flex-start;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
             margin-bottom: 32px !important;
         }
+
         .page-title {
-            font-family: var(--font-display); font-size: 2.2rem; font-weight: 800;
-            letter-spacing: -0.02em; color: var(--text); margin-bottom: 6px;
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            color: var(--text);
+            margin-bottom: 6px;
         }
-        .page-subtitle { font-size: 0.95rem; color: var(--text-muted); }
+
+        .page-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
 
         /* ── Employee Role Badge ── */
         .emp-role-badge {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 8px 18px; border-radius: 99px;
-            background: var(--primary-light); border: 1.5px solid rgba(176,0,0,0.18);
-            color: var(--primary); font-family: var(--font-display); font-weight: 700;
-            font-size: 0.85rem; margin-top: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 99px;
+            background: var(--primary-light);
+            border: 1.5px solid rgba(176, 0, 0, 0.18);
+            color: var(--primary);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 8px;
         }
+
         .emp-role-badge .dept-dot {
-            width: 8px; height: 8px; border-radius: 50%; background: var(--primary);
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
             animation: pulseDot 1.8s ease-in-out infinite;
         }
-        @keyframes pulseDot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.4;transform:scale(.75);} }
+
+        @keyframes pulseDot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .4;
+                transform: scale(.75);
+            }
+        }
 
         /* ── Tab Pane ── */
-        .tab-pane { display: none; }
-        .tab-pane.active { display: block; }
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
 
         /* ── KPI Stat Cards (matches dept dashboard) ── */
         .kpi-grid {
-            display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 28px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 28px;
         }
+
         .kpi-card {
-            background: #fff; border: 1px solid rgba(15,23,42,0.06);
-            border-radius: 20px; padding: 20px; box-shadow: var(--shadow-sm);
-            display: flex; flex-direction: column; gap: 8px; position: relative; overflow: hidden;
+            background: #fff;
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
+
         .kpi-card::before {
-            content: ''; position: absolute; top: 0; left: 0; right: 0;
-            height: 3px; border-radius: 20px 20px 0 0;
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            border-radius: 20px 20px 0 0;
         }
-        .kpi-card.kpi-blue::before  { background: linear-gradient(90deg,#2563EB,#8B5CF6); }
-        .kpi-card.kpi-yellow::before { background: linear-gradient(90deg,#F59E0B,#EF4444); }
-        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg,#6366f1,#2563EB); }
-        .kpi-card.kpi-green::before  { background: linear-gradient(90deg,#10B981,#06B6D4); }
-        .kpi-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
-        .kpi-value { font-family: var(--font-display); font-size: 2.2rem; font-weight: 800; color: var(--text); line-height: 1; }
-        .kpi-icon { position: absolute; top: 16px; right: 16px; font-size: 1.8rem; opacity: 0.15; }
+
+        .kpi-card.kpi-blue::before {
+            background: linear-gradient(90deg, #2563EB, #8B5CF6);
+        }
+
+        .kpi-card.kpi-yellow::before {
+            background: linear-gradient(90deg, #F59E0B, #EF4444);
+        }
+
+        .kpi-card.kpi-indigo::before {
+            background: linear-gradient(90deg, #6366f1, #2563EB);
+        }
+
+        .kpi-card.kpi-green::before {
+            background: linear-gradient(90deg, #10B981, #06B6D4);
+        }
+
+        .kpi-label {
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .kpi-value {
+            font-family: var(--font-display);
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1;
+        }
+
+        .kpi-icon {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            font-size: 1.8rem;
+            opacity: 0.15;
+        }
 
         /* ── Issue Cards ── */
-        .issues-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(360px,1fr)); gap: 20px; }
+        .issues-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
         .issue-card {
-            background: var(--bg-card); border: 1px solid rgba(15,23,42,0.06);
-            border-radius: 24px; overflow: hidden; transition: all 0.25s;
-            display: flex; flex-direction: column; box-shadow: var(--shadow-sm);
+            background: var(--bg-card);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 24px;
+            overflow: hidden;
+            transition: all 0.25s;
+            display: flex;
+            flex-direction: column;
+            box-shadow: var(--shadow-sm);
         }
-        .issue-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: rgba(176,0,0,0.12); }
-        .issue-card-img { height: 160px; object-fit: cover; width: 100%; background: #F1F3F5; display: block; }
+
+        .issue-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(176, 0, 0, 0.12);
+        }
+
+        .issue-card-img {
+            height: 160px;
+            object-fit: cover;
+            width: 100%;
+            background: #F1F3F5;
+            display: block;
+        }
+
         .issue-card-img-placeholder {
-            height: 160px; display: flex; align-items: center; justify-content: center;
-            font-size: 3rem; background: linear-gradient(135deg,rgba(176,0,0,0.06),rgba(176,0,0,0.02));
+            height: 160px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            background: linear-gradient(135deg, rgba(176, 0, 0, 0.06), rgba(176, 0, 0, 0.02));
         }
-        .issue-card-body { padding: 18px 20px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
-        .issue-card-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+
+        .issue-card-body {
+            padding: 18px 20px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .issue-card-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
         .badge {
-            padding: 3px 10px; border-radius: 99px; font-size: 0.72rem; font-weight: 700;
+            padding: 3px 10px;
+            border-radius: 99px;
+            font-size: 0.72rem;
+            font-weight: 700;
         }
-        .badge.pending   { background: #fef3c7; color: #d97706; }
-        .badge.in-progress { background: #dbeafe; color: #2563eb; }
-        .badge.completed { background: #dcfce7; color: #16a34a; }
-        .badge.priority  { background: #fce7f3; color: #be185d; }
-        .badge.dept      { background: rgba(176,0,0,0.08); color: var(--primary); }
-        .issue-card-title { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text); }
-        .issue-card-desc  { font-size: 0.83rem; color: var(--text-muted); line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-        .issue-card-meta  { font-size: 0.78rem; color: var(--text-muted); display: flex; flex-direction: column; gap: 4px; }
-        .issue-card-meta span { display: flex; align-items: center; gap: 5px; }
-        .issue-remarks-box { font-size: 0.8rem; padding: 8px 12px; background: var(--primary-light); border-radius: 10px; color: var(--primary); font-weight: 600; }
+
+        .badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .badge.in-progress {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .badge.completed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .badge.priority {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .badge.dept {
+            background: rgba(176, 0, 0, 0.08);
+            color: var(--primary);
+        }
+
+        .issue-card-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+        }
+
+        .issue-card-desc {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .issue-card-meta {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .issue-card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .issue-remarks-box {
+            font-size: 0.8rem;
+            padding: 8px 12px;
+            background: var(--primary-light);
+            border-radius: 10px;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
         .issue-card-actions {
-            padding: 10px 20px; display: flex; gap: 8px; flex-wrap: wrap;
+            padding: 10px 20px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
+
         .btn-nav-action {
-            padding: 7px 14px; border-radius: 99px; font-size: 0.78rem; font-weight: 700;
-            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 5px;
-            border: 1.5px solid rgba(15,23,42,0.1); background: rgba(15,23,42,0.02); color: var(--text-muted);
+            padding: 7px 14px;
+            border-radius: 99px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: 1.5px solid rgba(15, 23, 42, 0.1);
+            background: rgba(15, 23, 42, 0.02);
+            color: var(--text-muted);
         }
-        .btn-nav-action:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); transform: translateY(-1px); }
-        .btn-nav-action.map-btn { border-color: rgba(37,99,235,0.3); color: #2563eb; }
-        .btn-nav-action.map-btn:hover { background: rgba(37,99,235,0.08); border-color: #2563eb; }
-        .btn-nav-action.review-btn { border-color: rgba(245,158,11,0.3); color: #d97706; }
-        .btn-nav-action.review-btn:hover { background: rgba(245,158,11,0.08); border-color: #d97706; }
+
+        .btn-nav-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-nav-action.map-btn {
+            border-color: rgba(37, 99, 235, 0.3);
+            color: #2563eb;
+        }
+
+        .btn-nav-action.map-btn:hover {
+            background: rgba(37, 99, 235, 0.08);
+            border-color: #2563eb;
+        }
+
+        .btn-nav-action.review-btn {
+            border-color: rgba(245, 158, 11, 0.3);
+            color: #d97706;
+        }
+
+        .btn-nav-action.review-btn:hover {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: #d97706;
+        }
+
         .issue-card-footer {
-            padding: 14px 20px; border-top: 1px solid var(--border);
-            display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+            padding: 14px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
         }
+
         .status-select {
-            flex: 1; padding: 8px 12px; border: 1.5px solid var(--border); border-radius: 12px;
-            font-size: 0.85rem; font-weight: 600; color: var(--text); background: var(--bg); cursor: pointer;
+            flex: 1;
+            padding: 8px 12px;
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text);
+            background: var(--bg);
+            cursor: pointer;
         }
-        .status-select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
+
+        .status-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
         .btn-update {
-            padding: 8px 16px; border-radius: 12px; background: var(--primary); color: white;
-            font-size: 0.82rem; font-weight: 700; border: none; cursor: pointer; transition: all 0.2s;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: var(--primary);
+            color: white;
+            font-size: 0.82rem;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-update:hover { background: var(--primary-dark); transform: translateY(-1px); }
+
+        .btn-update:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
         .btn-remarks {
-            padding: 8px 16px; border-radius: 12px;
-            background: var(--bg); color: var(--primary); border: 1.5px solid var(--primary);
-            font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+            padding: 8px 16px;
+            border-radius: 12px;
+            background: var(--bg);
+            color: var(--primary);
+            border: 1.5px solid var(--primary);
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .btn-remarks:hover { background: var(--primary-light); }
+
+        .btn-remarks:hover {
+            background: var(--primary-light);
+        }
 
         /* ── Review Cards ── */
-        .reviews-list { display: flex; flex-direction: column; gap: 16px; }
-        .review-card {
-            background: var(--bg-card); backdrop-filter: blur(20px); border: 1px solid rgba(15,23,42,0.06);
-            border-radius: 20px; padding: 20px 24px; box-shadow: var(--shadow-sm); transition: all var(--transition);
+        .reviews-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
-        .review-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); border-color: rgba(176,0,0,0.12); }
-        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-        .stars { color: #f59e0b; font-size: 1.15rem; letter-spacing: 2px; }
-        .review-meta { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; }
-        .review-issue-title { font-family: var(--font-display); font-weight: 800; font-size: 1.05rem; color: var(--text); margin-bottom: 6px; }
-        .review-comment { background: rgba(15,23,42,0.02); padding: 12px 16px; border-radius: 12px; color: var(--text); font-size: 0.9rem; line-height: 1.5; margin-top: 10px; }
+
+        .review-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(15, 23, 42, 0.06);
+            border-radius: 20px;
+            padding: 20px 24px;
+            box-shadow: var(--shadow-sm);
+            transition: all var(--transition);
+        }
+
+        .review-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: rgba(176, 0, 0, 0.12);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .stars {
+            color: #f59e0b;
+            font-size: 1.15rem;
+            letter-spacing: 2px;
+        }
+
+        .review-meta {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .review-issue-title {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.05rem;
+            color: var(--text);
+            margin-bottom: 6px;
+        }
+
+        .review-comment {
+            background: rgba(15, 23, 42, 0.02);
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-top: 10px;
+        }
 
         /* ── Section Title ── */
         .section-title {
-            font-family: var(--font-display); font-size: 1.15rem; font-weight: 800;
-            color: var(--text); margin-bottom: 16px; border-bottom: 1.5px solid var(--border); padding-bottom: 8px;
+            font-family: var(--font-display);
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 16px;
+            border-bottom: 1.5px solid var(--border);
+            padding-bottom: 8px;
         }
 
         /* ── Map ── */
         #emp-map {
-            width: 100%; height: 520px; border-radius: 24px;
-            border: 1px solid rgba(15,23,42,0.08); box-shadow: var(--shadow-md);
-            overflow: hidden; background: #f1f5f9; position: relative; z-index: 1;
+            width: 100%;
+            height: 520px;
+            border-radius: 24px;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+            background: #f1f5f9;
+            position: relative;
+            z-index: 1;
         }
-        @media (max-width: 768px) { #emp-map { height: 360px; } }
+
+        @media (max-width: 768px) {
+            #emp-map {
+                height: 360px;
+            }
+        }
+
         .map-filter-toolbar {
-            display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; align-items: flex-start;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+            align-items: flex-start;
         }
-        .map-filter-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+        .map-filter-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+        }
+
         .map-filter-label {
-            font-size: 0.72rem; font-weight: 800; text-transform: uppercase;
-            letter-spacing: 0.05em; color: var(--text-muted); white-space: nowrap; margin-right: 2px;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            white-space: nowrap;
+            margin-right: 2px;
         }
+
         .map-pill {
-            display: inline-flex; align-items: center; gap: 4px; padding: 5px 14px;
-            border-radius: 99px; font-size: 0.8rem; font-weight: 600;
-            border: 1.5px solid rgba(15,23,42,0.1); background: rgba(255,255,255,0.8);
-            color: var(--text-muted); cursor: pointer; transition: all 0.2s; white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 14px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1.5px solid rgba(15, 23, 42, 0.1);
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
         }
-        .map-pill:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
-        .map-pill.active { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 12px rgba(176,0,0,0.2); }
-        .map-stats-row { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
+
+        .map-pill:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .map-pill.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(176, 0, 0, 0.2);
+        }
+
+        .map-stats-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
         .map-stat-chip {
-            display: inline-flex; align-items: center; gap: 6px; padding: 7px 16px;
-            border-radius: 99px; font-size: 0.8rem; font-weight: 700;
-            background: rgba(255,255,255,0.85); border: 1px solid rgba(15,23,42,0.08);
-            box-shadow: var(--shadow-sm); color: var(--text);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 7px 16px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: var(--shadow-sm);
+            color: var(--text);
         }
+
         .emp-scope-badge {
-            display: inline-flex; align-items: center; gap: 8px; padding: 8px 18px;
-            border-radius: 99px; background: var(--primary-light); border: 1.5px solid rgba(176,0,0,0.18);
-            color: var(--primary); font-family: var(--font-display); font-weight: 700; font-size: 0.85rem; margin-bottom: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            border-radius: 99px;
+            background: var(--primary-light);
+            border: 1.5px solid rgba(176, 0, 0, 0.18);
+            color: var(--primary);
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-bottom: 16px;
         }
-        .emp-scope-badge .scope-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); animation: pulseDot 1.8s ease-in-out infinite; }
+
+        .emp-scope-badge .scope-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: pulseDot 1.8s ease-in-out infinite;
+        }
 
         /* Leaflet overrides */
-        .leaflet-popup-content-wrapper { border-radius: 20px !important; box-shadow: 0 12px 40px rgba(15,23,42,0.18) !important; padding: 0 !important; overflow: hidden !important; border: 1px solid rgba(15,23,42,0.06) !important; }
-        .leaflet-popup-content { margin: 0 !important; width: 290px !important; }
-        .leaflet-popup-tip-container { margin-top: -1px; }
-        .map-popup-card { font-family: 'Inter', sans-serif; overflow: hidden; }
-        .map-popup-image { width: 100%; height: 130px; object-fit: cover; display: block; background: #f1f5f9; }
-        .map-popup-image-placeholder { width: 100%; height: 90px; background: linear-gradient(135deg,#f1f5f9,#e2e8f0); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; }
-        .map-popup-body { padding: 14px 16px 8px; }
-        .map-popup-title { font-family: 'Outfit', sans-serif; font-weight: 800; font-size: 0.93rem; color: #0f172a; margin-bottom: 5px; line-height: 1.3; }
-        .map-popup-meta { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 9px; }
-        .map-popup-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 700; }
-        .map-popup-badge.pending   { background: #fef3c7; color: #d97706; }
-        .map-popup-badge.in-progress { background: #dbeafe; color: #2563eb; }
-        .map-popup-badge.completed  { background: #dcfce7; color: #16a34a; }
-        .map-popup-info-row { display: flex; flex-direction: column; gap: 4px; font-size: 0.77rem; color: #475569; margin-bottom: 8px; }
-        .map-popup-footer { padding: 10px 16px 14px; border-top: 1px solid rgba(15,23,42,0.06); }
-        .map-popup-dir-btn {
-            display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%;
-            padding: 8px 14px; background: var(--primary); color: white; border: none; border-radius: 99px;
-            font-size: 0.82rem; font-weight: 700; cursor: pointer; font-family: 'Outfit', sans-serif;
-            transition: all 0.2s; text-decoration: none;
+        .leaflet-popup-content-wrapper {
+            border-radius: 20px !important;
+            box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18) !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            border: 1px solid rgba(15, 23, 42, 0.06) !important;
         }
-        .map-popup-dir-btn:hover { background: var(--primary-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(176,0,0,0.3); }
-        .custom-map-marker { width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 3px 10px rgba(0,0,0,0.28); display: flex; align-items: center; justify-content: center; font-size: 0.75rem; }
-        .cm-pending    { background: #d97706; }
-        .cm-inprogress { background: #2563eb; }
-        .cm-completed  { background: #16a34a; }
+
+        .leaflet-popup-content {
+            margin: 0 !important;
+            width: 290px !important;
+        }
+
+        .leaflet-popup-tip-container {
+            margin-top: -1px;
+        }
+
+        .map-popup-card {
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .map-popup-image {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            display: block;
+            background: #f1f5f9;
+        }
+
+        .map-popup-image-placeholder {
+            width: 100%;
+            height: 90px;
+            background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+        }
+
+        .map-popup-body {
+            padding: 14px 16px 8px;
+        }
+
+        .map-popup-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.93rem;
+            color: #0f172a;
+            margin-bottom: 5px;
+            line-height: 1.3;
+        }
+
+        .map-popup-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 9px;
+        }
+
+        .map-popup-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 2px 8px;
+            border-radius: 99px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .map-popup-badge.pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+
+        .map-popup-badge.in-progress {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+
+        .map-popup-badge.completed {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+
+        .map-popup-info-row {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 0.77rem;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+
+        .map-popup-footer {
+            padding: 10px 16px 14px;
+            border-top: 1px solid rgba(15, 23, 42, 0.06);
+        }
+
+        .map-popup-dir-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 7px;
+            width: 100%;
+            padding: 8px 14px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 99px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+
+        .map-popup-dir-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(176, 0, 0, 0.3);
+        }
+
+        .custom-map-marker {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.28);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .cm-pending {
+            background: #d97706;
+        }
+
+        .cm-inprogress {
+            background: #2563eb;
+        }
+
+        .cm-completed {
+            background: #16a34a;
+        }
 
         /* ── Empty state ── */
         .empty-state {
-            padding: 48px; text-align: center; background: var(--bg-card); border-radius: 24px;
-            border: 1.5px dashed var(--border); color: var(--text-muted);
+            padding: 48px;
+            text-align: center;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1.5px dashed var(--border);
+            color: var(--text-muted);
         }
-        .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
 
         /* ── Remarks modal ── */
         .modal-overlay {
-            position: fixed; inset: 0; z-index: 9999; display: flex; align-items: center; justify-content: center;
-            background: rgba(15,23,42,0.45); backdrop-filter: blur(6px); opacity: 0; pointer-events: none; transition: opacity 0.25s;
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s;
         }
-        .modal-overlay.open { opacity: 1; pointer-events: auto; }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
         .modal-box {
-            background: var(--bg-card); border-radius: 24px; border: 1.5px solid var(--border);
-            box-shadow: var(--shadow-lg); padding: 28px 32px; width: 92%; max-width: 500px; display: flex; flex-direction: column; gap: 16px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            border: 1.5px solid var(--border);
+            box-shadow: var(--shadow-lg);
+            padding: 28px 32px;
+            width: 92%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
-        .modal-title { font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: var(--text); }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--text);
+        }
+
         .modal-box textarea {
-            width: 100%; padding: 12px 14px; border: 1.5px solid var(--border); border-radius: 14px;
-            font-size: 0.9rem; resize: vertical; min-height: 100px; font-family: var(--font-body); color: var(--text); background: var(--bg);
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            font-size: 0.9rem;
+            resize: vertical;
+            min-height: 100px;
+            font-family: var(--font-body);
+            color: var(--text);
+            background: var(--bg);
             box-sizing: border-box;
         }
-        .modal-box textarea:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px var(--primary-glow); }
-        .modal-footer { display: flex; gap: 10px; justify-content: flex-end; }
+
+        .modal-box textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
 
         /* ── Mobile hamburger (uses shared mobile-burger from styles.css) ── */
         @media (max-width: 1024px) {
-            .kpi-grid { grid-template-columns: repeat(2,1fr); }
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
+
         @media (max-width: 768px) {
-            .dash-content { padding: 16px 14px !important; }
-            .page-header { flex-direction: column; gap: 12px; }
-            .page-title { font-size: 1.5rem !important; }
-            .issues-grid { grid-template-columns: 1fr; }
-            .kpi-grid { grid-template-columns: repeat(2,1fr); gap: 12px; }
-            .kpi-value { font-size: 1.8rem !important; }
-            .kpi-card { padding: 16px !important; }
-            .issue-card-body { padding: 14px 16px; }
-            .modal-box { padding: 20px 18px; }
+            .dash-content {
+                padding: 16px 14px !important;
+            }
+
+            .page-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .page-title {
+                font-size: 1.5rem !important;
+            }
+
+            .issues-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .kpi-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .kpi-value {
+                font-size: 1.8rem !important;
+            }
+
+            .kpi-card {
+                padding: 16px !important;
+            }
+
+            .issue-card-body {
+                padding: 14px 16px;
+            }
+
+            .modal-box {
+                padding: 20px 18px;
+            }
         }
+
         @media (max-width: 480px) {
-            .kpi-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-            .kpi-value { font-size: 1.5rem !important; }
-            .kpi-label { font-size: 0.7rem; }
+            .kpi-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .kpi-value {
+                font-size: 1.5rem !important;
+            }
+
+            .kpi-label {
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -318,17 +990,22 @@
                 <span>MakkalKural</span>
             </a>
             <ul class="nav-links">
-                <li><a class="nav-link-item active" href="#" id="nav-issues" onclick="switchTab('issues');return false;">📋 My Issues</a></li>
-                <li><a class="nav-link-item" href="#" id="nav-reviews" onclick="switchTab('reviews');return false;">⭐ Reviews</a></li>
-                <li><a class="nav-link-item" href="#" id="nav-map" onclick="switchTab('map');return false;">🗺️ Map View</a></li>
-                <li><a class="nav-link-item" href="#" id="nav-profile" onclick="switchTab('profile');return false;">⚙️ Profile</a></li>
+                <li><a class="nav-link-item active" href="#" id="nav-issues"
+                        onclick="switchTab('issues');return false;">📋 My Issues</a></li>
+                <li><a class="nav-link-item" href="#" id="nav-reviews" onclick="switchTab('reviews');return false;">⭐
+                        Reviews</a></li>
+                <li><a class="nav-link-item" href="#" id="nav-map" onclick="switchTab('map');return false;">🗺️ Map
+                        View</a></li>
+                <li><a class="nav-link-item" href="#" id="nav-profile" onclick="switchTab('profile');return false;">⚙️
+                        Profile</a></li>
             </ul>
             <div class="nav-actions">
                 <div style="font-size:0.85rem;color:var(--text-muted);font-weight:600;" id="nav-username">—</div>
                 <button class="btn btn-ghost btn-sm" id="logout-btn">Sign Out</button>
                 <!-- Mobile Burger Button -->
                 <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -341,20 +1018,27 @@
         <div class="mobile-nav-overlay" id="mobile-nav-overlay">
             <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                 <div class="mobile-drawer-header">
-                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
+                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon"
+                            src="makkal-sevi-logo.png" alt="MakkalKural Logo"
+                            style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span>
+                    </div>
                     <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                 </div>
                 <div class="mobile-drawer-nav">
-                    <a href="#" class="mobile-drawer-link active" id="drawer-issues" onclick="event.preventDefault();switchTab('issues');">
+                    <a href="#" class="mobile-drawer-link active" id="drawer-issues"
+                        onclick="event.preventDefault();switchTab('issues');">
                         <span class="drawer-icon">📋</span> My Issues
                     </a>
-                    <a href="#" class="mobile-drawer-link" id="drawer-reviews" onclick="event.preventDefault();switchTab('reviews');">
+                    <a href="#" class="mobile-drawer-link" id="drawer-reviews"
+                        onclick="event.preventDefault();switchTab('reviews');">
                         <span class="drawer-icon">⭐</span> Reviews
                     </a>
-                    <a href="#" class="mobile-drawer-link" id="drawer-map" onclick="event.preventDefault();switchTab('map');">
+                    <a href="#" class="mobile-drawer-link" id="drawer-map"
+                        onclick="event.preventDefault();switchTab('map');">
                         <span class="drawer-icon">🗺️</span> Map View
                     </a>
-                    <a href="#" class="mobile-drawer-link" id="drawer-profile" onclick="event.preventDefault();switchTab('profile');">
+                    <a href="#" class="mobile-drawer-link" id="drawer-profile"
+                        onclick="event.preventDefault();switchTab('profile');">
                         <span class="drawer-icon">⚙️</span> Profile
                     </a>
                 </div>
@@ -366,7 +1050,8 @@
                             <div class="mobile-drawer-user-role">Employee</div>
                         </div>
                     </div>
-                    <button class="btn btn-outline" style="width:100%;border-radius:99px;" id="drawer-logout-btn">Sign Out</button>
+                    <button class="btn btn-outline" style="width:100%;border-radius:99px;" id="drawer-logout-btn">Sign
+                        Out</button>
                 </div>
             </div>
         </div>
@@ -416,7 +1101,10 @@
                 <!-- Issues Grid -->
                 <div class="section-title">My Assigned Issues</div>
                 <div class="issues-grid" id="issues-grid">
-                    <div class="empty-state"><div class="empty-state-icon">📋</div><p>Loading your assigned issues…</p></div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📋</div>
+                        <p>Loading your assigned issues…</p>
+                    </div>
                 </div>
             </div>
 
@@ -424,7 +1112,10 @@
             <div id="tab-reviews" class="tab-pane">
                 <div class="section-title">Citizen Reviews on My Completed Issues</div>
                 <div class="reviews-list" id="reviews-list">
-                    <div class="empty-state"><div class="empty-state-icon">⭐</div><p>Loading reviews…</p></div>
+                    <div class="empty-state">
+                        <div class="empty-state-icon">⭐</div>
+                        <p>Loading reviews…</p>
+                    </div>
                 </div>
             </div>
 
@@ -457,32 +1148,46 @@
             <!-- ── Profile Tab ── -->
             <div id="tab-profile" class="tab-pane">
                 <div class="section-title">⚙️ Profile Settings</div>
-                <div style="background:var(--bg-card); padding:24px; border-radius:20px; box-shadow:var(--shadow-sm); border:1px solid var(--border); max-width: 600px;">
+                <div
+                    style="background:var(--bg-card); padding:24px; border-radius:20px; box-shadow:var(--shadow-sm); border:1px solid var(--border); max-width: 600px;">
                     <div style="display:flex; align-items:center; gap:20px; margin-bottom:24px;">
-                        <img id="profile-photo-preview" src="https://ui-avatars.com/api/?name=Employee" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
+                        <img id="profile-photo-preview" src="https://ui-avatars.com/api/?name=Employee"
+                            style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid var(--border);">
                         <div>
-                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Profile Photo (Editable)</label>
-                            <input type="file" id="profile-photo-input" accept="image/*" style="display:block; margin-top:8px;">
+                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Profile Photo
+                                (Editable)</label>
+                            <input type="file" id="profile-photo-input" accept="image/*"
+                                style="display:block; margin-top:8px;">
                         </div>
                     </div>
                     <div style="display:flex; flex-direction:column; gap:16px;">
                         <div>
-                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Full Name (Editable)</label>
-                            <input type="text" id="profile-name-input" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px;" placeholder="Full Name">
+                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Full Name
+                                (Editable)</label>
+                            <input type="text" id="profile-name-input"
+                                style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px;"
+                                placeholder="Full Name">
                         </div>
                         <div>
-                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Email (Non-Editable)</label>
-                            <input type="text" id="profile-email-input" disabled style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px; background:var(--bg);">
+                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Email
+                                (Non-Editable)</label>
+                            <input type="text" id="profile-email-input" disabled
+                                style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px; background:var(--bg);">
                         </div>
                         <div>
-                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Department (Non-Editable)</label>
-                            <input type="text" id="profile-dept-input" disabled style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px; background:var(--bg);">
+                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Department
+                                (Non-Editable)</label>
+                            <input type="text" id="profile-dept-input" disabled
+                                style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px; background:var(--bg);">
                         </div>
                         <div>
-                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Role (Non-Editable)</label>
-                            <input type="text" id="profile-role-input" disabled style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px; background:var(--bg);">
+                            <label style="font-size:0.85rem; font-weight:600; color:var(--text-muted);">Role
+                                (Non-Editable)</label>
+                            <input type="text" id="profile-role-input" disabled
+                                style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border); margin-top:6px; background:var(--bg);">
                         </div>
-                        <button class="btn-update" id="profile-save-btn" style="margin-top:10px; padding:12px;">💾 Save Changes</button>
+                        <button class="btn-update" id="profile-save-btn" style="margin-top:10px; padding:12px;">💾 Save
+                            Changes</button>
                     </div>
                 </div>
             </div>
@@ -506,12 +1211,16 @@
     <div class="modal-overlay" id="completion-modal">
         <div class="modal-box">
             <div class="modal-title">✅ Submit Completion Request</div>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">You must upload at least one proof image of the completed work. The Department Admin will review this request.</p>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:12px;">You must upload at least one
+                proof image of the completed work. The Department Admin will review this request.</p>
             <textarea id="completion-remarks-text" placeholder="Describe the completed work..."></textarea>
             <div style="margin-top:12px;">
-                <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:6px;">Upload Proof Image *</label>
-                <input type="file" id="completion-image-input" accept="image/*" style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px;">
-                <img id="completion-image-preview" style="max-width:100%; max-height:200px; margin-top:10px; display:none; border-radius:8px; border:1px solid var(--border);">
+                <label style="font-size:0.85rem; font-weight:600; display:block; margin-bottom:6px;">Upload Proof Image
+                    *</label>
+                <input type="file" id="completion-image-input" accept="image/*"
+                    style="width:100%; padding:8px; border:1px solid var(--border); border-radius:8px;">
+                <img id="completion-image-preview"
+                    style="max-width:100%; max-height:200px; margin-top:10px; display:none; border-radius:8px; border:1px solid var(--border);">
             </div>
             <div class="modal-footer" style="margin-top:20px;">
                 <button class="btn btn-ghost btn-sm" onclick="closeCompletionModal()">Cancel</button>
@@ -554,7 +1263,7 @@
         document.getElementById('emp-dept-label').textContent = deptLabel;
         document.getElementById('nav-username').textContent = user.name;
         document.getElementById('emp-page-title').textContent = 'Employee Dashboard';
-        
+
         // Init profile tab
         document.getElementById('profile-name-input').value = user.name || '';
         document.getElementById('profile-email-input').value = user.email || '';
@@ -583,14 +1292,14 @@
             const btn = document.getElementById('profile-save-btn');
             const newName = document.getElementById('profile-name-input').value.trim();
             if (!newName) return toast.error('Validation', 'Name cannot be empty.');
-            
+
             btn.disabled = true;
             btn.textContent = 'Saving...';
             try {
                 // Update via API
                 const payload = { name: newName };
                 if (currentProfilePhotoBase64) payload.profile_photo = currentProfilePhotoBase64;
-                
+
                 // Fetch to /api/users/me
                 const res = await fetch((window.location.hostname === 'localhost' ? 'http://localhost:5001/api' : 'https://makkalkural-3528.onrender.com/api') + '/users/me', {
                     method: 'PUT',
@@ -602,16 +1311,16 @@
                 });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'Failed to update profile');
-                
+
                 toast.success('Profile Updated', 'Your profile has been saved.');
-                
+
                 // Update local storage and UI
                 user.name = newName;
                 if (currentProfilePhotoBase64) user.profile_photo = currentProfilePhotoBase64;
                 localStorage.setItem('cm_user', JSON.stringify(user));
                 document.getElementById('emp-username').textContent = user.name;
                 document.getElementById('nav-username').textContent = user.name;
-                
+
             } catch (err) {
                 console.error('[Employee Profile] Error:', err);
                 toast.error('Update Failed', err.message);
@@ -634,9 +1343,9 @@
         // ── Mobile Drawer (uses shared initDashboardDrawer) ──
         initDashboardDrawer({
             linkMap: {
-                'drawer-issues':  'nav-issues',
+                'drawer-issues': 'nav-issues',
                 'drawer-reviews': 'nav-reviews',
-                'drawer-map':     'nav-map',
+                'drawer-map': 'nav-map',
                 'drawer-profile': 'nav-profile',
             },
             onLogout: doLogout
@@ -687,7 +1396,7 @@
 
         // ── Load Stats ──
         async function loadStats() {
-            ['s-total','s-pending','s-inprogress','s-completed'].forEach(id => {
+            ['s-total', 's-pending', 's-inprogress', 's-completed'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = '...';
             });
@@ -695,13 +1404,13 @@
                 console.log('[Employee Dashboard] Fetching stats for user.id:', user.id);
                 const stats = await employeesAPI.myStats();
                 console.log('[Employee Dashboard] Stats received:', stats);
-                document.getElementById('s-total').textContent     = stats.total     ?? 0;
-                document.getElementById('s-pending').textContent   = stats.pending   ?? 0;
+                document.getElementById('s-total').textContent = stats.total ?? 0;
+                document.getElementById('s-pending').textContent = stats.pending ?? 0;
                 document.getElementById('s-inprogress').textContent = stats.inProgress ?? 0;
                 document.getElementById('s-completed').textContent = stats.completed ?? 0;
             } catch (err) {
                 console.error('[Employee Dashboard] loadStats error:', err);
-                ['s-total','s-pending','s-inprogress','s-completed'].forEach(id => {
+                ['s-total', 's-pending', 's-inprogress', 's-completed'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el) el.textContent = '0';
                 });
@@ -763,7 +1472,7 @@
                     <div class="empty-state-icon">📋</div>
                     <p>No issues assigned to you yet.</p>
                     <p style="font-size:0.8rem;margin-top:8px;color:var(--text-muted);">
-                        Issues assigned to your account (ID: ${user.id.slice(0,8)}…) will appear here.
+                        Issues assigned to your account (ID: ${user.id.slice(0, 8)}…) will appear here.
                     </p>
                 </div>`;
                 return;
@@ -773,10 +1482,10 @@
                     ? `<img class="issue-card-img" src="${issue.image_url}" alt="Issue" onerror="this.style.display='none'">`
                     : `<div class="issue-card-img-placeholder">📍</div>`;
                 const assignedDate = issue.assigned_date
-                    ? new Date(issue.assigned_date).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+                    ? new Date(issue.assigned_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
                     : '—';
                 const reportedDate = issue.created_at
-                    ? new Date(issue.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})
+                    ? new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
                     : '—';
                 const isHigh = (issue.supports_count || 0) >= 3;
                 const sCls = statusBadgeClass(issue.status);
@@ -808,16 +1517,16 @@
                         ${issue.status !== 'COMPLETED' ? `
                             <div style="display:flex; gap:10px;">
                                 <select class="status-select" id="sel-${issue.id}">
-                                    <option value="PENDING"      ${issue.status==='PENDING'     ?'selected':''}>⏳ Pending</option>
-                                    <option value="IN_PROGRESS"  ${issue.status==='IN_PROGRESS' ?'selected':''}>🔵 In Progress</option>
+                                    <option value="PENDING"      ${issue.status === 'PENDING' ? 'selected' : ''}>⏳ Pending</option>
+                                    <option value="IN_PROGRESS"  ${issue.status === 'IN_PROGRESS' ? 'selected' : ''}>🔵 In Progress</option>
                                 </select>
                                 <button class="btn-update" onclick="updateStatus('${issue.id}')">Update</button>
                                 <button class="btn-remarks" onclick="openRemarks('${issue.id}')">📝 Remarks</button>
                             </div>
-                            ${issue.completion_status === 'PENDING_APPROVAL' 
-                                ? `<div class="badge pending" style="text-align:center; padding: 8px;">⏳ Completion Request Pending Approval</div>`
-                                : `<button class="btn-update" style="background:var(--success);width:100%;" onclick="openCompletionModal('${issue.id}')">✅ Submit Completion Request</button>`
-                            }
+                            ${issue.completion_status === 'PENDING_APPROVAL'
+                            ? `<div class="badge pending" style="text-align:center; padding: 8px;">⏳ Completion Request Pending Approval</div>`
+                            : `<button class="btn-update" style="background:var(--success);width:100%;" onclick="openCompletionModal('${issue.id}')">✅ Submit Completion Request</button>`
+                        }
                         ` : `
                             <div class="badge completed" style="text-align:center; padding: 8px;">✅ Work Completed & Approved</div>
                         `}
@@ -834,7 +1543,7 @@
             console.log(`[Employee Dashboard] Updating issue ${id} status to ${status}`);
             try {
                 await issuesAPI.updateStatus(id, status);
-                toast.success('Status Updated', `Issue marked as ${status.replace('_',' ').toLowerCase()}.`);
+                toast.success('Status Updated', `Issue marked as ${status.replace('_', ' ').toLowerCase()}.`);
                 await loadIssues();
             } catch (err) {
                 console.error('[Employee Dashboard] updateStatus error:', err);
@@ -873,7 +1582,7 @@
         // ── Completion Request ──
         let completionIssueId = null;
         let completionImageBase64 = null;
-        
+
         window.openCompletionModal = (id) => {
             completionIssueId = id;
             completionImageBase64 = null;
@@ -883,7 +1592,7 @@
             document.getElementById('completion-image-preview').src = '';
             document.getElementById('completion-modal').classList.add('open');
         };
-        
+
         window.closeCompletionModal = () => {
             document.getElementById('completion-modal').classList.remove('open');
             completionIssueId = null;
@@ -913,9 +1622,9 @@
             const btn = document.getElementById('completion-submit-btn');
             btn.disabled = true;
             btn.textContent = 'Submitting...';
-            
+
             const remarks = document.getElementById('completion-remarks-text').value.trim();
-            
+
             try {
                 await employeesAPI.submitCompletionRequest(completionIssueId, {
                     completionImageUrl: completionImageBase64,
@@ -948,7 +1657,7 @@
                 }
                 list.innerHTML = reviews.map(r => {
                     const stars = '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating);
-                    const date = new Date(r.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+                    const date = new Date(r.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
                     return `
                     <div class="review-card">
                         <div class="review-header">
@@ -997,7 +1706,7 @@
                 maxClusterRadius: 50, spiderfyOnMaxZoom: true, showCoverageOnHover: false,
                 iconCreateFunction: (cluster) => L.divIcon({
                     html: `<div style="background:var(--primary);color:white;width:34px;height:34px;border-radius:50%;border:3px solid white;box-shadow:0 3px 10px rgba(176,0,0,0.35);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.78rem;">${cluster.getChildCount()}</div>`,
-                    iconSize: [34,34], iconAnchor: [17,34], className: '',
+                    iconSize: [34, 34], iconAnchor: [17, 34], className: '',
                 }),
             });
             empMap.addLayer(empMarkerGroup);
@@ -1018,8 +1727,8 @@
             empMarkerGroup.clearLayers();
             const mappable = issues.filter(i => i.latitude && i.longitude);
 
-            document.getElementById('mc-total').textContent     = mappable.length;
-            document.getElementById('mc-pending').textContent   = mappable.filter(i => i.status === 'PENDING').length;
+            document.getElementById('mc-total').textContent = mappable.length;
+            document.getElementById('mc-pending').textContent = mappable.filter(i => i.status === 'PENDING').length;
             document.getElementById('mc-inprogress').textContent = mappable.filter(i => i.status === 'IN_PROGRESS').length;
             document.getElementById('mc-completed').textContent = mappable.filter(i => i.status === 'COMPLETED').length;
 
@@ -1032,19 +1741,19 @@
                 if (isNaN(lat) || isNaN(lng)) return;
 
                 const markerCls = issue.status === 'COMPLETED' ? 'cm-completed' : issue.status === 'IN_PROGRESS' ? 'cm-inprogress' : 'cm-pending';
-                const badgeCls  = issue.status === 'COMPLETED' ? 'completed' : issue.status === 'IN_PROGRESS' ? 'in-progress' : 'pending';
+                const badgeCls = issue.status === 'COMPLETED' ? 'completed' : issue.status === 'IN_PROGRESS' ? 'in-progress' : 'pending';
                 const statusLabel = issue.status === 'COMPLETED' ? '✅ Completed' : issue.status === 'IN_PROGRESS' ? '🔵 In Progress' : '⏳ Pending';
                 const isHigh = (issue.supports_count || 0) >= 3;
-                const reportedDate = issue.created_at ? new Date(issue.created_at).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}) : '—';
+                const reportedDate = issue.created_at ? new Date(issue.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
                 const imgHtml = issue.image_url
                     ? `<img class="map-popup-image" src="${issue.image_url}" alt="Issue" onerror="this.style.display='none'">`
                     : `<div class="map-popup-image-placeholder">📍</div>`;
 
                 const icon = L.divIcon({
                     html: `<div class="custom-map-marker ${markerCls}">📍</div>`,
-                    iconSize: [30,30], iconAnchor: [15,30], popupAnchor: [0,-34], className: '',
+                    iconSize: [30, 30], iconAnchor: [15, 30], popupAnchor: [0, -34], className: '',
                 });
-                const marker = L.marker([lat,lng], { icon });
+                const marker = L.marker([lat, lng], { icon });
 
                 marker.bindPopup(`
                     <div class="map-popup-card">
@@ -1073,7 +1782,7 @@
             });
 
             if (bounds.length > 0) {
-                try { empMap.fitBounds(bounds, { padding: [40,40], maxZoom: 14 }); } catch (_) {}
+                try { empMap.fitBounds(bounds, { padding: [40, 40], maxZoom: 14 }); } catch (_) { }
             }
         }
 
@@ -1160,4 +1869,5 @@
         loadIssues();
     </script>
 </body>
+
 </html>

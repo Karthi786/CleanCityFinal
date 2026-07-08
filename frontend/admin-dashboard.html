@@ -152,23 +152,30 @@
             <!-- Floating Nav Island -->
             <div class="nav-island-container">
                 <nav class="nav-island">
-                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
+                    <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon"
+                            src="makkal-sevi-logo.png" alt="MakkalKural Logo"
+                            style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span>
+                    </div>
 
                     <!-- Top Doc Navigation Links -->
                     <ul class="nav-links">
                         <li>
-                            <a class="nav-link-item active" href="#" id="nav-overview" onclick="event.preventDefault(); document.getElementById('tab-overview-btn').click();">
+                            <a class="nav-link-item active" href="#" id="nav-overview"
+                                onclick="event.preventDefault(); document.getElementById('tab-overview-btn').click();">
                                 Analytics
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-verify" onclick="event.preventDefault(); document.getElementById('tab-verifications-btn').click();">
+                            <a class="nav-link-item" href="#" id="nav-verify"
+                                onclick="event.preventDefault(); document.getElementById('tab-verifications-btn').click();">
                                 Verifications
-                                <span id="pending-badge" class="badge badge-red" style="margin-left:6px; display:none; padding: 2px 6px; border-radius:99px; font-size:0.75rem;">0</span>
+                                <span id="pending-badge" class="badge badge-red"
+                                    style="margin-left:6px; display:none; padding: 2px 6px; border-radius:99px; font-size:0.75rem;">0</span>
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link-item" href="#" id="nav-users" onclick="event.preventDefault(); document.getElementById('tab-users-btn').click();">
+                            <a class="nav-link-item" href="#" id="nav-users"
+                                onclick="event.preventDefault(); document.getElementById('tab-users-btn').click();">
                                 All Users
                             </a>
                         </li>
@@ -177,7 +184,8 @@
                     <div class="nav-actions">
                         <!-- Mobile Burger Button -->
                         <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="3" y1="12" x2="21" y2="12"></line>
                                 <line x1="3" y1="6" x2="21" y2="6"></line>
                                 <line x1="3" y1="18" x2="21" y2="18"></line>
@@ -185,13 +193,15 @@
                         </button>
 
                         <!-- User Info Profile Circle & Action Buttons -->
-                        <div style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
+                        <div
+                            style="display: flex; align-items: center; gap: 10px; border-left: 1px solid var(--border); padding-left: 12px;">
                             <div class="user-avatar-sidebar"
                                 style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--primary); color: white; font-family: var(--font-display); font-weight: 800; font-size: 0.95rem; box-shadow: 0 4px 10px rgba(176,0,0,0.2);"
                                 id="sidebar-avatar-visible">
                                 A
                             </div>
-                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Sign Out</button>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm"
+                                style="padding: 6px 12px; font-size: 0.85rem; border-radius: 99px;">Sign Out</button>
                         </div>
                     </div>
                 </nav>
@@ -200,7 +210,10 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer" id="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon" src="makkal-sevi-logo.png" alt="MakkalKural Logo" style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span></div>
+                            <div class="logo" style="display:flex;align-items:center;gap:10px;"><img class="logo-icon"
+                                    src="makkal-sevi-logo.png" alt="MakkalKural Logo"
+                                    style="width:36px;height:36px;border-radius:10px;object-fit:contain;" /><span>MakkalKural</span>
+                            </div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">
@@ -222,7 +235,8 @@
                                     <div class="mobile-drawer-user-role">Administrator</div>
                                 </div>
                             </div>
-                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;" id="drawer-logout-btn">Logout</button>
+                            <button class="btn btn-outline" style="width: 100%; border-radius: 99px;"
+                                id="drawer-logout-btn">Logout</button>
                         </div>
                     </div>
                 </div>
@@ -244,7 +258,8 @@
                                 <div class="stat-label">Pending User Verifications</div>
                                 <div class="stat-value" id="s-pending">—</div>
                             </div>
-                            <div class="stat-icon yellow" style="background: var(--warning-light); color: var(--warning);">⏳</div>
+                            <div class="stat-icon yellow"
+                                style="background: var(--warning-light); color: var(--warning);">⏳</div>
                         </div>
                     </div>
                 </div>
@@ -252,9 +267,11 @@
                 <!-- Verifications Tab -->
                 <div id="tab-verifications" class="tab-pane" style="display:none;">
                     <div style="margin-bottom: 24px;">
-                        <h3 style="font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--text);">User Verification Requests</h3>
+                        <h3
+                            style="font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--text);">
+                            User Verification Requests</h3>
                     </div>
-                    
+
                     <div id="users-verification-pane">
                         <div id="pending-users-list" class="space-y-4"></div>
                     </div>
@@ -263,7 +280,9 @@
                 <!-- All Users Tab -->
                 <div id="tab-users" class="tab-pane" style="display:none;">
                     <div style="margin-bottom: 24px;">
-                        <h3 style="font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--text);">All Registered Users</h3>
+                        <h3
+                            style="font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; color: var(--text);">
+                            All Registered Users</h3>
                     </div>
                     <div id="all-users-list" class="space-y-4"></div>
                 </div>
@@ -303,7 +322,7 @@
             tabs.forEach(t => {
                 const pane = document.getElementById('tab-' + t);
                 pane.style.display = t === name ? 'block' : 'none';
-                
+
                 const navLink = document.getElementById('nav-' + (t === 'overview' ? 'overview' : (t === 'verifications' ? 'verify' : 'users')));
                 if (navLink) {
                     navLink.classList.toggle('active', t === name);

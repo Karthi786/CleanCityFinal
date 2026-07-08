@@ -184,8 +184,15 @@
             transition: background 0.2s;
         }
 
-        .mobile-burger:hover { background: rgba(15, 23, 42, 0.06); }
-        .mobile-burger svg { width: 20px; height: 20px; display: block; }
+        .mobile-burger:hover {
+            background: rgba(15, 23, 42, 0.06);
+        }
+
+        .mobile-burger svg {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
 
         /* ── Content Area ── */
         .dash-content {
@@ -227,7 +234,10 @@
             background: rgba(245, 158, 11, 0.12);
         }
 
-        .hero-content { position: relative; z-index: 1; }
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
 
         .hero-eyebrow {
             font-size: 0.76rem;
@@ -247,7 +257,10 @@
             letter-spacing: -0.02em;
         }
 
-        .hero-subtitle { font-size: 0.95rem; color: rgba(255, 255, 255, 0.72); }
+        .hero-subtitle {
+            font-size: 0.95rem;
+            color: rgba(255, 255, 255, 0.72);
+        }
 
         .hero-district-badge {
             display: inline-flex;
@@ -264,8 +277,13 @@
         }
 
         /* ── Tab Panes ── */
-        .tab-pane { display: none; }
-        .tab-pane.active { display: block; }
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
 
         /* ── KPI / Stat Cards ── */
         .stats-grid-6 {
@@ -275,8 +293,17 @@
             margin-bottom: 28px;
         }
 
-        @media(max-width: 1200px) { .stats-grid-6 { grid-template-columns: repeat(3, 1fr); } }
-        @media(max-width: 640px)  { .stats-grid-6 { grid-template-columns: repeat(2, 1fr); } }
+        @media(max-width: 1200px) {
+            .stats-grid-6 {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media(max-width: 640px) {
+            .stats-grid-6 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
 
         .stats-grid-4 {
             display: grid;
@@ -285,8 +312,17 @@
             margin-bottom: 24px;
         }
 
-        @media(max-width: 900px)  { .stats-grid-4 { grid-template-columns: repeat(2, 1fr); } }
-        @media(max-width: 480px)  { .stats-grid-4 { grid-template-columns: 1fr 1fr; } }
+        @media(max-width: 900px) {
+            .stats-grid-4 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media(max-width: 480px) {
+            .stats-grid-4 {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
 
         .kpi-card {
             background: rgba(255, 255, 255, 0.9);
@@ -311,12 +347,29 @@
             border-radius: 20px 20px 0 0;
         }
 
-        .kpi-card.kpi-indigo::before { background: linear-gradient(90deg, #B00000, #EF4444); }
-        .kpi-card.kpi-green::before  { background: linear-gradient(90deg, #10B981, #06B6D4); }
-        .kpi-card.kpi-amber::before  { background: linear-gradient(90deg, #F59E0B, #EF4444); }
-        .kpi-card.kpi-blue::before   { background: linear-gradient(90deg, #2563EB, #EF4444); }
-        .kpi-card.kpi-purple::before { background: linear-gradient(90deg, #7C3AED, #06B6D4); }
-        .kpi-card.kpi-cyan::before   { background: linear-gradient(90deg, #06B6D4, #3B82F6); }
+        .kpi-card.kpi-indigo::before {
+            background: linear-gradient(90deg, #B00000, #EF4444);
+        }
+
+        .kpi-card.kpi-green::before {
+            background: linear-gradient(90deg, #10B981, #06B6D4);
+        }
+
+        .kpi-card.kpi-amber::before {
+            background: linear-gradient(90deg, #F59E0B, #EF4444);
+        }
+
+        .kpi-card.kpi-blue::before {
+            background: linear-gradient(90deg, #2563EB, #EF4444);
+        }
+
+        .kpi-card.kpi-purple::before {
+            background: linear-gradient(90deg, #7C3AED, #06B6D4);
+        }
+
+        .kpi-card.kpi-cyan::before {
+            background: linear-gradient(90deg, #06B6D4, #3B82F6);
+        }
 
         .kpi-card:hover {
             transform: translateY(-4px);
@@ -362,7 +415,11 @@
             margin-bottom: 24px;
         }
 
-        @media(max-width: 900px) { .chart-grid-2 { grid-template-columns: 1fr; } }
+        @media(max-width: 900px) {
+            .chart-grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
 
         .chart-card {
             background: rgba(255, 255, 255, 0.9);
@@ -404,7 +461,11 @@
             color: var(--text, #0f172a);
         }
 
-        .section-subtitle { font-size: 0.84rem; color: var(--text-muted, #64748b); margin-top: 3px; }
+        .section-subtitle {
+            font-size: 0.84rem;
+            color: var(--text-muted, #64748b);
+            margin-top: 3px;
+        }
 
         /* ── Issue Table ── */
         .table-container {
@@ -443,8 +504,13 @@
             transition: background 0.15s;
         }
 
-        .issues-table tbody tr:hover td { background: rgba(176, 0, 0, 0.02); }
-        .issues-table tbody tr:last-child td { border-bottom: none; }
+        .issues-table tbody tr:hover td {
+            background: rgba(176, 0, 0, 0.02);
+        }
+
+        .issues-table tbody tr:last-child td {
+            border-bottom: none;
+        }
 
         /* ── Status Badges ── */
         .status-badge {
@@ -457,9 +523,20 @@
             font-weight: 700;
         }
 
-        .status-pending  { background: rgba(245, 158, 11, 0.12); color: #d97706; }
-        .status-progress { background: rgba(37, 99, 235, 0.1);   color: #2563eb; }
-        .status-done     { background: rgba(22, 163, 74, 0.1);   color: #16a34a; }
+        .status-pending {
+            background: rgba(245, 158, 11, 0.12);
+            color: #d97706;
+        }
+
+        .status-progress {
+            background: rgba(37, 99, 235, 0.1);
+            color: #2563eb;
+        }
+
+        .status-done {
+            background: rgba(22, 163, 74, 0.1);
+            color: #16a34a;
+        }
 
         /* ── Dept Cards ── */
         .dept-grid {
@@ -502,7 +579,9 @@
             margin-bottom: 14px;
         }
 
-        .dept-stat { text-align: center; }
+        .dept-stat {
+            text-align: center;
+        }
 
         .dept-stat-val {
             font-family: var(--font-display, 'Outfit', sans-serif);
@@ -569,7 +648,9 @@
             transition: border-color 0.2s;
         }
 
-        .filter-select:focus { border-color: var(--comm-primary); }
+        .filter-select:focus {
+            border-color: var(--comm-primary);
+        }
 
         .filter-input {
             padding: 7px 14px;
@@ -583,7 +664,9 @@
             transition: border-color 0.2s;
         }
 
-        .filter-input:focus { border-color: var(--comm-primary); }
+        .filter-input:focus {
+            border-color: var(--comm-primary);
+        }
 
         .filter-btn {
             padding: 7px 18px;
@@ -598,7 +681,10 @@
             transition: all 0.2s;
         }
 
-        .filter-btn:hover { background: var(--comm-secondary); transform: translateY(-1px); }
+        .filter-btn:hover {
+            background: var(--comm-secondary);
+            transform: translateY(-1px);
+        }
 
         .filter-btn-ghost {
             padding: 7px 16px;
@@ -613,7 +699,9 @@
             transition: all 0.2s;
         }
 
-        .filter-btn-ghost:hover { background: #f1f5f9; }
+        .filter-btn-ghost:hover {
+            background: #f1f5f9;
+        }
 
         /* ── Progress Bar ── */
         .progress-bar {
@@ -638,8 +726,14 @@
             color: var(--text-muted, #64748b);
         }
 
-        .empty-state-icon { font-size: 3rem; margin-bottom: 12px; }
-        .empty-state-msg { font-size: 0.95rem; }
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .empty-state-msg {
+            font-size: 0.95rem;
+        }
 
         .loading-row td {
             text-align: center;
@@ -672,7 +766,9 @@
             border-bottom: 1px solid rgba(15, 23, 42, 0.04);
         }
 
-        .constituency-table tbody tr:hover td { background: rgba(176, 0, 0, 0.02); }
+        .constituency-table tbody tr:hover td {
+            background: rgba(176, 0, 0, 0.02);
+        }
 
         .inline-bar {
             display: flex;
@@ -694,7 +790,12 @@
             background: linear-gradient(90deg, var(--comm-primary), var(--comm-accent));
         }
 
-        .bar-pct { font-size: 0.8rem; font-weight: 700; color: var(--text-muted, #64748b); min-width: 38px; }
+        .bar-pct {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted, #64748b);
+            min-width: 38px;
+        }
 
         /* ── Report Download Cards ── */
         .report-grid {
@@ -737,7 +838,10 @@
             margin-bottom: 4px;
         }
 
-        .report-desc { font-size: 0.82rem; color: var(--text-muted, #64748b); }
+        .report-desc {
+            font-size: 0.82rem;
+            color: var(--text-muted, #64748b);
+        }
 
         .download-buttons-row {
             display: flex;
@@ -761,7 +865,11 @@
             background: transparent;
         }
 
-        .dl-btn-pdf { border-color: rgba(220, 38, 38, 0.3); color: #dc2626; }
+        .dl-btn-pdf {
+            border-color: rgba(220, 38, 38, 0.3);
+            color: #dc2626;
+        }
+
         .dl-btn-pdf:hover {
             background: rgba(220, 38, 38, 0.05);
             border-color: #dc2626;
@@ -769,7 +877,11 @@
             box-shadow: 0 8px 22px rgba(220, 38, 38, 0.15);
         }
 
-        .dl-btn-excel { border-color: rgba(22, 163, 74, 0.3); color: #16a34a; }
+        .dl-btn-excel {
+            border-color: rgba(22, 163, 74, 0.3);
+            color: #16a34a;
+        }
+
         .dl-btn-excel:hover {
             background: rgba(22, 163, 74, 0.05);
             border-color: #16a34a;
@@ -802,23 +914,52 @@
 
         /* ── Responsive ── */
         @media(max-width: 900px) {
-            .dash-content { padding: 20px 16px; }
+            .dash-content {
+                padding: 20px 16px;
+            }
         }
 
         @media(max-width: 640px) {
-            .page-hero { padding: 26px 22px; }
-            .hero-title { font-size: 1.55rem; }
-            .download-buttons-row { flex-direction: column; }
+            .page-hero {
+                padding: 26px 22px;
+            }
+
+            .hero-title {
+                font-size: 1.55rem;
+            }
+
+            .download-buttons-row {
+                flex-direction: column;
+            }
         }
 
         /* ── Print Styles ── */
         @media print {
-            .nav-island-container, .filters-row, .download-buttons-row,
-            .mobile-nav-overlay, .mobile-burger { display: none !important; }
-            body { background: white !important; }
-            .dash-main { padding-top: 0 !important; }
-            .tab-pane { display: block !important; }
-            .page-hero { background: #B00000 !important; -webkit-print-color-adjust: exact; }
+
+            .nav-island-container,
+            .filters-row,
+            .download-buttons-row,
+            .mobile-nav-overlay,
+            .mobile-burger {
+                display: none !important;
+            }
+
+            body {
+                background: white !important;
+            }
+
+            .dash-main {
+                padding-top: 0 !important;
+            }
+
+            .tab-pane {
+                display: block !important;
+            }
+
+            .page-hero {
+                background: #B00000 !important;
+                -webkit-print-color-adjust: exact;
+            }
         }
     </style>
 </head>
@@ -836,10 +977,13 @@
                     </div>
 
                     <ul class="nav-links">
-                        <li><button class="nav-link-item active" data-tab="overview" id="nav-overview">📊 Overview</button></li>
+                        <li><button class="nav-link-item active" data-tab="overview" id="nav-overview">📊
+                                Overview</button></li>
                         <li><button class="nav-link-item" data-tab="issues" id="nav-issues">📋 Issues</button></li>
-                        <li><button class="nav-link-item" data-tab="departments" id="nav-departments">🏛️ Departments</button></li>
-                        <li><button class="nav-link-item" data-tab="analytics" id="nav-analytics">📈 Analytics</button></li>
+                        <li><button class="nav-link-item" data-tab="departments" id="nav-departments">🏛️
+                                Departments</button></li>
+                        <li><button class="nav-link-item" data-tab="analytics" id="nav-analytics">📈 Analytics</button>
+                        </li>
                         <li><button class="nav-link-item" data-tab="heatmap" id="nav-heatmap">🗺️ Heatmap</button></li>
                         <li><button class="nav-link-item" data-tab="reports" id="nav-reports">📥 Reports</button></li>
                     </ul>
@@ -847,18 +991,23 @@
                     <div class="nav-actions">
                         <button class="mobile-burger" id="mobile-menu-btn" aria-label="Menu">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <line x1="3" y1="12" x2="21" y2="12"/>
-                                <line x1="3" y1="6" x2="21" y2="6"/>
-                                <line x1="3" y1="18" x2="21" y2="18"/>
+                                <line x1="3" y1="12" x2="21" y2="12" />
+                                <line x1="3" y1="6" x2="21" y2="6" />
+                                <line x1="3" y1="18" x2="21" y2="18" />
                             </svg>
                         </button>
-                        <div style="display:flex;align-items:center;gap:8px;border-left:1px solid rgba(15,23,42,0.1);padding-left:12px;">
+                        <div
+                            style="display:flex;align-items:center;gap:8px;border-left:1px solid rgba(15,23,42,0.1);padding-left:12px;">
                             <div class="comm-avatar" id="comm-avatar-el">CO</div>
                             <div style="display:flex;flex-direction:column;">
-                                <span id="comm-name-el" style="font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.84rem;color:var(--text,#0f172a);">Collector</span>
-                                <span id="comm-district-el" style="font-size:0.7rem;color:var(--text-muted,#64748b);">District</span>
+                                <span id="comm-name-el"
+                                    style="font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.84rem;color:var(--text,#0f172a);">Collector</span>
+                                <span id="comm-district-el"
+                                    style="font-size:0.7rem;color:var(--text-muted,#64748b);">District</span>
                             </div>
-                            <button id="logout-btn" class="btn btn-ghost btn-sm" style="padding:6px 12px;font-size:0.82rem;border-radius:99px;margin-left:4px;">Sign Out</button>
+                            <button id="logout-btn" class="btn btn-ghost btn-sm"
+                                style="padding:6px 12px;font-size:0.82rem;border-radius:99px;margin-left:4px;">Sign
+                                Out</button>
                         </div>
                     </div>
                 </nav>
@@ -867,7 +1016,8 @@
                 <div class="mobile-nav-overlay" id="mobile-nav-overlay">
                     <div class="mobile-nav-drawer">
                         <div class="mobile-drawer-header">
-                            <div class="nav-logo" style="font-size:1rem;">MakkalKural <span class="nav-logo-badge" style="background:#B00000;font-size:0.62rem;">COLLECTOR</span></div>
+                            <div class="nav-logo" style="font-size:1rem;">MakkalKural <span class="nav-logo-badge"
+                                    style="background:#B00000;font-size:0.62rem;">COLLECTOR</span></div>
                             <button class="mobile-drawer-close" id="mobile-nav-close">✕</button>
                         </div>
                         <div class="mobile-drawer-nav">
@@ -883,10 +1033,12 @@
                                 <div class="comm-avatar" style="width:40px;height:40px;" id="drawer-avatar-el">CO</div>
                                 <div>
                                     <div id="drawer-name-el" style="font-weight:700;font-size:0.88rem;">Collector</div>
-                                    <div id="drawer-dist-el" style="font-size:0.74rem;color:var(--text-muted,#64748b);">District</div>
+                                    <div id="drawer-dist-el" style="font-size:0.74rem;color:var(--text-muted,#64748b);">
+                                        District</div>
                                 </div>
                             </div>
-                            <button id="drawer-logout-btn" class="btn btn-outline" style="width:100%;border-radius:99px;">Logout</button>
+                            <button id="drawer-logout-btn" class="btn btn-outline"
+                                style="width:100%;border-radius:99px;">Logout</button>
                         </div>
                     </div>
                 </div>
@@ -900,8 +1052,10 @@
                     <div class="hero-content">
                         <div class="hero-eyebrow">Government of Tamil Nadu</div>
                         <h1 class="hero-title">Collector's District Portal</h1>
-                        <p class="hero-subtitle">Monitor civic issues, department performance, and analytics for your assigned district</p>
-                        <div class="hero-district-badge">🏛️ <span id="hero-district-name">Loading...</span> District</div>
+                        <p class="hero-subtitle">Monitor civic issues, department performance, and analytics for your
+                            assigned district</p>
+                        <div class="hero-district-badge">🏛️ <span id="hero-district-name">Loading...</span> District
+                        </div>
                     </div>
                 </div>
 
@@ -985,7 +1139,8 @@
                     <div class="section-hdr animate-in">
                         <div>
                             <div class="section-title">Constituency Breakdown</div>
-                            <div class="section-subtitle">Issue performance across all constituencies in your district</div>
+                            <div class="section-subtitle">Issue performance across all constituencies in your district
+                            </div>
                         </div>
                     </div>
                     <div class="table-container animate-in">
@@ -1001,7 +1156,9 @@
                                 </tr>
                             </thead>
                             <tbody id="const-tbody">
-                                <tr class="loading-row"><td colspan="6">Loading...</td></tr>
+                                <tr class="loading-row">
+                                    <td colspan="6">Loading...</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -1016,7 +1173,8 @@
                         </div>
                         <div style="display:flex;gap:10px;">
                             <button id="issues-export-excel" class="filter-btn">📊 Export Excel</button>
-                            <button id="issues-export-pdf" class="filter-btn" style="background:#dc2626;">📄 Export PDF</button>
+                            <button id="issues-export-pdf" class="filter-btn" style="background:#dc2626;">📄 Export
+                                PDF</button>
                         </div>
                     </div>
 
@@ -1051,7 +1209,8 @@
 
                     <!-- Issue Count -->
                     <div style="font-size:0.84rem;color:var(--text-muted,#64748b);margin-bottom:12px;font-weight:600;">
-                        Showing <span id="issues-count-label" style="color:var(--comm-primary);font-weight:800;">0</span> issues
+                        Showing <span id="issues-count-label"
+                            style="color:var(--comm-primary);font-weight:800;">0</span> issues
                     </div>
 
                     <!-- Issues Table -->
@@ -1071,7 +1230,9 @@
                                     </tr>
                                 </thead>
                                 <tbody id="issues-tbody">
-                                    <tr class="loading-row"><td colspan="8">Loading issues...</td></tr>
+                                    <tr class="loading-row">
+                                        <td colspan="8">Loading issues...</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
@@ -1108,7 +1269,9 @@
                     <div class="chart-card animate-in stagger-3">
                         <div class="chart-card-title">⏱️ Average Resolution Time</div>
                         <div class="chart-card-sub">Average hours taken to resolve issues per department</div>
-                        <div id="resTimeDeptGrid" style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:8px;"></div>
+                        <div id="resTimeDeptGrid"
+                            style="display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));margin-top:8px;">
+                        </div>
                     </div>
                 </div>
 
@@ -1187,7 +1350,8 @@
                     <div class="section-hdr animate-in">
                         <div>
                             <div class="section-title">Issue Density Heatmap</div>
-                            <div class="section-subtitle">Geographical visualization of civic issues in your district</div>
+                            <div class="section-subtitle">Geographical visualization of civic issues in your district
+                            </div>
                         </div>
                     </div>
 
@@ -1220,14 +1384,23 @@
 
                     <!-- Stats row -->
                     <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
-                        <div style="background:white;border-radius:14px;padding:10px 18px;border:1px solid rgba(15,23,42,0.07);font-size:0.85rem;font-weight:700;color:var(--comm-primary);">
+                        <div
+                            style="background:white;border-radius:14px;padding:10px 18px;border:1px solid rgba(15,23,42,0.07);font-size:0.85rem;font-weight:700;color:var(--comm-primary);">
                             📍 <span id="hm-points-count">0</span> locations plotted
                         </div>
                         <div class="heatmap-legend">
-                            <div class="legend-item"><div class="legend-dot" style="background:red;"></div> High Density</div>
-                            <div class="legend-item"><div class="legend-dot" style="background:orange;"></div> Medium</div>
-                            <div class="legend-item"><div class="legend-dot" style="background:yellow;border:1px solid #e2e8f0;"></div> Low Density</div>
-                            <div class="legend-item" style="border-left:1px solid #e2e8f0;padding-left:12px;">⬤ Pending = Full intensity &nbsp; ⬤ Resolved = Dim</div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:red;"></div> High Density
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:orange;"></div> Medium
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:yellow;border:1px solid #e2e8f0;"></div> Low
+                                Density
+                            </div>
+                            <div class="legend-item" style="border-left:1px solid #e2e8f0;padding-left:12px;">⬤ Pending
+                                = Full intensity &nbsp; ⬤ Resolved = Dim</div>
                         </div>
                     </div>
 
@@ -1237,8 +1410,10 @@
                     </div>
 
                     <!-- Heatmap info note -->
-                    <div style="margin-top:14px;padding:14px 18px;background:var(--comm-primary-light);border-radius:14px;border:1px solid rgba(176, 0, 0, 0.15);font-size:0.84rem;color:var(--comm-primary);">
-                        💡 <strong>Tip:</strong> Only issues with GPS coordinates will appear on the map. Issues without location data are excluded from the heatmap visualization.
+                    <div
+                        style="margin-top:14px;padding:14px 18px;background:var(--comm-primary-light);border-radius:14px;border:1px solid rgba(176, 0, 0, 0.15);font-size:0.84rem;color:var(--comm-primary);">
+                        💡 <strong>Tip:</strong> Only issues with GPS coordinates will appear on the map. Issues without
+                        location data are excluded from the heatmap visualization.
                     </div>
                 </div>
 
@@ -1247,23 +1422,28 @@
                     <div class="section-hdr animate-in">
                         <div>
                             <div class="section-title">Report Downloads</div>
-                            <div class="section-subtitle">Generate and download district reports in PDF or Excel format</div>
+                            <div class="section-subtitle">Generate and download district reports in PDF or Excel format
+                            </div>
                         </div>
                     </div>
 
                     <!-- Report Options -->
-                    <div style="margin-bottom:20px;font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.9rem;color:var(--text-muted,#64748b);text-transform:uppercase;letter-spacing:0.06em;">Select Report Type</div>
+                    <div
+                        style="margin-bottom:20px;font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.9rem;color:var(--text-muted,#64748b);text-transform:uppercase;letter-spacing:0.06em;">
+                        Select Report Type</div>
 
                     <div class="report-grid animate-in stagger-1">
                         <div class="report-option-card selected" data-report="all">
                             <div class="report-icon">📋</div>
                             <div class="report-name">All Issues Report</div>
-                            <div class="report-desc">Complete list of all civic issues in your district with full details</div>
+                            <div class="report-desc">Complete list of all civic issues in your district with full
+                                details</div>
                         </div>
                         <div class="report-option-card" data-report="dept">
                             <div class="report-icon">🏛️</div>
                             <div class="report-name">Department-wise Report</div>
-                            <div class="report-desc">Issues grouped and summarized by department with performance metrics</div>
+                            <div class="report-desc">Issues grouped and summarized by department with performance
+                                metrics</div>
                         </div>
                         <div class="report-option-card" data-report="status">
                             <div class="report-icon">🎯</div>
@@ -1298,29 +1478,38 @@
                     <!-- Report Contents Info -->
                     <div class="chart-card animate-in stagger-2" style="margin-bottom:24px;">
                         <div class="chart-card-title">📌 Report Contents</div>
-                        <div style="display:grid;gap:8px;margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));">
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                        <div
+                            style="display:grid;gap:8px;margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Issue ID & Title
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Category & Department
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Location & Constituency
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Status & Priority
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Created & Updated Dates
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Reporter Name
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Department Performance Summary
                             </div>
-                            <div style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
+                            <div
+                                style="display:flex;align-items:center;gap:8px;font-size:0.88rem;color:var(--text-muted,#64748b);">
                                 <span style="color:#16a34a;font-size:1rem;">✓</span> Resolution Rate Analytics
                             </div>
                         </div>
@@ -1339,7 +1528,8 @@
                             <span>📊</span>
                             <div>
                                 <div>Download Excel / CSV</div>
-                                <div style="font-size:0.76rem;font-weight:500;opacity:0.7;">Multi-sheet spreadsheet</div>
+                                <div style="font-size:0.76rem;font-weight:500;opacity:0.7;">Multi-sheet spreadsheet
+                                </div>
                             </div>
                         </button>
                     </div>
@@ -1353,16 +1543,27 @@
     <div class="modal-overlay" id="issue-details-modal">
         <div class="modal" style="max-width: 600px; border-radius:24px; border: 1px solid rgba(15,23,42,0.08);">
             <div class="modal-header" style="border-bottom:1px solid rgba(15,23,42,0.06); padding: 16px 20px;">
-                <div class="modal-title" style="font-family:var(--font-display,'Outfit',sans-serif); font-weight:800; font-size:1.15rem; color:#0f172a;">📋 Issue Details</div>
-                <button class="modal-close" onclick="document.getElementById('issue-details-modal').classList.remove('open')" style="background:none; border:none; font-size:1.1rem; cursor:pointer; color:#64748b;">✕</button>
+                <div class="modal-title"
+                    style="font-family:var(--font-display,'Outfit',sans-serif); font-weight:800; font-size:1.15rem; color:#0f172a;">
+                    📋 Issue Details</div>
+                <button class="modal-close"
+                    onclick="document.getElementById('issue-details-modal').classList.remove('open')"
+                    style="background:none; border:none; font-size:1.1rem; cursor:pointer; color:#64748b;">✕</button>
             </div>
             <div class="modal-body" id="issue-details-body" style="max-height: 75vh; overflow-y: auto; padding: 20px;">
                 <!-- Dynamic Content -->
             </div>
-            <div class="modal-footer" style="border-top: 1px solid rgba(15, 23, 42, 0.06); padding: 16px 20px; display: flex; justify-content: flex-end; gap: 12px; background: #fff; border-radius: 0 0 24px 24px;">
-                <button class="btn btn-outline" onclick="document.getElementById('issue-details-modal').classList.remove('open')" style="padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(15,23,42,0.12); background: transparent; color: var(--text);">Close</button>
-                <button class="btn btn-danger" id="delete-issue-btn" style="background: #dc2626; color: white; border: none; display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">🗑️ Delete Report</button>
-                <button class="btn btn-primary" id="download-details-pdf-btn" style="background: var(--comm-primary); color: white; border: none; display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">📄 Download PDF</button>
+            <div class="modal-footer"
+                style="border-top: 1px solid rgba(15, 23, 42, 0.06); padding: 16px 20px; display: flex; justify-content: flex-end; gap: 12px; background: #fff; border-radius: 0 0 24px 24px;">
+                <button class="btn btn-outline"
+                    onclick="document.getElementById('issue-details-modal').classList.remove('open')"
+                    style="padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer; border: 1px solid rgba(15,23,42,0.12); background: transparent; color: var(--text);">Close</button>
+                <button class="btn btn-danger" id="delete-issue-btn"
+                    style="background: #dc2626; color: white; border: none; display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">🗑️
+                    Delete Report</button>
+                <button class="btn btn-primary" id="download-details-pdf-btn"
+                    style="background: var(--comm-primary); color: white; border: none; display: flex; align-items: center; gap: 6px; padding: 8px 18px; border-radius: 99px; font-size: 0.88rem; font-weight: 600; cursor: pointer;">📄
+                    Download PDF</button>
             </div>
         </div>
     </div>
@@ -1418,10 +1619,10 @@
             if (!tabInitialized[tab]) {
                 tabInitialized[tab] = true;
                 if (tab === 'departments') renderDepartmentsTab();
-                if (tab === 'analytics')   renderAnalyticsTab();
-                if (tab === 'heatmap')     renderHeatmapTab();
-                if (tab === 'issues')      renderIssuesTab();
-                if (tab === 'reports')     renderReportsTab();
+                if (tab === 'analytics') renderAnalyticsTab();
+                if (tab === 'heatmap') renderHeatmapTab();
+                if (tab === 'issues') renderIssuesTab();
+                if (tab === 'reports') renderReportsTab();
             }
             // Re-init heatmap on tab switch
             if (tab === 'heatmap') setTimeout(refreshMap, 100);
@@ -1453,11 +1654,11 @@
 
         const P = {
             indigo: '#B00000', indigoL: 'rgba(176,0,0,0.12)',
-            green:  '#10B981', greenL:  'rgba(16,185,129,0.12)',
-            amber:  '#F59E0B', amberL:  'rgba(245,158,11,0.12)',
-            blue:   '#2563EB', blueL:   'rgba(37,99,235,0.12)',
+            green: '#10B981', greenL: 'rgba(16,185,129,0.12)',
+            amber: '#F59E0B', amberL: 'rgba(245,158,11,0.12)',
+            blue: '#2563EB', blueL: 'rgba(37,99,235,0.12)',
             purple: '#7C3AED', purpleL: 'rgba(124,58,237,0.12)',
-            cyan:   '#06B6D4', cyanL:   'rgba(6,182,212,0.12)',
+            cyan: '#06B6D4', cyanL: 'rgba(6,182,212,0.12)',
         };
 
         let chartInstances = {};
@@ -1494,9 +1695,9 @@
         };
 
         function statusBadge(status) {
-            if (status === 'PENDING')     return `<span class="status-badge status-pending">⏳ Pending</span>`;
+            if (status === 'PENDING') return `<span class="status-badge status-pending">⏳ Pending</span>`;
             if (status === 'IN_PROGRESS') return `<span class="status-badge status-progress">🔄 In Progress</span>`;
-            if (status === 'COMPLETED')   return `<span class="status-badge status-done">✅ Resolved</span>`;
+            if (status === 'COMPLETED') return `<span class="status-badge status-done">✅ Resolved</span>`;
             return `<span class="status-badge">${status}</span>`;
         }
 
@@ -1514,7 +1715,7 @@
             currentDetailIssueId = id;
 
             const body = document.getElementById('issue-details-body');
-            
+
             // Set delete button onclick
             const delBtn = document.getElementById('delete-issue-btn');
             if (delBtn) {
@@ -1600,12 +1801,12 @@
                 await issuesAPI.delete(id);
                 toast.success('Report Deleted', 'The issue has been removed successfully.');
                 document.getElementById('issue-details-modal').classList.remove('open');
-                
+
                 // Refresh list
                 const res = await issuesAPI.getAll();
                 globalIssues = res.issues || [];
                 renderIssuesTab();
-                
+
                 // Also update stats if function exists
                 if (typeof updateDashboardStats === 'function') {
                     updateDashboardStats();
@@ -1871,10 +2072,10 @@
 
             let filtered = [...globalIssues];
             if (status) filtered = filtered.filter(i => i.status === status);
-            if (dept)   filtered = filtered.filter(i => i.department === dept);
-            if (cat)    filtered = filtered.filter(i => i.category === cat);
-            if (from)   filtered = filtered.filter(i => new Date(i.created_at) >= new Date(from));
-            if (to)     filtered = filtered.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59.999Z'));
+            if (dept) filtered = filtered.filter(i => i.department === dept);
+            if (cat) filtered = filtered.filter(i => i.category === cat);
+            if (from) filtered = filtered.filter(i => new Date(i.created_at) >= new Date(from));
+            if (to) filtered = filtered.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59.999Z'));
 
             renderIssuesTable(filtered);
         }
@@ -1905,7 +2106,7 @@
 
         document.getElementById('apply-issue-filters').addEventListener('click', () => applyIssueFilters());
         document.getElementById('clear-issue-filters').addEventListener('click', () => {
-            ['if-status','if-dept','if-cat','if-from','if-to'].forEach(id => {
+            ['if-status', 'if-dept', 'if-cat', 'if-from', 'if-to'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -2144,8 +2345,8 @@
 
             let filtered = [...globalIssues];
             if (status) filtered = filtered.filter(i => i.status === status);
-            if (dept)   filtered = filtered.filter(i => i.department === dept);
-            if (cat)    filtered = filtered.filter(i => i.category === cat);
+            if (dept) filtered = filtered.filter(i => i.department === dept);
+            if (cat) filtered = filtered.filter(i => i.category === cat);
 
             const points = filtered
                 .filter(i => i.latitude && i.longitude)
@@ -2199,7 +2400,7 @@
 
         document.getElementById('apply-heatmap-filters').addEventListener('click', () => applyHeatmapFilters());
         document.getElementById('reset-heatmap-filters').addEventListener('click', () => {
-            ['hm-status','hm-dept','hm-cat'].forEach(id => { document.getElementById(id).value = ''; });
+            ['hm-status', 'hm-dept', 'hm-cat'].forEach(id => { document.getElementById(id).value = ''; });
             applyHeatmapFilters();
         });
 
@@ -2226,9 +2427,9 @@
             let issues = [...globalIssues];
             if (selectedReport === 'date') {
                 const from = document.getElementById('rep-date-from').value;
-                const to   = document.getElementById('rep-date-to').value;
+                const to = document.getElementById('rep-date-to').value;
                 if (from) issues = issues.filter(i => new Date(i.created_at) >= new Date(from));
-                if (to)   issues = issues.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59.999Z'));
+                if (to) issues = issues.filter(i => new Date(i.created_at) <= new Date(to + 'T23:59:59.999Z'));
             }
             return issues;
         }
@@ -2368,7 +2569,7 @@
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([mHeaders, ...mRows]), 'Monthly Trends');
             }
 
-            const filename = `MakkalKural_Collector_${district}_${selectedReport}_${new Date().toISOString().slice(0,10)}.xlsx`;
+            const filename = `MakkalKural_Collector_${district}_${selectedReport}_${new Date().toISOString().slice(0, 10)}.xlsx`;
             XLSX.writeFile(wb, filename);
             toast.success('Downloaded', `Report saved as ${filename}`);
         }
