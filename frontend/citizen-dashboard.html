@@ -2417,10 +2417,14 @@
                     imageUrl,
                 });
 
-                toast.success('Campaign Launched! 🚀', 'Your campaign is now listed for volunteers to join.');
+                toast.success('Request Submitted! 📋', 'Your campaign request has been sent to the Commissioner for approval. It will appear in \'Created by Me\' as Pending.');
                 modal.classList.remove('open');
                 document.getElementById('campaign-form').reset();
+                // Reload campaigns and switch to 'mine' filter so user sees their pending campaign
                 await loadCampaigns();
+                // Switch to 'mine' tab so they can see their pending campaign immediately
+                const mineBtn = document.querySelector('#campaign-filters .tab-item[data-filter="mine"]');
+                if (mineBtn) mineBtn.click();
                 showView('campaigns');
             } catch (err) {
                 toast.error('Campaign Failed', err.message);
@@ -2494,8 +2498,8 @@
                 <div class="vm-banner" style="${bannerStyle}">
                     <span class="vm-status-badge" style="background:${bgColors[status]};color:${statusColors[status]};">${statusEmojis[status]} ${status}</span>
                     ${isCreator ? `
-                    <span class="vm-status-badge" style="top:44px; background:${camp.verification_status === 'approved' ? '#dcfce7' : camp.verification_status === 'rejected' ? '#fee2e2' : '#fef3c7'}; color:${camp.verification_status === 'approved' ? '#16a34a' : camp.verification_status === 'rejected' ? '#991b1b' : '#92400e'};">
-                        ${camp.verification_status === 'approved' ? '✅ Approved' : camp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending Verifications'}
+                    <span class="vm-status-badge" style="top:44px; background:${camp.verification_status === 'approved' ? '#dcfce7' : camp.verification_status === 'rejected' ? '#fee2e2' : '#fff7ed'}; color:${camp.verification_status === 'approved' ? '#166534' : camp.verification_status === 'rejected' ? '#991b1b' : '#c2410c'}; border:1px solid ${camp.verification_status === 'approved' ? '#bbf7d0' : camp.verification_status === 'rejected' ? '#fecaca' : '#fed7aa'}; font-weight:700; font-size:0.72rem; padding:4px 10px; border-radius:99px;">
+                        ${camp.verification_status === 'approved' ? '✅ Commissioner Approved' : camp.verification_status === 'rejected' ? '❌ Rejected' : '⏳ Pending Commissioner Approval'}
                     </span>` : ''}
                     ${!camp.image_url ? statusEmojis[status] : ''}
                 </div>

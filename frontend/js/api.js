@@ -194,9 +194,9 @@ export const campaignsAPI = {
 
     getPending: () => apiFetch('/campaigns/pending'),
 
-    verify: (id, status) => apiFetch(`/campaigns/${id}/verify`, {
+    verify: (id, status, rejectionReason = '') => apiFetch(`/campaigns/${id}/verify`, {
         method: 'PUT',
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status, rejectionReason })
     }),
 };
 

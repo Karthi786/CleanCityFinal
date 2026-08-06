@@ -319,8 +319,8 @@
         }
 
         @media(max-width: 480px) {
-            .stats-grid-4 {
-                grid-template-columns: 1fr 1fr;
+            .stats-grid-6, .stats-grid-4 {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -1001,7 +1001,7 @@
                         <div
                             style="display:flex;align-items:center;gap:8px;border-left:1px solid rgba(15,23,42,0.1);padding-left:12px;">
                             <div class="comm-avatar" id="comm-avatar-el">CO</div>
-                            <div style="display:flex;flex-direction:column;">
+                            <div class="user-text-details" style="display:flex;flex-direction:column;">
                                 <span id="comm-name-el"
                                     style="font-family:var(--font-display,'Outfit',sans-serif);font-weight:700;font-size:0.84rem;color:var(--text,#0f172a);">Commissioner</span>
                                 <span id="comm-district-el"

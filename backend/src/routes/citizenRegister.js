@@ -3,19 +3,17 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const { supabaseAdmin } = require('../config/supabase');
 const districtsMapping = require('../config/districts');
-// ── Use Resend API (HTTP-based) instead of Gmail SMTP (blocked on Render free tier) ──
-const { sendEmail } = require('../utils/resend');
+// ── Use Nodemailer Gmail SMTP email service ──
+const { sendEmail } = require('../utils/emailService');
 require('dotenv').config();
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET;
 const MAX_ATTEMPTS = 5;         // Max OTP verification attempts before lockout
 const MAX_RESENDS = 5;          // Max resend attempts per OTP session
-const MAX_OTP_PER_HOUR = 5;    // Max OTP requests per hour per email (rate limiting)
 
 /**
  * Utility: Clean up expired OTPs from the database
- * Called before OTP operations to keep the table clean
  */
 async function cleanupExpiredOTPs() {
     try {
@@ -30,9 +28,6 @@ async function cleanupExpiredOTPs() {
 
 /**
  * Utility: Generate a professional branded HTML email template for OTP verification
- * @param {string} name - Recipient's name
- * @param {string} otp - The 6-digit OTP code
- * @returns {string} Complete HTML email body
  */
 function generateOTPEmailTemplate(name, otp) {
     return `
@@ -67,7 +62,7 @@ function generateOTPEmailTemplate(name, otp) {
                                     Hello <strong>${name}</strong>,
                                 </p>
                                 <p style="margin: 0 0 24px 0; color: #444; font-size: 15px; line-height: 1.6;">
-                                    Thank you for registering with <strong>Citizen Portal</strong>. Please use the verification code below to complete your registration.
+                                    Thank you for registering with <strong>MakkalKural Citizen Portal</strong>. Please use the verification code below to complete your registration.
                                 </p>
                                 
                                 <!-- OTP Code Box -->
@@ -136,10 +131,6 @@ router.post('/check-uniqueness', async (req, res) => {
     try {
         if (email) {
             const cleanEmail = email.trim().toLowerCase();
-            const sqlQuery = `SELECT id FROM public.users WHERE email = '${cleanEmail}' LIMIT 1;`;
-            console.log(`Phone Validation Started - Checking users table`);
-            console.log(`[SQL QUERY] Executing: ${sqlQuery}`);
-            
             const { data: existingEmail, error: emailCheckError } = await supabaseAdmin
                 .from('users')
                 .select('id')
@@ -147,27 +138,16 @@ router.post('/check-uniqueness', async (req, res) => {
                 .maybeSingle();
 
             if (emailCheckError) {
-                console.error(`[DATABASE ERROR] SQL Query: ${sqlQuery}`);
-                console.error(`[DATABASE ERROR] Message: ${emailCheckError.message}`);
-                console.error(`[DATABASE ERROR] Details:`, emailCheckError);
-                console.log("Validation Failed: Database error occurred.");
                 return res.status(500).json({ error: 'Email validation failed. Please try again later.' });
             }
 
             if (existingEmail) {
-                console.log("Validation Failed: Email already registered.");
                 return res.status(400).json({ error: 'Email already registered' });
             }
-            console.log("Validation Passed: Email is unique.");
         }
 
         if (phone_number) {
             const cleanPhone = phone_number.trim();
-            const sqlQuery = `SELECT id FROM public.users WHERE phone_number = '${cleanPhone}' LIMIT 1;`;
-            console.log(`Phone Validation Started - Checking users table`);
-            console.log(`Using column: phone_number`);
-            console.log(`[SQL QUERY] Executing: ${sqlQuery}`);
-
             const { data: existingPhone, error: phoneCheckError } = await supabaseAdmin
                 .from('users')
                 .select('id')
@@ -175,18 +155,12 @@ router.post('/check-uniqueness', async (req, res) => {
                 .maybeSingle();
 
             if (phoneCheckError) {
-                console.error(`[DATABASE ERROR] SQL Query: ${sqlQuery}`);
-                console.error(`[DATABASE ERROR] Message: ${phoneCheckError.message}`);
-                console.error(`[DATABASE ERROR] Details:`, phoneCheckError);
-                console.log(`Validation Failed: ${phoneCheckError.message}`);
                 return res.status(500).json({ error: 'Phone validation failed. Please try again later.' });
             }
 
             if (existingPhone) {
-                console.log("Validation Failed: Phone number already registered.");
                 return res.status(400).json({ error: 'Phone number already registered' });
             }
-            console.log("Validation Passed: Phone number is unique.");
         }
 
         return res.json({ available: true });
@@ -198,10 +172,13 @@ router.post('/check-uniqueness', async (req, res) => {
 
 /**
  * POST /api/citizen/register-request
- * Direct citizen registration — no OTP/email verification required.
- * Validates all fields and creates the account immediately.
+ * Step 1: Validates citizen registration details, generates a secure 6-digit OTP,
+ * stores temporary payload in otps table and sends verification code via email.
+ * DOES NOT create user account in database before OTP verification.
  */
 router.post('/register-request', async (req, res) => {
+    await cleanupExpiredOTPs();
+
     const { name, dob, email, phone_number, district, constituency, password } = req.body;
 
     // 1. Required field validation
@@ -256,83 +233,80 @@ router.post('/register-request', async (req, res) => {
     const cleanPhone = phone_number.trim();
 
     try {
-        // Check email uniqueness
+        // Check email uniqueness in users table
         const { data: existingEmail, error: emailCheckError } = await supabaseAdmin
             .from('users').select('id').eq('email', cleanEmail).maybeSingle();
         if (emailCheckError) throw new Error('Email validation failed. Please try again later.');
         if (existingEmail) return res.status(400).json({ error: 'Email already registered' });
 
-        // Check phone uniqueness
+        // Check phone uniqueness in users table
         const { data: existingPhone, error: phoneCheckError } = await supabaseAdmin
             .from('users').select('id').eq('phone_number', cleanPhone).maybeSingle();
         if (phoneCheckError) throw new Error('Phone validation failed. Please try again later.');
         if (existingPhone) return res.status(400).json({ error: 'Phone number already registered' });
 
-        // Create Supabase Auth user directly (no OTP)
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
-            email: cleanEmail,
-            password,
-            email_confirm: true,
-        });
-        if (authError) return res.status(400).json({ error: authError.message });
+        // Generate secure 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const salt = await bcrypt.genSalt(10);
+        const otpHash = await bcrypt.hash(otp, salt);
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes expiry
 
-        const userId = authData.user.id;
+        // Delete any existing pending OTP session for this email
+        await supabaseAdmin.from('otps').delete().eq('email', cleanEmail);
 
-        // Insert citizen profile
-        const { data: userRecord, error: dbError } = await supabaseAdmin
-            .from('users')
+        // Store OTP and pending registration data in otps table
+        const { error: otpInsertError } = await supabaseAdmin
+            .from('otps')
             .insert({
-                id: userId,
-                name,
                 email: cleanEmail,
-                role: 'USER',
-                verification_status: 'approved',
-                full_name: name,
-                date_of_birth: dob,
-                phone_number: cleanPhone,
-                district,
-                constituency,
-                email_verified: true,
-                email_verified_at: new Date().toISOString()
-            })
-            .select()
-            .single();
+                otp_hash: otpHash,
+                attempts: 0,
+                resends: 0,
+                registration_data: {
+                    name,
+                    email: cleanEmail,
+                    dob,
+                    phone_number: cleanPhone,
+                    district,
+                    constituency,
+                    password
+                },
+                expires_at: expiresAt.toISOString(),
+                last_resend_at: new Date().toISOString()
+            });
 
-        if (dbError) {
-            console.error('[Citizen Register] DB insert error:', dbError);
-            await supabaseAdmin.auth.admin.deleteUser(userId);
-            return res.status(500).json({ error: 'Failed to create user profile.' });
+        if (otpInsertError) {
+            console.error('OTP DB insert error:', otpInsertError);
+            return res.status(500).json({ error: 'Failed to initiate verification. Please try again.' });
         }
 
-        // Generate JWT session token
-        const token = require('jsonwebtoken').sign(
-            { userId, email: cleanEmail, role: 'USER' },
-            process.env.JWT_SECRET,
-            { expiresIn: '7d' }
-        );
+        // Send OTP via Gmail SMTP using emailService
+        const emailBody = generateOTPEmailTemplate(name, otp);
+        await sendEmail({
+            to: cleanEmail,
+            subject: 'Email Verification - MakkalKural Citizen Portal',
+            html: emailBody
+        });
 
-        console.log('[Citizen Register] Account created for:', cleanEmail);
+        console.log(`[Citizen Register] OTP sent successfully to: ${cleanEmail}`);
 
-        return res.status(201).json({
-            message: 'Account created successfully.',
-            token,
-            user: userRecord,
-            redirect: '/citizen-dashboard.html'
+        return res.status(200).json({
+            message: 'Verification code sent to your email.',
+            email: cleanEmail,
+            expires_in_seconds: 600
         });
 
     } catch (err) {
         console.error('Register request error:', err);
-        return res.status(500).json({ error: err.message || 'Failed to register. Please try again.' });
+        // If email failed, delete stored OTP session
+        await supabaseAdmin.from('otps').delete().eq('email', cleanEmail);
+        return res.status(500).json({ error: err.message || 'Failed to send verification email. Please check your email address and try again.' });
     }
 });
 
 /**
  * POST /api/citizen/resend-otp
  * Dedicated endpoint for resending OTP without re-submitting full registration data
- * 
- * Rate limiting:
- * - 60-second cooldown between resends
- * - Maximum 5 resend attempts per session
  */
 router.post('/resend-otp', async (req, res) => {
     await cleanupExpiredOTPs();
@@ -345,14 +319,14 @@ router.post('/resend-otp', async (req, res) => {
 
     const cleanEmail = email.trim().toLowerCase();
 
-    // ── Validate email format ──
+    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(cleanEmail)) {
         return res.status(400).json({ error: 'Invalid email format.' });
     }
 
     try {
-        // ── Look up existing OTP session ──
+        // Look up existing OTP session
         const { data: existingOTP, error: fetchError } = await supabaseAdmin
             .from('otps')
             .select('*')
@@ -367,33 +341,29 @@ router.post('/resend-otp', async (req, res) => {
             return res.status(400).json({ error: 'No pending registration found for this email. Please start registration again.' });
         }
 
-        // ── Rate limiting: 60-second cooldown ──
+        // 60-second cooldown check
         const secondsSinceLastResend = (Date.now() - new Date(existingOTP.last_resend_at).getTime()) / 1000;
         if (secondsSinceLastResend < 60) {
             return res.status(429).json({ error: `Please wait ${Math.ceil(60 - secondsSinceLastResend)} seconds before requesting a new OTP.` });
         }
 
-        // ── Rate limiting: max resend attempts ──
+        // Max resend attempts check
         if (existingOTP.resends >= MAX_RESENDS) {
             return res.status(400).json({ error: 'Maximum resend attempts reached. Please start registration again.' });
         }
 
-        // ── Generate new OTP ──
+        // Generate new OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const salt = await bcrypt.genSalt(10);
         const otpHash = await bcrypt.hash(otp, salt);
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-        console.log(`[DEBUG] Resend OTP for: ${cleanEmail}`);
-        console.log(`- New OTP (Plaintext): ${otp}`);
-        console.log(`- Resend count: ${existingOTP.resends + 1}/${MAX_RESENDS}`);
-
-        // ── Update OTP session: invalidate old OTP, set new one ──
+        // Update OTP session
         const { error: updateError } = await supabaseAdmin
             .from('otps')
             .update({
                 otp_hash: otpHash,
-                attempts: 0,       // Reset verification attempts on resend
+                attempts: 0,
                 resends: existingOTP.resends + 1,
                 expires_at: expiresAt.toISOString(),
                 last_resend_at: new Date().toISOString()
@@ -404,13 +374,13 @@ router.post('/resend-otp', async (req, res) => {
             throw new Error(`Database update error: ${updateError.message}`);
         }
 
-        // ── Send new OTP email via Gmail SMTP ──
+        // Send new OTP email via Gmail SMTP
         const regData = existingOTP.registration_data;
         const emailBody = generateOTPEmailTemplate(regData.name || 'User', otp);
 
         await sendEmail({
             to: cleanEmail,
-            subject: 'Email Verification - Citizen Portal',
+            subject: 'Email Verification - MakkalKural Citizen Portal',
             html: emailBody
         });
 
@@ -428,13 +398,6 @@ router.post('/resend-otp', async (req, res) => {
 /**
  * POST /api/citizen/verify-otp
  * Step 2: Verifies OTP and creates the citizen user account
- * 
- * Security checks:
- * - OTP exists and is not expired
- * - Max 5 verification attempts
- * - bcrypt hash comparison
- * - Final uniqueness check before account creation
- * - Rollback on failure
  */
 router.post('/verify-otp', async (req, res) => {
     await cleanupExpiredOTPs();
@@ -448,12 +411,7 @@ router.post('/verify-otp', async (req, res) => {
     const cleanEmail = email.trim().toLowerCase();
     const cleanOtp = otp.toString().trim();
 
-    console.log(`[DEBUG] OTP Verification Request received:`);
-    console.log(`- Email Used: ${cleanEmail}`);
-    console.log(`- User Entered OTP: ${cleanOtp}`);
-
     try {
-        // ── Fetch the OTP record from database ──
         const { data: otpRecord, error: fetchError } = await supabaseAdmin
             .from('otps')
             .select('*')
@@ -461,48 +419,32 @@ router.post('/verify-otp', async (req, res) => {
             .maybeSingle();
 
         if (fetchError) {
-            console.error(`[DEBUG] Database fetch error for OTP record:`, fetchError);
             throw new Error(`Database query failed: ${fetchError.message}`);
         }
 
-        console.log(`[DEBUG] Database record fetched:`, JSON.stringify(otpRecord));
-
         if (!otpRecord) {
-            console.warn(`[DEBUG] No active OTP session found for email: ${cleanEmail}`);
             return res.status(400).json({ error: 'No pending verification found. Please register again.' });
         }
 
-        console.log(`[DEBUG] Stored OTP Hash: ${otpRecord.otp_hash}`);
-        console.log(`[DEBUG] Expiration Timestamp: ${otpRecord.expires_at}`);
-        console.log(`[DEBUG] Current Server Time: ${new Date().toISOString()}`);
-
-        // ── Check if OTP has expired ──
+        // Check if OTP has expired
         const isExpired = new Date(otpRecord.expires_at).getTime() < Date.now();
-        console.log(`[DEBUG] Expiration Check Result (Is Expired): ${isExpired}`);
         if (isExpired) {
             return res.status(400).json({ error: 'OTP has expired. Please request a new one.' });
         }
 
-        // ── Check verification attempt limit ──
-        console.log(`[DEBUG] Current Attempts: ${otpRecord.attempts}/${MAX_ATTEMPTS}`);
+        // Check verification attempt limit
         if (otpRecord.attempts >= MAX_ATTEMPTS) {
             return res.status(400).json({ error: 'Too many incorrect attempts. Please request a new OTP.' });
         }
 
-        // ── Verify OTP using bcrypt hash comparison ──
+        // Verify OTP using bcrypt hash comparison
         const isMatch = await bcrypt.compare(cleanOtp, otpRecord.otp_hash);
-        console.log(`[DEBUG] bcrypt.compare Result: ${isMatch}`);
         
         if (!isMatch) {
-            // Increment attempt counter
-            const { error: updateAttemptsError } = await supabaseAdmin
+            await supabaseAdmin
                 .from('otps')
                 .update({ attempts: otpRecord.attempts + 1 })
                 .eq('email', cleanEmail);
-
-            if (updateAttemptsError) {
-                console.error(`[DEBUG] Failed to increment attempts in DB:`, updateAttemptsError);
-            }
 
             const remainingAttempts = MAX_ATTEMPTS - (otpRecord.attempts + 1);
             return res.status(400).json({ 
@@ -510,11 +452,10 @@ router.post('/verify-otp', async (req, res) => {
             });
         }
 
-        // ── OTP verified successfully! Create the citizen account. ──
+        // OTP verified successfully! Create the citizen account.
         const regData = otpRecord.registration_data;
-        console.log(`[DEBUG] OTP match successful! Creating citizen account for: ${regData.email}`);
 
-        // ── Final uniqueness check before creating the account ──
+        // Final uniqueness check before creating the account
         const { data: finalEmailCheck, error: finalEmailError } = await supabaseAdmin
             .from('users')
             .select('id')
@@ -526,10 +467,11 @@ router.post('/verify-otp', async (req, res) => {
         }
 
         if (finalEmailCheck) {
+            await supabaseAdmin.from('otps').delete().eq('email', cleanEmail);
             return res.status(400).json({ error: 'Email already registered' });
         }
 
-        // ── Create Supabase Auth user ──
+        // Create Supabase Auth user
         const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
             email: regData.email,
             password: regData.password,
@@ -541,9 +483,8 @@ router.post('/verify-otp', async (req, res) => {
         }
 
         const userId = authData.user.id;
-        console.log(`[DEBUG] Auth user created successfully. ID: ${userId}`);
 
-        // ── Insert citizen profile into users table ──
+        // Insert citizen profile into users table
         const { data: userRecord, error: dbError } = await supabaseAdmin
             .from('users')
             .insert({
@@ -564,25 +505,16 @@ router.post('/verify-otp', async (req, res) => {
             .single();
 
         if (dbError) {
-            console.error(`[DEBUG] Database insert error (user profile):`, dbError);
-            // Rollback: delete the auth user if profile creation fails
+            console.error('[Citizen Register] Profile DB insert error:', dbError);
+            // Rollback auth user creation if profile insert fails
             await supabaseAdmin.auth.admin.deleteUser(userId);
             return res.status(500).json({ error: 'Failed to create user profile.' });
         }
 
-        console.log(`[DEBUG] User profile created successfully:`, JSON.stringify(userRecord));
+        // Clean up OTP record after successful verification
+        await supabaseAdmin.from('otps').delete().eq('email', cleanEmail);
 
-        // ── Clean up OTP record after successful verification ──
-        const { error: deleteOtpError } = await supabaseAdmin
-            .from('otps')
-            .delete()
-            .eq('email', cleanEmail);
-
-        if (deleteOtpError) {
-            console.warn(`[DEBUG] Failed to delete OTP record after success (non-blocking):`, deleteOtpError);
-        }
-
-        // ── Generate JWT session token ──
+        // Generate JWT session token
         const token = jwt.sign(
             { userId, email: userRecord.email, role: 'USER' },
             JWT_SECRET,
@@ -593,7 +525,7 @@ router.post('/verify-otp', async (req, res) => {
             message: 'Email verified successfully. Your account has been created.',
             token,
             user: userRecord,
-            redirect: '/citizen-dashboard.html'
+            redirect: '/login.html'
         });
     } catch (err) {
         console.error('Verify OTP error:', err);

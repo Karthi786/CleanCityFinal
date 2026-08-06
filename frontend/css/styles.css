@@ -2525,27 +2525,50 @@ html {
   }
 }
 
-/* ── nav-username responsive ── */
-#nav-username {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 140px;
-}
-
-@media (max-width: 640px) {
-  #nav-username {
-    display: none;
-  }
-}
-
-/* ── Btn-ghost text hide on small screens ── */
-@media (max-width: 480px) {
-  .nav-actions .btn-ghost span {
-    display: none;
+/* ── Global Mobile Navbar Sanitation ── */
+@media (max-width: 767px) {
+  /* Remove role badges from nav logo on mobile */
+  .nav-logo-badge,
+  .logo-badge {
+    display: none !important;
   }
 
-  .nav-actions .btn-ghost {
-    padding: 6px 8px !important;
+  /* Hide textual user details and desktop sign out button in nav-actions on mobile */
+  .nav-actions .user-text-details,
+  .nav-actions .nav-user-text,
+  .nav-actions #nav-username,
+  .nav-actions #logout-btn,
+  .nav-actions .logout-btn {
+    display: none !important;
   }
-}
+
+  /* Clean up gap and padding in nav-actions on mobile */
+  .nav-actions {
+    gap: 8px !important;
+  }
+
+  .nav-actions > div {
+    border-left: none !important;
+    padding-left: 0 !important;
+  }
+
+  /* Compact Nav Island for Mobile */
+  .nav-island-container {
+    padding: 0 12px !important;
+    top: 10px !important;
+  }
+
+  .nav-island {
+    padding: 0 12px 0 16px !important;
+    height: 60px !important;
+  }
+
+  .nav-logo span {
+    font-size: 1.1rem !important;
+  }
+
+  .nav-logo img {
+    width: 30px !important;
+    height: 30px !important;
+  }
+}

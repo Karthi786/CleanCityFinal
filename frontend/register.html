@@ -230,173 +230,6 @@
             color: var(--text);
             line-height: 1.4;
         }
-
-        /* ── Demo Credentials Panel ── */
-        .demo-creds-panel {
-            width: 100%;
-            max-width: 520px;
-            margin-bottom: 24px;
-            background: linear-gradient(135deg, rgba(15,23,42,0.96) 0%, rgba(30,41,70,0.98) 100%);
-            border: 1px solid rgba(255,208,0,0.25);
-            border-radius: 24px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.28), 0 0 0 1px rgba(255,208,0,0.08);
-            padding: 28px 30px 22px;
-            animation: slideInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .demo-creds-panel::before {
-            content: '';
-            position: absolute;
-            top: -40px;
-            right: -40px;
-            width: 160px;
-            height: 160px;
-            background: radial-gradient(circle, rgba(255,208,0,0.12) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .demo-creds-panel::after {
-            content: '';
-            position: absolute;
-            bottom: -30px;
-            left: -30px;
-            width: 120px;
-            height: 120px;
-            background: radial-gradient(circle, rgba(176,0,0,0.15) 0%, transparent 70%);
-            pointer-events: none;
-        }
-
-        .demo-creds-title {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 6px;
-        }
-
-        .demo-creds-title .title-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            background: linear-gradient(90deg, #FFD000, #FFA500);
-            color: #0f172a;
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800;
-            font-size: 0.7rem;
-            letter-spacing: 1.2px;
-            text-transform: uppercase;
-            padding: 3px 10px;
-            border-radius: 99px;
-        }
-
-        .demo-creds-title h2 {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 800;
-            font-size: 1.15rem;
-            color: #fff;
-            margin: 0;
-        }
-
-        .demo-creds-subtitle {
-            font-size: 0.8rem;
-            color: rgba(255,255,255,0.45);
-            margin-bottom: 20px;
-            margin-left: 2px;
-        }
-
-        .creds-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .cred-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 12px;
-            padding: 10px 14px;
-            transition: background 0.2s ease, border-color 0.2s ease;
-        }
-
-        .cred-row:hover {
-            background: rgba(255,255,255,0.09);
-            border-color: rgba(255,208,0,0.25);
-        }
-
-        .cred-role-icon {
-            font-size: 1.1rem;
-            flex-shrink: 0;
-            width: 28px;
-            text-align: center;
-        }
-
-        .cred-info {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .cred-role-name {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            font-size: 0.78rem;
-            color: rgba(255,255,255,0.9);
-            margin-bottom: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .cred-email {
-            font-size: 0.73rem;
-            color: rgba(255,208,0,0.85);
-            font-family: 'Courier New', monospace;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .cred-pass {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 8px;
-            padding: 4px 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: rgba(255,255,255,0.75);
-            white-space: nowrap;
-            flex-shrink: 0;
-        }
-
-        .citizen-note {
-            margin-top: 12px;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            background: rgba(255,208,0,0.07);
-            border: 1px solid rgba(255,208,0,0.18);
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-size: 0.77rem;
-            color: rgba(255,255,255,0.65);
-            line-height: 1.5;
-        }
-
-        .citizen-note strong {
-            color: #FFD000;
-        }
-
-        .demo-creds-footer {
-            margin-top: 14px;
-            text-align: center;
-            font-size: 0.72rem;
-            color: rgba(255,255,255,0.28);
-            letter-spacing: 0.3px;
-        }
     </style>
 </head>
 
@@ -409,89 +242,6 @@
                 <option value="en">English</option>
                 <option value="ta">தமிழ்</option>
             </select>
-        </div>
-
-        <!-- ══════════════════════════════════════════════ -->
-        <!-- JUDGE DEMO ACCESS — Pre-seeded Credentials     -->
-        <!-- ══════════════════════════════════════════════ -->
-        <div class="demo-creds-panel">
-            <div class="demo-creds-title">
-                <span class="title-badge">⚖️ Judge Access</span>
-                <h2>Demo Credentials</h2>
-            </div>
-            <p class="demo-creds-subtitle">Use the accounts below to explore each dashboard role</p>
-
-            <div class="creds-grid">
-                <div class="cred-row">
-                    <span class="cred-role-icon">🏙️</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">Citizen Dashboard</div>
-                        <div class="cred-email">karthikeyan2909y@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-
-                <div class="cred-row">
-                    <span class="cred-role-icon">🏛️</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">Department Dashboard</div>
-                        <div class="cred-email">corporationmdu@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-
-                <div class="cred-row">
-                    <span class="cred-role-icon">🧑‍🔧</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">Employee Dashboard</div>
-                        <div class="cred-email">emp1corporationmdu@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-
-                <div class="cred-row">
-                    <span class="cred-role-icon">🏢</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">Commissioner Dashboard</div>
-                        <div class="cred-email">commissionermdu@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-
-                <div class="cred-row">
-                    <span class="cred-role-icon">🛡️</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">Collector Dashboard</div>
-                        <div class="cred-email">collectormdu@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-
-                <div class="cred-row">
-                    <span class="cred-role-icon">🗣️</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">MLA Dashboard</div>
-                        <div class="cred-email">mlamdusouth@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-
-                <div class="cred-row">
-                    <span class="cred-role-icon">🏵️</span>
-                    <div class="cred-info">
-                        <div class="cred-role-name">Chief Minister Dashboard</div>
-                        <div class="cred-email">cm@gmail.com</div>
-                    </div>
-                    <span class="cred-pass">123456</span>
-                </div>
-            </div>
-
-            <div class="citizen-note">
-                <span>💡</span>
-                <span>For <strong>Citizen</strong>: use the account above <strong>or</strong> register a new account using the form below — the <strong>Register</strong> option is open to the public.</span>
-            </div>
-
-            <p class="demo-creds-footer">All passwords are &nbsp;<strong style="color:rgba(255,255,255,0.4);">123456</strong> &nbsp;·&nbsp; For evaluation purposes only</p>
         </div>
         <!-- ══════════════════════════════════════════════ -->
 
@@ -1107,13 +857,15 @@
                     throw new Error(data.error || 'Request failed');
                 }
 
-                toast.success('Welcome!', 'Account created successfully.');
+                toast.success('Verification Code Sent', `A 6-digit verification code has been sent to ${email}.`);
                 
-                // Direct login and redirect (OTP bypassed)
-                saveSession(data.token, data.user);
-                setTimeout(() => {
-                    window.location.href = data.redirect || 'citizen-dashboard.html';
-                }, 1000);
+                // Show OTP section and hide registration form
+                registrationFields.style.display = 'none';
+                otpSection.style.display = 'flex';
+                otpEmailDisplay.textContent = email;
+                otpInput.value = '';
+                otpInput.focus();
+                startResendTimer();
             } catch (err) {
                 toast.error('Registration Request Failed', err.message);
             } finally {
@@ -1154,13 +906,12 @@
                     throw new Error(data.error || 'Verification failed');
                 }
 
-                // Success! Save session and redirect
-                toast.success('Email Verified!', 'Email verified successfully. Your account has been created.');
-                saveSession(data.token, data.user);
+                // Success! Show success message and redirect to login.html
+                toast.success('Account Created!', 'Email verified successfully. Redirecting to login page...');
                 
                 setTimeout(() => {
-                    window.location.href = 'citizen-dashboard.html';
-                }, 1200);
+                    window.location.href = 'login.html';
+                }, 1500);
             } catch (err) {
                 toast.error('Verification Failed', err.message);
             } finally {

@@ -1113,7 +1113,7 @@
                         <div
                             style="display:flex;gap:20px;border-bottom:1.5px solid var(--border);padding-bottom:12px;margin-bottom:24px;justify-content:flex-start;">
                             <button class="tab-sub-btn active" id="sub-tab-all-camps-btn">All Campaigns</button>
-                            <button class="tab-sub-btn" id="sub-tab-pending-camps-btn" style="position:relative;">
+                            <button class="tab-sub-btn" id="sub-tab-pending-camps-btn" style="display:none !important;" style="position:relative;">
                                 Pending Approvals
                                 <span id="camp-pending-badge" class="badge-dot"
                                     style="display:none;top:0;right:-8px;background:var(--primary);width:8px;height:8px;border-radius:50%;"></span>
@@ -1497,7 +1497,7 @@
             if (name === 'campaigns' && !campaignsLoaded) {
                 campaignsLoaded = true;
                 loadCollectorCampaigns();
-                loadPendingCampaigns(); // To show badge
+                // loadPendingCampaigns(); // To show badge
             }
             if (name === 'leaderboard' && !leaderboardLoaded) { leaderboardLoaded = true; loadCollectorLeaderboard(); }
             if (name === 'analytics' && !analyticsLoaded) {

@@ -36,10 +36,11 @@ router.get('/', verifyToken, requireApproved, async (req, res) => {
                 .order('start_time', { ascending: true });
         }
 
-        // Regular users only see approved campaigns. 
-        // Creators see their own pending campaigns.
-        // Admins/Collectors see all.
-        if (!['ADMIN', 'COLLECTOR'].includes(req.user.role)) {
+        // Regular users see approved campaigns + their own campaigns (any status).
+        // Admins/Collectors/Commissioners see all.
+        if (req.user.role === 'USER') {
+            query = query.or(`verification_status.eq.approved,created_by_id.eq.${req.userId}`);
+        } else if (!['ADMIN', 'COLLECTOR', 'COMMISSIONER'].includes(req.user.role)) {
             query = query.or(`verification_status.eq.approved,created_by_id.eq.${req.userId}`);
         }
 
@@ -106,7 +107,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
     const hoursDifference = (startDT - now) / (1000 * 60 * 60);
     
     if (hoursDifference < 48) {
-        return res.status(400).json({ error: 'Campaign must be scheduled at least 48 hours in advance to allow time for Collector and Commissioner approvals.' });
+        return res.status(400).json({ error: 'Campaign requests must be submitted at least 48 hours before the campaign start date.' });
     }
 
     try {
@@ -144,7 +145,7 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
                 const { data: officials } = await supabaseAdmin
                     .from('users')
                     .select('id, role')
-                    .in('role', ['COLLECTOR', 'COMMISSIONER'])
+                    .in('role', ['COMMISSIONER'])
                     .eq('district', req.user.district)
                     .limit(2);
 
@@ -168,6 +169,110 @@ router.post('/', verifyToken, requireApproved, requireRole('USER'), async (req, 
     } catch (err) {
         console.error('Create campaign error:', err);
         return res.status(500).json({ error: err.message || 'Failed to create campaign.' });
+    }
+});
+
+/**
+ * GET /api/campaigns/pending
+ * Returns campaigns waiting for Commissioner approval.
+ * Must be defined BEFORE /:id routes to avoid Express routing collision.
+ */
+router.get('/pending', verifyToken, requireApproved, async (req, res) => {
+    if (!['COMMISSIONER', 'ADMIN'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Access denied.' });
+    }
+
+    try {
+        let query = supabaseAdmin
+            .from('campaigns')
+            .select('*, creator:users!campaigns_created_by_id_fkey(district, constituency, name)')
+            .eq('verification_status', 'pending')
+            .order('created_at', { ascending: false });
+
+        let { data, error } = await query;
+        if (error) throw error;
+
+        // Filter by commissioner's district
+        if (data && req.user.role === 'COMMISSIONER' && req.user.district) {
+            data = data.filter(camp => camp.creator && camp.creator.district === req.user.district);
+        }
+
+        // Clean up creator data for client
+        if (data) {
+            data = data.map(camp => {
+                const { creator, ...rest } = camp;
+                return { ...rest, creator_district: creator?.district, creator_constituency: creator?.constituency, creator_name: creator?.name };
+            });
+        }
+
+        return res.json({ campaigns: data || [] });
+    } catch (err) {
+        console.error('Get pending campaigns error:', err);
+        return res.status(500).json({ error: 'Failed to fetch pending campaigns.' });
+    }
+});
+
+/**
+ * PUT /api/campaigns/:id/verify
+ * Commissioner approves or rejects a campaign.
+ * Must be defined BEFORE generic /:id routes.
+ */
+router.put('/:id/verify', verifyToken, requireApproved, async (req, res) => {
+    if (!['COMMISSIONER', 'ADMIN'].includes(req.user.role)) {
+        return res.status(403).json({ error: 'Access denied.' });
+    }
+
+    const { id } = req.params;
+    const { status, rejectionReason } = req.body;
+
+    if (!['approved', 'rejected'].includes(status)) {
+        return res.status(400).json({ error: "Invalid status. Must be 'approved' or 'rejected'." });
+    }
+
+    try {
+        const { data: campaign, error: fetchErr } = await supabaseAdmin
+            .from('campaigns')
+            .select('id, title, created_by_id, verification_status')
+            .eq('id', id)
+            .single();
+
+        if (fetchErr || !campaign) return res.status(404).json({ error: 'Campaign not found.' });
+
+        const updates = {
+            verification_status: status,
+            commissioner_approved: status === 'approved',
+        };
+        if (status === 'rejected' && rejectionReason) {
+            updates.rejection_reason = rejectionReason;
+        }
+
+        const { error: updateErr } = await supabaseAdmin
+            .from('campaigns')
+            .update(updates)
+            .eq('id', id);
+
+        if (updateErr) throw updateErr;
+
+        // Notify the campaign creator
+        try {
+            const isApproved = status === 'approved';
+            await createNotification({
+                userId: campaign.created_by_id,
+                title: isApproved ? '✅ Campaign Approved!' : '❌ Campaign Rejected',
+                message: isApproved
+                    ? `Your campaign "${campaign.title}" has been approved by the Commissioner and is now live!`
+                    : `Your campaign "${campaign.title}" was rejected by the Commissioner.${rejectionReason ? ' Reason: ' + rejectionReason : ''}`,
+                type: 'campaign',
+                relatedId: id
+            });
+        } catch (nErr) {
+            console.error('Failed to notify creator:', nErr);
+        }
+
+        return res.json({ message: `Campaign ${status} successfully.`, status });
+    } catch (err) {
+        console.error('Verify campaign error:', err);
+        return res.status(500).json({ error: 'Failed to verify campaign.' });
     }
 });
 
@@ -589,123 +694,6 @@ router.delete('/:id', verifyToken, requireApproved, async (req, res) => {
     } catch (err) {
         console.error('Delete campaign error:', err);
         return res.status(500).json({ error: 'Failed to delete campaign.' });
-    }
-});
-
-/**
- * GET /api/campaigns/pending
- * Returns campaigns waiting for admin approval
- */
-router.get('/pending', verifyToken, requireApproved, async (req, res) => {
-    if (!['COLLECTOR', 'COMMISSIONER'].includes(req.user.role)) {
-        return res.status(403).json({ error: 'Access denied.' });
-    }
-
-    try {
-        let { data, error } = await supabaseAdmin
-            .from('campaigns')
-            .select('*, creator:users!campaigns_created_by_id_fkey(district, constituency)')
-            .eq('verification_status', 'pending')
-            .order('created_at', { ascending: false });
-
-        if (error) throw error;
-
-        if (data && req.user.role === 'COLLECTOR') {
-            data = data.filter(c => !c.collector_approved);
-            if (req.user.district) data = data.filter(camp => camp.creator && camp.creator.district === req.user.district);
-        } else if (data && req.user.role === 'COMMISSIONER') {
-            data = data.filter(c => !c.commissioner_approved);
-            if (req.user.district) data = data.filter(camp => camp.creator && camp.creator.district === req.user.district);
-        }
-
-        // Clean up creator data for client
-        if (data) {
-            data = data.map(camp => {
-                const { creator, ...rest } = camp;
-                return rest;
-            });
-        }
-
-        return res.json({ campaigns: data });
-    } catch (err) {
-        console.error('Get pending campaigns error:', err);
-        return res.status(500).json({ error: 'Failed to fetch pending campaigns.' });
-    }
-});
-
-/**
- * PUT /api/campaigns/:id/verify
- * Approve or reject a campaign
- */
-router.put('/:id/verify', verifyToken, requireApproved, async (req, res) => {
-    if (!['COLLECTOR', 'COMMISSIONER'].includes(req.user.role)) {
-        return res.status(403).json({ error: 'Access denied.' });
-    }
-
-    const { id } = req.params;
-    const { status } = req.body; // 'approved' or 'rejected'
-
-    if (!['approved', 'rejected'].includes(status)) {
-        return res.status(400).json({ error: "Invalid status. Must be 'approved' or 'rejected'." });
-    }
-
-    try {
-        const { data: campaign } = await supabaseAdmin
-            .from('campaigns')
-            .select('*, creator:users!campaigns_created_by_id_fkey(district, constituency)')
-            .eq('id', id)
-            .single();
-
-        if (!campaign) return res.status(404).json({ error: 'Campaign not found' });
-
-        let updates = {};
-        let finalStatus = 'pending';
-
-        if (status === 'rejected') {
-            finalStatus = 'rejected';
-            updates.verification_status = 'rejected';
-        } else {
-            if (req.user.role === 'COLLECTOR') updates.collector_approved = true;
-            if (req.user.role === 'COMMISSIONER') updates.commissioner_approved = true;
-            
-            const willBeCollectorApproved = updates.collector_approved || campaign.collector_approved;
-            const willBeCommissionerApproved = updates.commissioner_approved || campaign.commissioner_approved;
-            
-            if (willBeCollectorApproved && willBeCommissionerApproved) {
-                finalStatus = 'approved';
-                updates.verification_status = 'approved';
-            }
-        }
-
-        const { error } = await supabaseAdmin
-            .from('campaigns')
-            .update(updates)
-            .eq('id', id);
-
-        if (error) throw error;
-
-        // Notify Creator
-        try {
-            if (finalStatus === 'approved' || finalStatus === 'rejected') {
-                const isApproved = finalStatus === 'approved';
-                await createNotification({
-                    userId: campaign.created_by_id,
-                    title: isApproved ? 'Campaign Approved' : 'Campaign Rejected',
-                    message: isApproved 
-                        ? `Your campaign "${campaign.title}" has been fully verified by both the Collector and Commissioner and is now approved.`
-                        : `Your campaign "${campaign.title}" has been declined by the ${req.user.role}.`,
-                    type: 'campaign',
-                    relatedId: id
-                });
-            }
-        } catch (nErr) {
-            console.error('Failed to notify:', nErr);
-        }
-
-        return res.json({ message: `Campaign ${status} successfully.` });
-    } catch (err) {
-        console.error('Verify campaign error:', err);
-        return res.status(500).json({ error: 'Failed to verify campaign.' });
     }
 });
 
