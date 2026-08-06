@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const { supabaseAdmin } = require('../config/supabase');
 const districtsMapping = require('../config/districts');
 // ── Use Nodemailer Gmail SMTP email service ──
-const { sendEmail } = require('../utils/resend');
+const { sendEmail } = require('../utils/emailService');
 require('dotenv').config();
 
 const router = express.Router();
