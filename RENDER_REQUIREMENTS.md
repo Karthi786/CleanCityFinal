@@ -69,19 +69,11 @@ Render offers **"Secret Files"**.
 
 ## 5. Render Build and Start Commands
 
-Since your Node.js application is located inside the `backend` folder (not the root of the repository), you need to tell Render to navigate into that folder before downloading dependencies and starting the server.
+When creating the Web Service on Render, use the following configuration:
 
-When creating the Web Service on Render, you have two options:
-
-**Option A: Using the Root Directory Setting (Recommended)**
-1. **Root Directory**: `backend`
-2. **Build Command**: `npm install` *(This downloads everything, including Nodemailer for SMTP)*
-3. **Start Command**: `npm start` 
-
-**Option B: Using inline folder navigation**
-If you leave the Root Directory field empty, use these commands:
-- **Build Command**: `cd backend && npm install`
-- **Start Command**: `cd backend && npm start`
+- **Environment**: `Node`
+- **Build Command**: `npm install`
+- **Start Command**: `npm start` (This will trigger `node src/index.js` as defined in your `package.json`)
 
 ## 6. Summary of Action Items Before Deployment
 - [ ] Push the latest code to a GitHub repository.

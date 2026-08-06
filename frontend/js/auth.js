@@ -63,6 +63,8 @@ export function getDashboardForRole(role) {
 /* ── Login ── */
 export async function login(email, password) {
     const data = await authAPI.login(email, password);
+    // If OTP is required, do not save a session yet (no token yet)
+    if (data && data.status === 'otp_required') return data;
     saveSession(data.token, data.user);
     return data;
 }

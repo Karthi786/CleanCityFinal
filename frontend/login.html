@@ -95,6 +95,69 @@
         .logo-icon {
             font-size: 1.45rem;
         }
+
+        /* ── Login OTP Panel ── */
+        .login-otp-panel {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: slideInUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .login-otp-badge {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(135deg, rgba(176,0,0,0.06), rgba(176,0,0,0.02));
+            border: 1px solid rgba(176,0,0,0.15);
+            border-radius: 14px;
+            padding: 14px 18px;
+        }
+
+        .login-otp-badge .badge-icon { font-size: 1.3rem; flex-shrink: 0; }
+        .login-otp-badge .badge-text { font-size: 0.88rem; color: var(--text); line-height: 1.5; }
+        .login-otp-badge .badge-email { color: var(--primary); font-weight: 700; }
+
+        #login-otp-input {
+            text-align: center;
+            font-size: 1.5rem;
+            letter-spacing: 6px;
+            font-weight: 800;
+            font-family: 'Courier New', monospace;
+            padding: 14px 20px;
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        #login-otp-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-glow);
+            outline: none;
+        }
+
+        .login-otp-timer {
+            font-size: 0.83rem;
+            color: var(--text-muted);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .login-otp-back {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-decoration: underline;
+            text-align: center;
+            padding: 4px;
+            transition: color 0.2s;
+        }
+
+        .login-otp-back:hover { color: var(--text); }
     </style>
 </head>
 
@@ -120,6 +183,7 @@
             </div>
 
             <div class="auth-card-body">
+                <!-- Standard Login Form -->
                 <form id="login-form" class="form-stack" novalidate autocomplete="off">
                     <div class="form-group">
                         <label class="label" for="email" data-i18n="lbl_email">Email Address</label>
@@ -139,6 +203,32 @@
                         <div id="login-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
                     </button>
                 </form>
+
+                <!-- Login OTP Verification Panel -->
+                <div id="login-otp-panel" class="login-otp-panel">
+                    <div class="login-otp-badge">
+                        <span class="badge-icon">📧</span>
+                        <span class="badge-text">
+                            We sent a 6-digit login code to
+                            <span id="login-otp-email-display" class="badge-email"></span>.
+                            Enter it below to sign in.
+                        </span>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="label" for="login-otp-input">Login Verification Code</label>
+                        <input id="login-otp-input" type="text" class="input" placeholder="• • • • • •"
+                            maxlength="6" inputmode="numeric" pattern="\d{6}" autocomplete="one-time-code" />
+                    </div>
+
+                    <button id="verify-login-otp-btn" type="button" class="btn btn-primary btn-full btn-lg">
+                        <span id="verify-login-otp-text">✅ Verify &amp; Sign In</span>
+                        <div id="verify-login-otp-spinner" class="spinner spinner-sm" style="display:none; border-top-color: white;"></div>
+                    </button>
+
+                    <div id="login-otp-timer" class="login-otp-timer"></div>
+                    <button id="login-otp-back-btn" class="login-otp-back" type="button">← Back to login</button>
+                </div>
             </div>
 
             <div class="auth-card-footer">
@@ -156,17 +246,21 @@
 
     <script type="module">
         import { redirectIfLoggedIn } from './js/router.js';
-        import { login } from './js/auth.js';
+        import { login, saveSession } from './js/auth.js';
         import { toast } from './js/toast.js';
 
         redirectIfLoggedIn();
+
+        // Auto-detect API base
+        const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+            ? 'http://localhost:5001/api'
+            : 'https://makkalkural-3528.onrender.com/api';
 
         // Clear fields on every load to prevent autofill interference
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('email').value = '';
             document.getElementById('password').value = '';
         });
-        // Also clear immediately since module scripts run deferred
         document.getElementById('email').value = '';
         document.getElementById('password').value = '';
 
@@ -175,12 +269,75 @@
         const btnText = document.getElementById('login-btn-text');
         const spinner = document.getElementById('login-spinner');
 
+        const loginOtpPanel = document.getElementById('login-otp-panel');
+        const loginOtpEmailDisplay = document.getElementById('login-otp-email-display');
+        const loginOtpInput = document.getElementById('login-otp-input');
+        const verifyLoginOtpBtn = document.getElementById('verify-login-otp-btn');
+        const verifyLoginOtpText = document.getElementById('verify-login-otp-text');
+        const verifyLoginOtpSpinner = document.getElementById('verify-login-otp-spinner');
+        const loginOtpTimerEl = document.getElementById('login-otp-timer');
+        const loginOtpBackBtn = document.getElementById('login-otp-back-btn');
+
+        let pendingLoginEmail = '';
+        let loginOtpCountdown;
+
         function setLoading(on) {
             btn.disabled = on;
             btnText.style.display = on ? 'none' : 'inline-flex';
             spinner.style.display = on ? 'block' : 'none';
         }
 
+        function setVerifyLoading(on) {
+            verifyLoginOtpBtn.disabled = on;
+            verifyLoginOtpText.style.display = on ? 'none' : 'inline-flex';
+            verifyLoginOtpSpinner.style.display = on ? 'block' : 'none';
+        }
+
+        function showOtpPanel(email) {
+            pendingLoginEmail = email;
+            loginOtpEmailDisplay.textContent = email;
+            form.style.display = 'none';
+            loginOtpPanel.style.display = 'flex';
+            loginOtpInput.value = '';
+            loginOtpInput.focus();
+            startLoginOtpTimer();
+        }
+
+        function hideOtpPanel() {
+            clearInterval(loginOtpCountdown);
+            loginOtpPanel.style.display = 'none';
+            form.style.display = 'block';
+            loginOtpTimerEl.textContent = '';
+        }
+
+        function startLoginOtpTimer() {
+            clearInterval(loginOtpCountdown);
+            let remaining = 10 * 60; // 10 minutes in seconds
+            loginOtpTimerEl.textContent = `Code expires in ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+            loginOtpCountdown = setInterval(() => {
+                remaining--;
+                if (remaining <= 0) {
+                    clearInterval(loginOtpCountdown);
+                    loginOtpTimerEl.textContent = 'Code expired. Please log in again.';
+                    loginOtpTimerEl.style.color = '#D32F2F';
+                } else {
+                    loginOtpTimerEl.textContent = `Code expires in ${Math.floor(remaining / 60)}:${String(remaining % 60).padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // ── OTP Input filter ──
+        loginOtpInput.addEventListener('input', (e) => {
+            e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 6);
+        });
+        loginOtpInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); verifyLoginOtpBtn.click(); }
+        });
+
+        // ── Back button ──
+        loginOtpBackBtn.addEventListener('click', () => hideOtpPanel());
+
+        // ── Login Form Submit ──
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
@@ -194,8 +351,15 @@
             setLoading(true);
             try {
                 const data = await login(email, password);
-                toast.success('Welcome back!', `Signed in successfully.`);
-                // Strip leading slash — Live Server serves from a subfolder, not root
+
+                // Check if server signals OTP is required
+                if (data && data.status === 'otp_required') {
+                    toast.info('OTP Sent', `A login verification code has been sent to ${data.email}.`);
+                    showOtpPanel(data.email);
+                    return;
+                }
+
+                toast.success('Welcome back!', 'Signed in successfully.');
                 const redirect = (data.redirect || '').replace(/^\//, '');
                 setTimeout(() => { window.location.href = redirect; }, 800);
             } catch (err) {
@@ -208,6 +372,37 @@
                 }
             } finally {
                 setLoading(false);
+            }
+        });
+
+        // ── Login OTP Verify ──
+        verifyLoginOtpBtn.addEventListener('click', async () => {
+            const otpVal = loginOtpInput.value.trim();
+            if (!otpVal || !/^\d{6}$/.test(otpVal)) {
+                toast.error('Invalid Code', 'Please enter a valid 6-digit login code.');
+                return;
+            }
+
+            setVerifyLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/auth/verify-login-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingLoginEmail, otp: otpVal })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Verification failed');
+
+                // Save session and redirect
+                saveSession(data.token, data.user);
+                toast.success('Welcome back!', 'Signed in successfully.');
+                const redirect = (data.redirect || '').replace(/^\//, '');
+                setTimeout(() => { window.location.href = redirect; }, 800);
+            } catch (err) {
+                toast.error('Verification Failed', err.message);
+            } finally {
+                setVerifyLoading(false);
             }
         });
     </script>

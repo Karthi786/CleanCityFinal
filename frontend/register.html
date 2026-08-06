@@ -146,6 +146,100 @@
             animation: slideInUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
+        /* ── OTP Toggle Styles ── */
+        .otp-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(135deg, rgba(176,0,0,0.04) 0%, rgba(176,0,0,0.02) 100%);
+            border: 1.5px solid rgba(176,0,0,0.12);
+            border-radius: 18px;
+            padding: 16px 20px;
+            margin-bottom: 0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .otp-toggle-row:hover {
+            border-color: rgba(176,0,0,0.3);
+            background: linear-gradient(135deg, rgba(176,0,0,0.07) 0%, rgba(176,0,0,0.04) 100%);
+        }
+
+        .otp-toggle-label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .otp-toggle-icon {
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+
+        .otp-toggle-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .otp-toggle-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: var(--text);
+        }
+
+        .otp-toggle-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            width: 50px;
+            height: 28px;
+            flex-shrink: 0;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: #ddd;
+            border-radius: 28px;
+            transition: background 0.3s ease;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            left: 4px;
+            top: 4px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(22px);
+        }
+
         /* ── OTP Section Styles ── */
         .otp-email-highlight {
             color: var(--primary);
@@ -412,6 +506,23 @@
                             <div class="form-group">
                                 <label class="label" for="dob">Date of Birth</label>
                                 <input id="dob" type="date" class="input" required />
+                            </div>
+
+                            <!-- OTP Login Toggle — only visible for Citizen role -->
+                            <div class="form-group" id="otp-toggle-group">
+                                <label class="otp-toggle-row" for="otp-login-toggle" id="otp-toggle-row-label">
+                                    <div class="otp-toggle-label">
+                                        <span class="otp-toggle-icon">🔒</span>
+                                        <div class="otp-toggle-text">
+                                            <span class="otp-toggle-title">Enable OTP Login</span>
+                                            <span class="otp-toggle-desc">Require a one-time code every time you log in for extra security</span>
+                                        </div>
+                                    </div>
+                                    <label class="toggle-switch" onclick="event.stopPropagation()">
+                                        <input type="checkbox" id="otp-login-toggle" />
+                                        <span class="toggle-slider"></span>
+                                    </label>
+                                </label>
                             </div>
                         </div>
 
@@ -807,10 +918,10 @@
             }
 
             // ══════════════════════════════════════════
-            // CITIZEN REGISTRATION (OTP Verification Flow)
-            // Step 1: Validate → Send OTP → Show OTP modal
+            // CITIZEN REGISTRATION
             // ══════════════════════════════════════════
             const dob = document.getElementById('dob').value;
+            const otpLoginEnabled = document.getElementById('otp-login-toggle').checked;
 
             if (!dob) {
                 toast.error('Missing Fields', 'Please enter your date of birth.');
@@ -841,15 +952,37 @@
                 return;
             }
 
-            // Store payload for resend and verify
+            // Store payload
             lastRegistrationPayload = { name, email, password, dob, phone_number, district, constituency };
 
+            // ── Path A: OTP Login DISABLED → Direct Registration ──
+            if (!otpLoginEnabled) {
+                setLoading(true);
+                try {
+                    const response = await fetch(`${API_BASE}/citizen/direct-register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ ...lastRegistrationPayload, otp_login_enabled: false })
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.error || 'Registration failed');
+                    toast.success('Account Created!', 'Your account has been created. Redirecting to login...');
+                    setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+                } catch (err) {
+                    toast.error('Registration Failed', err.message);
+                } finally {
+                    setLoading(false);
+                }
+                return;
+            }
+
+            // ── Path B: OTP Login ENABLED → OTP Verification Flow ──
             setLoading(true);
             try {
                 const response = await fetch(`${API_BASE}/citizen/register-request`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(lastRegistrationPayload)
+                    body: JSON.stringify({ ...lastRegistrationPayload, otp_login_enabled: true })
                 });
                 
                 const data = await response.json();
