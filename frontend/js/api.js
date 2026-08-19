@@ -255,3 +255,16 @@ export const employeesAPI = {
         body: JSON.stringify(payload),
     }),
 };
+
+/* ── Petition Endpoints ── */
+export const petitionAPI = {
+    generate: (payload) => apiFetch('/petition/generate', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    }),
+    submit: (payload) => apiFetch('/petition/submit', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+    }),
+    myPetitions: () => apiFetch('/petition/my-petitions'),
+};

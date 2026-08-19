@@ -1258,7 +1258,7 @@
             this._wakeRestarting = true;
             setTimeout(() => {
                 this._wakeRestarting = false;
-                if (!this.isListening && !this.isProcessing && !this.isSpeaking && !this._wakeActive) {
+                if (!this.isExternallyPaused && !this.isListening && !this.isProcessing && !this.isSpeaking && !this._wakeActive) {
                     console.log('[Kural AI] Restarting wake listener...');
                     this._startWakeListen();
                 }
@@ -1435,6 +1435,28 @@
         // Backward-compat alias (speak() calls this via window.KuralAI.setSpeakingState)
         setSpeakingState(isSpeaking, skipWakeRestart = false) {
             this._setSpeakingState(isSpeaking, skipWakeRestart);
+        }
+
+        /* ── External Control API (e.g. for Form Voice Recorders) ── */
+        pauseVoiceAssistant() {
+            this.isExternallyPaused = true;
+            this._stopWakeListen();
+            if (this.commandRecognition) {
+                try { this.commandRecognition.abort(); } catch (e) {}
+                this.isListening = false;
+            }
+            if (window.speechSynthesis) {
+                try { window.speechSynthesis.cancel(); } catch (e) {}
+                this.isSpeaking = false;
+            }
+            this._setStatus('', activeLang === 'ta' ? 'தயார்' : 'Ready');
+            console.log('[Kural AI] Voice assistant externally paused.');
+        }
+
+        resumeVoiceAssistant() {
+            this.isExternallyPaused = false;
+            console.log('[Kural AI] Voice assistant externally resumed.');
+            this._scheduleWakeRestart(300);
         }
 
         /* ══════════════════════════════════════════════════

@@ -118,7 +118,29 @@ const translations = {
         'th_completed': 'Completed Date',
         'th_status': 'Status',
         'th_last_updated': 'Last Updated',
-        'th_assigned_dept': 'Assigned Department'
+        'th_assigned_dept': 'Assigned Department',
+
+        // Petition
+        'petition_title': 'Report Petition',
+        'petition_describe': 'Describe your issue',
+        'petition_describe_hint': 'Explain your problem in your own words. You can type or use your voice.',
+        'petition_generate': 'Generate Petition',
+        'petition_generating': 'Generating your petition...',
+        'petition_regenerate': 'Regenerate Petition',
+        'petition_edit': 'Edit Petition',
+        'petition_submit': 'Submit Petition',
+        'petition_preview': 'Petition Preview',
+        'petition_original': 'Your Original Description',
+        'petition_key_points': 'Key Points',
+        'petition_empty_error': 'Please describe your issue before generating the petition.',
+        'petition_ai_error': "We couldn't generate the petition right now. Please try again.",
+        'petition_submitted': 'Petition Submitted Successfully!',
+        'petition_record': 'Record Voice',
+        'petition_stop': 'Stop Recording',
+        'petition_mic_denied': 'Microphone access denied. Please enable it in browser settings.',
+        'petition_subject': 'Subject',
+        'petition_generated': 'Generated Petition',
+        'petition_back': 'Back to Form'
     },
     ta: {
         // General & Nav
@@ -236,7 +258,29 @@ const translations = {
         'th_completed': 'முடிக்கப்பட்ட தேதி',
         'th_status': 'நிலை',
         'th_last_updated': 'கடைசியாக புதுப்பிக்கப்பட்டது',
-        'th_assigned_dept': 'ஒதுக்கப்பட்ட துறை'
+        'th_assigned_dept': 'ஒதுக்கப்பட்ட துறை',
+
+        // Petition
+        'petition_title': 'மனு புகார்',
+        'petition_describe': 'உங்கள் பிரச்சினையை விவரிக்கவும்',
+        'petition_describe_hint': 'உங்கள் பிரச்சினையை உங்கள் சொந்த வார்த்தைகளில் விவரிக்கவும். தட்டச்சு செய்யலாம் அல்லது குரல் மூலம் தெரிவிக்கலாம்.',
+        'petition_generate': 'மனுவை உருவாக்கவும்',
+        'petition_generating': 'உங்கள் மனு உருவாக்கப்படுகிறது...',
+        'petition_regenerate': 'மனுவை மீண்டும் உருவாக்கவும்',
+        'petition_edit': 'மனுவைத் திருத்தவும்',
+        'petition_submit': 'மனுவை சமர்ப்பிக்கவும்',
+        'petition_preview': 'மனு முன்னோட்டம்',
+        'petition_original': 'உங்கள் அசல் விவரிப்பு',
+        'petition_key_points': 'முக்கிய தகவல்கள்',
+        'petition_empty_error': 'மனுவை உருவாக்குவதற்கு முன் உங்கள் பிரச்சினையை விவரிக்கவும்.',
+        'petition_ai_error': 'தற்போது மனுவை உருவாக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.',
+        'petition_submitted': 'மனு வெற்றிகரமாக சமர்ப்பிக்கப்பட்டது!',
+        'petition_record': 'குரல் பதிவு',
+        'petition_stop': 'பதிவை நிறுத்து',
+        'petition_mic_denied': 'மைக்ரோஃபோன் அணுகல் மறுக்கப்பட்டது. உலாவி அமைப்புகளில் இயக்கவும்.',
+        'petition_subject': 'பொருள்',
+        'petition_generated': 'உருவாக்கப்பட்ட மனு',
+        'petition_back': 'படிவத்திற்கு திரும்பவும்'
     }
 };
 

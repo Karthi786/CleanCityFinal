@@ -953,6 +953,9 @@
                     <button type="button" id="toggle-issue"
                         style="flex:1; padding:10px 0; border-radius:99px; border:none; font-weight:700; font-family: var(--font-display); font-size:0.9rem; background:var(--primary); color:#fff; cursor:pointer; transition:all var(--transition);">🚨
                         Report Issue</button>
+                    <button type="button" id="toggle-petition"
+                        style="flex:1; padding:10px 0; border-radius:99px; border:none; font-weight:700; font-family: var(--font-display); font-size:0.9rem; background:transparent; color:var(--text-muted); cursor:pointer; transition:all var(--transition);">📝
+                        Report Petition</button>
                     <button type="button" id="toggle-campaign"
                         style="flex:1; padding:10px 0; border-radius:99px; border:none; font-weight:700; font-family: var(--font-display); font-size:0.9rem; background:transparent; color:var(--text-muted); cursor:pointer; transition:all var(--transition);">📣
                         Run Campaign</button>
@@ -962,40 +965,20 @@
                 <div id="issue-form-section">
                     <form id="report-form" class="form-stack">
                         <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <!-- 1. User Name & Title -->
+                            <div class="form-group">
+                                <label class="label" for="issue-user-name">Your Name *</label>
+                                <input id="issue-user-name" class="input" placeholder="Enter your name" required />
+                            </div>
                             <div class="form-group">
                                 <label class="label" for="issue-title" data-i18n="lbl_report_name">Issue Title *</label>
-                                <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop"
-                                    required />
+                                <input id="issue-title" class="input" placeholder="e.g. Garbage pile near bus stop" required />
                             </div>
+
+                            <!-- 2. Issue Description -->
                             <div class="form-group">
-                                <label class="label" for="issue-category" data-i18n="lbl_department">Category *</label>
-                                <select id="issue-category" class="select" required>
-                                    <option value="">— Select Category —</option>
-                                    <option value="Waste" data-i18n="cat_waste">🗑️ Waste</option>
-                                    <option value="Water" data-i18n="cat_water">💧 Water</option>
-                                    <option value="Electricity" data-i18n="cat_eb">⚡ Electricity</option>
-                                    <option value="Roads" data-i18n="cat_pw">🛣️ Roads</option>
-                                    <option value="Law &amp; Order" data-i18n="cat_police">👮 Law &amp; Order</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label class="label" for="issue-location" data-i18n="lbl_location">Location Address
-                                    *</label>
-                                <div style="display:flex; gap:8px; margin-bottom: 8px;">
-                                    <input id="issue-location" class="input"
-                                        placeholder="e.g. Mattuthavani Bus Stand..." required
-                                        style="flex:1; max-width: calc(100% - 110px);" />
-                                    <button type="button" class="btn btn-outline btn-sm" id="detect-location-btn"
-                                        style="white-space:nowrap; flex-shrink: 0;">📍 Auto-Detect</button>
-                                </div>
-                                <div id="issue-map"></div>
-                                <input type="hidden" id="issue-lat" />
-                                <input type="hidden" id="issue-lng" />
-                            </div>
-                            <div class="form-group">
-                                <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Description *</label>
-                                <textarea id="issue-desc" class="textarea" placeholder="Describe the issue in detail..."
-                                    required></textarea>
+                                <label class="label" for="issue-desc" data-i18n="lbl_report_desc">Describe the Issue *</label>
+                                <textarea id="issue-desc" class="textarea" placeholder="Tell us what happened... Describe the issue in detail..." required></textarea>
 
                                 <!-- ── Voice to Text Panel ── -->
                                 <div id="voice-panel"
@@ -1050,6 +1033,46 @@
                                     </div>
                                 </div>
                                 <!-- ── End Voice Panel ── -->
+                            </div>
+
+                            <!-- 3. Automatically Detect Issue Category -->
+                            <div class="form-group" id="auto-category-group" style="margin-top: 4px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 6px;">
+                                    <label class="label" style="margin-bottom:0;">Issue Category</label>
+                                    <span id="cat-detecting-loader" style="display:none; font-size:0.82rem; font-weight:700; color:var(--primary);">
+                                        ⚡ [ Detecting Category... ]
+                                    </span>
+                                </div>
+
+                                <!-- Detection Result Box -->
+                                <div id="cat-detection-result" style="margin-bottom: 4px;"></div>
+
+                                <!-- Manual Category Fallback / Selector -->
+                                <div id="manual-category-container" style="background:rgba(15,23,42,0.02); border:1px solid var(--border); border-radius:14px; padding:14px; margin-top:8px;">
+                                    <div style="font-size:0.85rem; font-weight:700; color:var(--text); margin-bottom:8px;">
+                                        Issue Category:
+                                    </div>
+                                    <select id="issue-category" class="select" required>
+                                        <option value="">— Select Category —</option>
+                                        <option value="Waste" data-i18n="cat_waste">🗑️ Waste</option>
+                                        <option value="Water" data-i18n="cat_water">💧 Water</option>
+                                        <option value="Electricity" data-i18n="cat_eb">⚡ Electrical</option>
+                                        <option value="Roads" data-i18n="cat_pw">🛣️ Road</option>
+                                        <option value="Law &amp; Order" data-i18n="cat_police">👮 Law &amp; Order</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- 4. Location Address -->
+                            <div class="form-group">
+                                <label class="label" for="issue-location" data-i18n="lbl_location">Location Address *</label>
+                                <div style="display:flex; gap:8px; margin-bottom: 8px;">
+                                    <input id="issue-location" class="input" placeholder="e.g. Mattuthavani Bus Stand..." required style="flex:1; max-width: calc(100% - 110px);" />
+                                    <button type="button" class="btn btn-outline btn-sm" id="detect-location-btn" style="white-space:nowrap; flex-shrink: 0;">📍 Auto-Detect</button>
+                                </div>
+                                <div id="issue-map"></div>
+                                <input type="hidden" id="issue-lat" />
+                                <input type="hidden" id="issue-lng" />
                             </div>
                             <div class="form-group">
                                 <label class="label">Image Attachment *</label>
@@ -1191,6 +1214,138 @@
                             </button>
                         </div>
                     </form>
+                </div>
+
+                <!-- ── Petition Form Section ── -->
+                <div id="petition-form-section" style="display:none;">
+                    <!-- Language Toggle -->
+                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                        <span style="font-size:0.85rem; font-weight:700; color:var(--text-muted);">Language:</span>
+                        <div id="petition-lang-toggle" style="display:flex; background:rgba(15,23,42,0.06); border-radius:99px; padding:4px; gap:4px;">
+                            <button type="button" data-lang="ta" class="petition-lang-btn"
+                                style="padding:8px 20px; border-radius:99px; border:none; font-weight:700; font-size:0.88rem; cursor:pointer; font-family:var(--font-display); transition:all 0.2s; background:transparent; color:var(--text-muted);">
+                                தமிழ்
+                            </button>
+                            <button type="button" data-lang="en" class="petition-lang-btn active"
+                                style="padding:8px 20px; border-radius:99px; border:none; font-weight:700; font-size:0.88rem; cursor:pointer; font-family:var(--font-display); transition:all 0.2s; background:var(--primary); color:#fff;">
+                                English
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Description Input -->
+                    <div class="form-group">
+                        <label class="label" id="petition-desc-label" for="petition-desc">Describe your issue</label>
+                        <p id="petition-desc-hint" style="font-size:0.82rem; color:var(--text-muted); margin:-4px 0 8px 0; line-height:1.5;">
+                            Explain your problem in your own words. You can type or use your voice.
+                        </p>
+                        <textarea id="petition-desc" class="textarea"
+                            placeholder="Explain your issue in detail..."
+                            style="min-height:160px; font-size:0.95rem; line-height:1.7;"></textarea>
+
+                        <!-- Voice Input Panel -->
+                        <div style="margin-top:12px; background:linear-gradient(135deg,rgba(176,0,0,0.04) 0%,rgba(124,58,237,0.04) 100%); border:1.5px dashed rgba(176,0,0,0.25); border-radius:18px; padding:14px 16px;">
+                            <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                                <button type="button" id="petition-voice-record-btn"
+                                    style="display:flex; align-items:center; gap:7px; padding:10px 20px; border-radius:99px; border:none; background:var(--primary); color:#fff; font-weight:700; font-size:0.88rem; cursor:pointer; font-family:var(--font-display); transition:all 0.2s; white-space:nowrap;"
+                                    aria-label="Record Voice">
+                                    🎙️ <span id="petition-voice-btn-text">Record Voice</span>
+                                </button>
+                                <button type="button" id="petition-voice-stop-btn"
+                                    style="display:none; align-items:center; gap:7px; padding:10px 20px; border-radius:99px; border:none; background:#ef4444; color:#fff; font-weight:700; font-size:0.88rem; cursor:pointer; font-family:var(--font-display); transition:all 0.2s; white-space:nowrap;"
+                                    aria-label="Stop Recording">
+                                    ⏹️ <span id="petition-voice-stop-text">Stop</span>
+                                </button>
+                                <span id="petition-voice-status" style="font-size:0.82rem; color:var(--text-muted); font-weight:600;"></span>
+                                <span id="petition-voice-pulse" style="display:none; width:10px; height:10px; border-radius:50%; background:#ef4444; animation:voicePulse 1s ease-in-out infinite;"></span>
+                                <span id="petition-voice-timer" style="display:none; font-size:0.82rem; font-weight:700; color:#ef4444; font-family:var(--font-display);"></span>
+                            </div>
+                            <div style="margin-top:6px; font-size:0.75rem; color:var(--text-muted);">
+                                🔒 Voice is processed locally — no audio is stored.
+                                &nbsp;|&nbsp; Supports: <strong>English</strong> & <strong>தமிழ்</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Generate Petition Button -->
+                    <div style="padding-top:16px; display:flex; gap:12px; justify-content:flex-end;">
+                        <button type="button" class="btn btn-ghost" id="petition-form-cancel">Cancel</button>
+                        <button type="button" id="petition-generate-btn" class="btn btn-primary btn-lg"
+                            style="box-shadow:var(--shadow-primary); min-width:200px;">
+                            <span id="petition-generate-text">✨ Generate Petition</span>
+                            <div class="spinner spinner-sm" id="petition-generate-spinner" style="display:none; border-top-color:white;"></div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ── Petition Preview Section ── -->
+                <div id="petition-preview-section" style="display:none;">
+                    <!-- Original Description -->
+                    <div style="margin-bottom:20px;">
+                        <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                            📝 <span id="petition-preview-original-label">Your Original Description</span>
+                        </div>
+                        <div id="petition-preview-original"
+                            style="background:rgba(15,23,42,0.03); border:1px solid var(--border); border-radius:16px; padding:16px; font-size:0.9rem; color:var(--text); line-height:1.7; white-space:pre-wrap; word-break:break-word; max-height:150px; overflow-y:auto;">
+                        </div>
+                    </div>
+
+                    <!-- Subject -->
+                    <div style="margin-bottom:16px;">
+                        <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:6px;">
+                            📌 <span id="petition-preview-subject-label">Subject</span>
+                        </div>
+                        <div id="petition-preview-subject"
+                            style="font-family:var(--font-display); font-weight:700; font-size:1.05rem; color:var(--primary); padding:12px 16px; background:rgba(176,0,0,0.04); border:1px solid rgba(176,0,0,0.12); border-radius:14px;">
+                        </div>
+                    </div>
+
+                    <!-- Generated Petition (Editable) -->
+                    <div style="margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                            <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); display:flex; align-items:center; gap:6px;">
+                                📄 <span id="petition-preview-petition-label">Generated Petition</span>
+                            </div>
+                            <button type="button" id="petition-edit-toggle-btn"
+                                style="padding:5px 14px; border-radius:99px; border:1.5px solid var(--border); background:white; color:var(--text-muted); font-weight:600; font-size:0.78rem; cursor:pointer; font-family:var(--font-display); transition:all 0.2s;">
+                                ✏️ Edit
+                            </button>
+                        </div>
+                        <!-- Read-only display -->
+                        <div id="petition-preview-text"
+                            style="background:#fff; border:1.5px solid var(--border); border-radius:16px; padding:20px; font-size:0.92rem; color:var(--text); line-height:1.8; white-space:pre-wrap; word-break:break-word; max-height:300px; overflow-y:auto;">
+                        </div>
+                        <!-- Editable textarea (hidden by default) -->
+                        <textarea id="petition-preview-edit"
+                            style="display:none; width:100%; min-height:250px; font-size:0.92rem; line-height:1.8; padding:20px; border:1.5px solid var(--primary); border-radius:16px; background:#fff; color:var(--text); resize:vertical; outline:none; font-family:var(--font-body);"></textarea>
+                    </div>
+
+                    <!-- Key Points -->
+                    <div id="petition-keypoints-container" style="margin-bottom:20px; display:none;">
+                        <div style="font-size:0.82rem; font-weight:700; text-transform:uppercase; letter-spacing:0.06em; color:var(--text-muted); margin-bottom:8px; display:flex; align-items:center; gap:6px;">
+                            🔑 <span id="petition-preview-keypoints-label">Key Points</span>
+                        </div>
+                        <div id="petition-preview-keypoints"
+                            style="display:flex; flex-wrap:wrap; gap:8px;">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="padding-top:16px; border-top:1px solid var(--border); display:flex; gap:10px; flex-wrap:wrap; justify-content:space-between;">
+                        <div style="display:flex; gap:10px;">
+                            <button type="button" id="petition-back-btn" class="btn btn-ghost btn-sm">
+                                ← <span id="petition-back-text">Back</span>
+                            </button>
+                            <button type="button" id="petition-regenerate-btn" class="btn btn-outline btn-sm">
+                                🔄 <span id="petition-regenerate-text">Regenerate</span>
+                            </button>
+                        </div>
+                        <button type="button" id="petition-submit-btn" class="btn btn-primary btn-lg"
+                            style="box-shadow:var(--shadow-primary); min-width:190px;">
+                            <span id="petition-submit-text">✅ Submit Petition</span>
+                            <div class="spinner spinner-sm" id="petition-submit-spinner" style="display:none; border-top-color:white;"></div>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1369,10 +1524,12 @@
     <script type="module">
         import { guardPage } from './js/router.js';
         import { logout } from './js/auth.js';
-        import { issuesAPI, reviewsAPI, campaignsAPI, leaderboardAPI, usersAPI, notificationsAPI, imageAPI } from './js/api.js';
+        import { issuesAPI, reviewsAPI, campaignsAPI, leaderboardAPI, usersAPI, notificationsAPI, imageAPI, petitionAPI } from './js/api.js';
         import { toast } from './js/toast.js';
         import { t, getLang } from './js/i18n.js';
         import { initDashboardDrawer, syncDrawerActive } from './js/dashboard-nav.js';
+        import { detectCategory } from './js/categoryDetection.js';
+        import { CATEGORY_KEYWORDS } from './js/categoryKeywords.js';
 
         const user = guardPage(['USER']);
         if (!user) throw new Error('Not authorized');
@@ -1381,6 +1538,72 @@
         const firstName = user.name.split(' ')[0];
         document.getElementById('header-name').textContent = firstName;
         document.getElementById('welcome-msg').textContent = `Welcome, ${firstName}!`;
+
+        // Pre-fill user name into reporting form
+        const userNameInput = document.getElementById('issue-user-name');
+        if (userNameInput && user && user.name) {
+            userNameInput.value = user.name;
+        }
+
+        // ─── Automatic Rule-Based Category Detection Logic ───
+        const issueDescEl = document.getElementById('issue-desc');
+        const issueCategoryEl = document.getElementById('issue-category');
+        const catDetectionResultEl = document.getElementById('cat-detection-result');
+        const catDetectingLoaderEl = document.getElementById('cat-detecting-loader');
+        const manualCategoryContainerEl = document.getElementById('manual-category-container');
+
+        let autoDetectDebounceTimer = null;
+        let isUserManuallyChanged = false;
+        
+        if (issueCategoryEl) {
+            issueCategoryEl.addEventListener('change', () => {
+                isUserManuallyChanged = true;
+                catDetectionResultEl.innerHTML = '';
+            });
+        }
+
+        function updateCategoryDetectionUI() {
+            if (catDetectingLoaderEl) catDetectingLoaderEl.style.display = 'none';
+            if (!issueDescEl || !catDetectionResultEl) return;
+
+            const desc = issueDescEl.value;
+            const result = detectCategory(desc);
+
+            if (result.status === 'EMPTY') {
+                catDetectionResultEl.innerHTML = '';
+                if (!isUserManuallyChanged && issueCategoryEl) issueCategoryEl.value = '';
+                return;
+            }
+
+            if (result.status === 'NO_MATCH') {
+                catDetectionResultEl.innerHTML = '';
+                return;
+            }
+
+            // SUCCESS or AMBIGUOUS state
+            if (!isUserManuallyChanged && issueCategoryEl) {
+                issueCategoryEl.value = result.category;
+                
+                catDetectionResultEl.innerHTML = `
+                    <div style="font-size:0.85rem; color:#10b981; font-weight:600; padding:8px 12px; background:rgba(16,185,129,0.1); border-radius:8px; display:inline-block; margin-top: 4px;">
+                        ✨ Auto-assigned to ${result.emoji} ${result.label} based on description
+                    </div>
+                `;
+            } else if (isUserManuallyChanged) {
+                catDetectionResultEl.innerHTML = '';
+            }
+        }
+
+        // Attach input listener with 350ms debounce
+        if (issueDescEl) {
+            issueDescEl.addEventListener('input', () => {
+                if (catDetectingLoaderEl) catDetectingLoaderEl.style.display = 'inline-block';
+                clearTimeout(autoDetectDebounceTimer);
+                autoDetectDebounceTimer = setTimeout(() => {
+                    updateCategoryDetectionUI();
+                }, 350);
+            });
+        }
 
         // Profile photo setup - fetch from API
         let userDistrict = user.district || '';
@@ -1574,38 +1797,56 @@
             document.getElementById('report-modal').classList.add('open');
         });
 
-        // ─── Report/Campaign Type Toggle ───
+        // ─── Report/Campaign/Petition Type Toggle ───
         const toggleIssueBtn = document.getElementById('toggle-issue');
+        const togglePetitionBtn = document.getElementById('toggle-petition');
         const toggleCampBtn = document.getElementById('toggle-campaign');
         const issueFormSec = document.getElementById('issue-form-section');
         const campFormSec = document.getElementById('campaign-form-section');
+        const petitionFormSec = document.getElementById('petition-form-section');
+        const petitionPreviewSec = document.getElementById('petition-preview-section');
         let currentModalMode = 'issue';
+
+        function resetToggleBtns() {
+            [toggleIssueBtn, togglePetitionBtn, toggleCampBtn].forEach(b => {
+                b.style.background = 'transparent';
+                b.style.color = 'var(--text-muted)';
+            });
+        }
 
         function switchModalMode(mode) {
             currentModalMode = mode;
+            resetToggleBtns();
+            issueFormSec.style.display = 'none';
+            campFormSec.style.display = 'none';
+            petitionFormSec.style.display = 'none';
+            petitionPreviewSec.style.display = 'none';
+
             if (mode === 'issue') {
                 issueFormSec.style.display = '';
-                campFormSec.style.display = 'none';
                 toggleIssueBtn.style.background = 'var(--primary)';
                 toggleIssueBtn.style.color = '#fff';
-                toggleCampBtn.style.background = 'transparent';
-                toggleCampBtn.style.color = 'var(--text-muted)';
                 document.getElementById('modal-main-title').textContent = 'Report New Issue';
+            } else if (mode === 'petition') {
+                petitionFormSec.style.display = '';
+                togglePetitionBtn.style.background = 'var(--primary)';
+                togglePetitionBtn.style.color = '#fff';
+                document.getElementById('modal-main-title').textContent = t('petition_title');
+                // Default petition language to app language
+                petitionSetLang(getLang());
             } else {
-                issueFormSec.style.display = 'none';
                 campFormSec.style.display = '';
                 toggleCampBtn.style.background = '#7c3aed';
                 toggleCampBtn.style.color = '#fff';
-                toggleIssueBtn.style.background = 'transparent';
-                toggleIssueBtn.style.color = 'var(--text-muted)';
                 document.getElementById('modal-main-title').textContent = 'Run a Campaign';
             }
         }
 
         toggleIssueBtn.addEventListener('click', () => switchModalMode('issue'));
+        togglePetitionBtn.addEventListener('click', () => switchModalMode('petition'));
         toggleCampBtn.addEventListener('click', () => switchModalMode('campaign'));
 
-        // Cancel buttons for both forms
+        // Cancel buttons for all forms
         document.getElementById('camp-cancel').addEventListener('click', () => {
             document.getElementById('report-modal').classList.remove('open');
         });
@@ -1667,6 +1908,11 @@
             capturedPhotoData = null;
             capturedPhotoTime = null;
             if (typeof fileInput !== 'undefined' && fileInput) fileInput.setAttribute('required', 'true');
+
+            // Reset category detection state
+            isUserManuallyChanged = false;
+            if (userNameInput && user && user.name) userNameInput.value = user.name;
+            updateCategoryDetectionUI();
         });
 
         function closeModalAndStopCamera() {
@@ -2347,6 +2593,14 @@
             }
 
             try {
+                const catVal = document.getElementById('issue-category').value;
+                if (!catVal) {
+                    toast.error('Category Required', 'Please confirm or select an issue category.');
+                    btn.disabled = false;
+                    if (manualCategoryContainerEl) manualCategoryContainerEl.style.display = 'block';
+                    return;
+                }
+
                 const lat = document.getElementById('issue-lat').value;
                 const lng = document.getElementById('issue-lng').value;
 
@@ -2359,7 +2613,7 @@
                 await issuesAPI.create({
                     title: document.getElementById('issue-title').value.trim(),
                     description: description,
-                    category: document.getElementById('issue-category').value,
+                    category: catVal,
                     locationName: document.getElementById('issue-location').value.trim(),
                     latitude: lat ? parseFloat(lat) : null,
                     longitude: lng ? parseFloat(lng) : null,
@@ -2375,6 +2629,17 @@
                 capturedPhotoData = null;
                 capturedPhotoTime = null;
                 fileInput.setAttribute('required', 'true');
+
+                // Reset category detection state
+                isCategoryConfirmed = false;
+                if (catDetectionResultEl) {
+                    catDetectionResultEl.innerHTML = `
+                        <div style="font-size:0.85rem; color:var(--text-muted); font-weight:500; padding:12px; background:rgba(15,23,42,0.03); border-radius:12px; border:1px dashed var(--border);">
+                            ℹ️ Please describe the issue so we can identify the appropriate category.
+                        </div>
+                    `;
+                }
+                if (manualCategoryContainerEl) manualCategoryContainerEl.style.display = 'none';
 
                 modal.classList.remove('open');
                 document.getElementById('report-form').reset();
@@ -2434,6 +2699,391 @@
                 txt.style.display = '';
             }
         });
+
+        // ═══════════════════════════════════════════════════════
+        // ─── PETITION FEATURE LOGIC ───
+        // ═══════════════════════════════════════════════════════
+        (function initPetitionFeature() {
+            // State
+            let petitionLang = getLang() || 'en';
+            let petitionInputMethod = 'text';
+            let petitionOriginalDesc = '';
+            let petitionAIData = null;
+            let petitionIsGenerating = false;
+            let petitionIsSubmitting = false;
+            let petitionVoiceRecognition = null;
+            let petitionVoiceTimerInterval = null;
+            let petitionVoiceSeconds = 0;
+            let petitionIsEditing = false;
+
+            // DOM refs
+            const descField = document.getElementById('petition-desc');
+            const descLabel = document.getElementById('petition-desc-label');
+            const descHint = document.getElementById('petition-desc-hint');
+            const genBtn = document.getElementById('petition-generate-btn');
+            const genText = document.getElementById('petition-generate-text');
+            const genSpinner = document.getElementById('petition-generate-spinner');
+            const formCancel = document.getElementById('petition-form-cancel');
+            const voiceRecordBtn = document.getElementById('petition-voice-record-btn');
+            const voiceStopBtn = document.getElementById('petition-voice-stop-btn');
+            const voiceBtnText = document.getElementById('petition-voice-btn-text');
+            const voiceStopText = document.getElementById('petition-voice-stop-text');
+            const voiceStatus = document.getElementById('petition-voice-status');
+            const voicePulse = document.getElementById('petition-voice-pulse');
+            const voiceTimer = document.getElementById('petition-voice-timer');
+
+            // Preview refs
+            const previewOrigLabel = document.getElementById('petition-preview-original-label');
+            const previewOriginal = document.getElementById('petition-preview-original');
+            const previewSubjectLabel = document.getElementById('petition-preview-subject-label');
+            const previewSubject = document.getElementById('petition-preview-subject');
+            const previewPetitionLabel = document.getElementById('petition-preview-petition-label');
+            const previewText = document.getElementById('petition-preview-text');
+            const previewEdit = document.getElementById('petition-preview-edit');
+            const editToggleBtn = document.getElementById('petition-edit-toggle-btn');
+            const keypointsContainer = document.getElementById('petition-keypoints-container');
+            const keypointsLabel = document.getElementById('petition-preview-keypoints-label');
+            const keypointsDiv = document.getElementById('petition-preview-keypoints');
+            const backBtn = document.getElementById('petition-back-btn');
+            const backText = document.getElementById('petition-back-text');
+            const regenBtn = document.getElementById('petition-regenerate-btn');
+            const regenText = document.getElementById('petition-regenerate-text');
+            const submitBtn = document.getElementById('petition-submit-btn');
+            const submitText = document.getElementById('petition-submit-text');
+            const submitSpinner = document.getElementById('petition-submit-spinner');
+
+            // ─── Language Toggle ───
+            window.petitionSetLang = function(lang) {
+                petitionLang = (lang === 'ta') ? 'ta' : 'en';
+                // Update toggle buttons
+                document.querySelectorAll('.petition-lang-btn').forEach(btn => {
+                    if (btn.dataset.lang === petitionLang) {
+                        btn.style.background = 'var(--primary)';
+                        btn.style.color = '#fff';
+                        btn.classList.add('active');
+                    } else {
+                        btn.style.background = 'transparent';
+                        btn.style.color = 'var(--text-muted)';
+                        btn.classList.remove('active');
+                    }
+                });
+                // Update UI text
+                descLabel.textContent = t('petition_describe');
+                descHint.textContent = t('petition_describe_hint');
+                genText.textContent = '✨ ' + t('petition_generate');
+                voiceBtnText.textContent = t('petition_record');
+                voiceStopText.textContent = t('petition_stop');
+                // Update placeholder
+                descField.placeholder = petitionLang === 'ta'
+                    ? 'உங்கள் பிரச்சினையை இங்கே விவரிக்கவும்...'
+                    : 'Explain your issue in detail...';
+            };
+
+            document.querySelectorAll('.petition-lang-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    petitionSetLang(btn.dataset.lang);
+                });
+            });
+
+            // ─── Cancel ───
+            formCancel.addEventListener('click', () => {
+                stopPetitionVoice();
+                document.getElementById('report-modal').classList.remove('open');
+            });
+
+            // ─── Voice Input (Web Speech API) ───
+            async function startPetitionVoice() {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SpeechRecognition) {
+                    toast.error('Not Supported', 'Speech recognition is not supported in this browser. Please use Chrome.');
+                    return;
+                }
+
+                // Pause Kural AI voice assistant so mic is free for petition recording
+                if (typeof window.pauseKuralAI === 'function') {
+                    window.pauseKuralAI();
+                } else if (window.KuralAI && typeof window.KuralAI.pauseVoiceAssistant === 'function') {
+                    window.KuralAI.pauseVoiceAssistant();
+                }
+
+                // Request microphone permission first
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    stream.getTracks().forEach(t => t.stop());
+                } catch (permErr) {
+                    toast.error(t('petition_mic_denied'));
+                    if (typeof window.resumeKuralAI === 'function') window.resumeKuralAI();
+                    return;
+                }
+
+                petitionVoiceRecognition = new SpeechRecognition();
+                petitionVoiceRecognition.lang = petitionLang === 'ta' ? 'ta-IN' : 'en-IN';
+                petitionVoiceRecognition.interimResults = true;
+                petitionVoiceRecognition.continuous = true;
+                petitionVoiceRecognition.maxAlternatives = 1;
+
+                let finalTranscript = descField.value || '';
+                petitionInputMethod = 'voice';
+
+                petitionVoiceRecognition.onstart = () => {
+                    voiceRecordBtn.style.display = 'none';
+                    voiceStopBtn.style.display = 'flex';
+                    voicePulse.style.display = '';
+                    voiceTimer.style.display = '';
+                    voiceStatus.textContent = petitionLang === 'ta' ? '🎤 கேட்கிறது...' : '🎤 Listening...';
+                    petitionVoiceSeconds = 0;
+                    voiceTimer.textContent = '0:00';
+                    petitionVoiceTimerInterval = setInterval(() => {
+                        petitionVoiceSeconds++;
+                        const m = Math.floor(petitionVoiceSeconds / 60);
+                        const s = petitionVoiceSeconds % 60;
+                        voiceTimer.textContent = `${m}:${String(s).padStart(2, '0')}`;
+                    }, 1000);
+                };
+
+                petitionVoiceRecognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        if (event.results[i].isFinal) {
+                            finalTranscript += event.results[i][0].transcript + ' ';
+                        } else {
+                            interimTranscript += event.results[i][0].transcript;
+                        }
+                    }
+                    descField.value = finalTranscript + interimTranscript;
+                };
+
+                petitionVoiceRecognition.onerror = (event) => {
+                    stopPetitionVoice();
+                    if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                        toast.error(t('petition_mic_denied'));
+                    } else if (event.error === 'no-speech') {
+                        voiceStatus.textContent = petitionLang === 'ta' ? 'குரல் கண்டறியப்படவில்லை' : 'No speech detected';
+                    } else if (event.error === 'network') {
+                        toast.error('Network Error', 'Speech recognition requires internet. Please check your connection.');
+                    } else {
+                        voiceStatus.textContent = petitionLang === 'ta' ? 'பிழை ஏற்பட்டது. மீண்டும் முயற்சிக்கவும்.' : 'Error occurred. Please try again.';
+                    }
+                };
+
+                petitionVoiceRecognition.onend = () => {
+                    // Finalize
+                    descField.value = finalTranscript.trim();
+                    stopPetitionVoice();
+                };
+
+                try {
+                    petitionVoiceRecognition.start();
+                } catch (e) {
+                    toast.error('Voice Error', 'Could not start voice recording.');
+                }
+            }
+
+            function stopPetitionVoice() {
+                if (petitionVoiceRecognition) {
+                    try { petitionVoiceRecognition.stop(); } catch (_) {}
+                    petitionVoiceRecognition = null;
+                }
+                if (petitionVoiceTimerInterval) {
+                    clearInterval(petitionVoiceTimerInterval);
+                    petitionVoiceTimerInterval = null;
+                }
+                voiceRecordBtn.style.display = 'flex';
+                voiceStopBtn.style.display = 'none';
+                voicePulse.style.display = 'none';
+                voiceTimer.style.display = 'none';
+                if (petitionVoiceSeconds > 0) {
+                    voiceStatus.textContent = petitionLang === 'ta' ? '✅ பதிவு முடிந்தது' : '✅ Recording complete';
+                } else {
+                    voiceStatus.textContent = '';
+                }
+
+                // Resume Kural AI background listening after petition recording completes
+                if (typeof window.resumeKuralAI === 'function') {
+                    window.resumeKuralAI();
+                } else if (window.KuralAI && typeof window.KuralAI.resumeVoiceAssistant === 'function') {
+                    window.KuralAI.resumeVoiceAssistant();
+                }
+            }
+
+            voiceRecordBtn.addEventListener('click', startPetitionVoice);
+            voiceStopBtn.addEventListener('click', stopPetitionVoice);
+
+            // ─── Generate Petition ───
+            genBtn.addEventListener('click', async () => {
+                const desc = descField.value.trim();
+                if (!desc) {
+                    toast.error(t('petition_empty_error'));
+                    descField.focus();
+                    return;
+                }
+                if (petitionIsGenerating) return;
+                petitionIsGenerating = true;
+                petitionOriginalDesc = desc;
+
+                genBtn.disabled = true;
+                genText.style.display = 'none';
+                genSpinner.style.display = '';
+                document.getElementById('modal-main-title').textContent = t('petition_generating');
+
+                try {
+                    const result = await petitionAPI.generate({
+                        description: desc,
+                        language: petitionLang
+                    });
+                    petitionAIData = result;
+                    showPetitionPreview(result);
+                } catch (err) {
+                    toast.error(t('petition_ai_error'), err.message || '');
+                    document.getElementById('modal-main-title').textContent = t('petition_title');
+                } finally {
+                    petitionIsGenerating = false;
+                    genBtn.disabled = false;
+                    genText.style.display = '';
+                    genSpinner.style.display = 'none';
+                }
+            });
+
+            // ─── Show Petition Preview ───
+            function showPetitionPreview(data) {
+                // Hide form, show preview
+                petitionFormSec.style.display = 'none';
+                petitionPreviewSec.style.display = '';
+                document.getElementById('modal-main-title').textContent = t('petition_preview');
+
+                // Populate
+                previewOrigLabel.textContent = t('petition_original');
+                previewOriginal.textContent = petitionOriginalDesc;
+                previewSubjectLabel.textContent = t('petition_subject');
+                previewSubject.textContent = data.subject || '—';
+                previewPetitionLabel.textContent = t('petition_generated');
+                previewText.textContent = data.petition || '';
+                previewEdit.value = data.petition || '';
+
+                // Key points
+                if (data.key_points && data.key_points.length > 0) {
+                    keypointsContainer.style.display = '';
+                    keypointsLabel.textContent = t('petition_key_points');
+                    keypointsDiv.innerHTML = data.key_points.map(kp =>
+                        `<span style="background:rgba(176,0,0,0.06); color:var(--primary); padding:6px 14px; border-radius:99px; font-size:0.82rem; font-weight:600; border:1px solid rgba(176,0,0,0.12);">${kp}</span>`
+                    ).join('');
+                } else {
+                    keypointsContainer.style.display = 'none';
+                }
+
+                // Update button labels
+                backText.textContent = t('petition_back');
+                regenText.textContent = t('petition_regenerate');
+                submitText.textContent = '✅ ' + t('petition_submit');
+
+                // Reset edit state
+                petitionIsEditing = false;
+                previewText.style.display = '';
+                previewEdit.style.display = 'none';
+                editToggleBtn.innerHTML = '✏️ ' + t('petition_edit');
+            }
+
+            // ─── Edit Toggle ───
+            editToggleBtn.addEventListener('click', () => {
+                petitionIsEditing = !petitionIsEditing;
+                if (petitionIsEditing) {
+                    previewEdit.value = previewText.textContent;
+                    previewText.style.display = 'none';
+                    previewEdit.style.display = '';
+                    previewEdit.focus();
+                    editToggleBtn.innerHTML = '👁️ ' + (petitionLang === 'ta' ? 'முன்னோட்டம்' : 'Preview');
+                } else {
+                    previewText.textContent = previewEdit.value;
+                    previewText.style.display = '';
+                    previewEdit.style.display = 'none';
+                    editToggleBtn.innerHTML = '✏️ ' + t('petition_edit');
+                }
+            });
+
+            // ─── Back to Form ───
+            backBtn.addEventListener('click', () => {
+                petitionPreviewSec.style.display = 'none';
+                petitionFormSec.style.display = '';
+                document.getElementById('modal-main-title').textContent = t('petition_title');
+            });
+
+            // ─── Regenerate ───
+            regenBtn.addEventListener('click', async () => {
+                if (petitionIsGenerating || !petitionOriginalDesc) return;
+                petitionIsGenerating = true;
+                regenBtn.disabled = true;
+                regenText.textContent = petitionLang === 'ta' ? 'உருவாக்குகிறது...' : 'Generating...';
+                document.getElementById('modal-main-title').textContent = t('petition_generating');
+
+                try {
+                    const result = await petitionAPI.generate({
+                        description: petitionOriginalDesc,
+                        language: petitionLang
+                    });
+                    petitionAIData = result;
+                    showPetitionPreview(result);
+                } catch (err) {
+                    toast.error(t('petition_ai_error'), err.message || '');
+                } finally {
+                    petitionIsGenerating = false;
+                    regenBtn.disabled = false;
+                    regenText.textContent = t('petition_regenerate');
+                }
+            });
+
+            // ─── Submit Petition ───
+            submitBtn.addEventListener('click', async () => {
+                if (petitionIsSubmitting) return;
+                petitionIsSubmitting = true;
+                submitBtn.disabled = true;
+                submitText.style.display = 'none';
+                submitSpinner.style.display = '';
+
+                // Get the final petition text (edited or original)
+                const finalPetition = petitionIsEditing ? previewEdit.value.trim() : previewText.textContent.trim();
+
+                if (!finalPetition) {
+                    toast.error(petitionLang === 'ta' ? 'மனு உரை காலியாக உள்ளது.' : 'Petition text is empty.');
+                    petitionIsSubmitting = false;
+                    submitBtn.disabled = false;
+                    submitText.style.display = '';
+                    submitSpinner.style.display = 'none';
+                    return;
+                }
+
+                try {
+                    await petitionAPI.submit({
+                        originalDescription: petitionOriginalDesc,
+                        language: petitionLang,
+                        inputMethod: petitionInputMethod,
+                        subject: petitionAIData?.subject || null,
+                        petition: finalPetition,
+                        keyPoints: petitionAIData?.key_points || [],
+                        location: petitionAIData?.location || null,
+                        duration: petitionAIData?.duration || null,
+                        requestedAction: petitionAIData?.requested_action || null
+                    });
+
+                    toast.success(t('petition_submitted'), '🎉');
+                    // Reset and close
+                    descField.value = '';
+                    petitionOriginalDesc = '';
+                    petitionAIData = null;
+                    petitionInputMethod = 'text';
+                    voiceStatus.textContent = '';
+                    petitionPreviewSec.style.display = 'none';
+                    petitionFormSec.style.display = '';
+                    document.getElementById('report-modal').classList.remove('open');
+                } catch (err) {
+                    toast.error(petitionLang === 'ta' ? 'சமர்ப்பிப்பு தோல்வியடைந்தது' : 'Submission Failed', err.message || '');
+                } finally {
+                    petitionIsSubmitting = false;
+                    submitBtn.disabled = false;
+                    submitText.style.display = '';
+                    submitSpinner.style.display = 'none';
+                }
+            });
+        })();
 
         // ─── Campaign Data & Rendering ───
         let allCampaigns = [];
@@ -3174,40 +3824,34 @@
             let interimTranscript = '';
 
             // ── Kural AI Wake-Word Conflict Management ──
-            // Pause Kural AI's background wake-word listener before starting
-            // our recording so they don't conflict (only one SpeechRecognition
-            // instance can be active in Chrome/Edge at the same time).
-            function pauseKuralAI() {
+            window.pauseKuralAI = function pauseKuralAI() {
                 try {
-                    if (window.KuralAI) {
-                        // Set the flag FIRST so the onend handler won't auto-restart
+                    if (window.KuralAI && typeof window.KuralAI.pauseVoiceAssistant === 'function') {
+                        window.KuralAI.pauseVoiceAssistant();
+                    } else if (window.KuralAI) {
                         window.KuralAI.isExternallyPaused = true;
-                        if (window.KuralAI.wakeRecognition) {
-                            window.KuralAI.wakeRecognition.stop();
-                        }
-                        if (window.KuralAI.commandRecognition) {
-                            window.KuralAI.commandRecognition.stop();
-                        }
-                    }
-                } catch (e) { /* ignore — already stopped */ }
-            }
-
-            function resumeKuralAI() {
-                try {
-                    if (window.KuralAI) {
-                        window.KuralAI.isExternallyPaused = false;
-                        if (window.KuralAI.wakeRecognition) {
-                            setTimeout(() => {
-                                try {
-                                    if (window.KuralAI && !window.KuralAI.isExternallyPaused) {
-                                        window.KuralAI.wakeRecognition.start();
-                                    }
-                                } catch (e) { /* ignore */ }
-                            }, 800);
+                        if (typeof window.KuralAI._stopWakeListen === 'function') {
+                            window.KuralAI._stopWakeListen();
                         }
                     }
                 } catch (e) { /* ignore */ }
-            }
+            };
+
+            window.resumeKuralAI = function resumeKuralAI() {
+                try {
+                    if (window.KuralAI && typeof window.KuralAI.resumeVoiceAssistant === 'function') {
+                        window.KuralAI.resumeVoiceAssistant();
+                    } else if (window.KuralAI) {
+                        window.KuralAI.isExternallyPaused = false;
+                        if (typeof window.KuralAI._scheduleWakeRestart === 'function') {
+                            window.KuralAI._scheduleWakeRestart(300);
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            };
+
+            const pauseKuralAI = window.pauseKuralAI;
+            const resumeKuralAI = window.resumeKuralAI;
 
             // ── UI State Helper ──
             function setRecordingState(recording) {
